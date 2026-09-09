@@ -1,0 +1,44 @@
+# K-water 경품추첨 구현계획
+
+- 기준일: 2026-09-09
+- 승인 설계: `docs/superpowers/specs/2026-09-09-prize-draw-web-design.md`
+- 승인 구현계획: `docs/superpowers/plans/2026-09-09-prize-draw-web-implementation.md`
+- 기준 선택: 기존 `study/implementation_plan.md`가 없어 더 최신인 승인 구현계획을 기준으로 생성
+
+## 목적과 범위
+
+행사 참석자의 개인정보를 안전하게 접수하고, 관리자 통제 아래 30개 경품을 공정하게 추첨·공개하는 웹 서비스를 단계별로 구축한다. 이번 실행 범위는 승인 구현계획의 Task 1인 프로젝트 기반과 개발 계약으로 한정한다.
+
+## Context
+
+`context/design-reference/`의 모바일 화면 참고 이미지 3개와 방울이 캐릭터 원본 2개를 읽기 전용 원본으로 보존한다.
+
+## 기술 선택
+
+Next.js App Router, TypeScript strict mode, Tailwind CSS, ESLint, Prettier, Vitest와 Testing Library, Playwright, npm, `src/` 구조 및 `@/*` 별칭을 사용한다. 이후 Task에서 Supabase, Zod, JOSE, bcryptjs 및 QR 코드를 사용한다.
+
+## Task 1 구현 단계
+
+1. 현재 폴더를 Git 및 npm 프로젝트로 초기화한다.
+2. 런타임·개발·테스트 의존성과 npm 스크립트를 구성한다.
+3. 환경변수 계약과 Git 제외 규칙을 작성한다.
+4. 첫 화면 테스트를 먼저 실패시킨 뒤 최소 화면을 구현한다.
+5. Windows용 `setup.ps1`, `verify.ps1`을 작성한다.
+6. 테스트, typecheck, lint, formatting, production build를 검증한다.
+7. 검증 기록과 변경이력을 작성하고 지정 메시지로 커밋한다.
+
+## 데이터 변경과 배포
+
+Task 1에는 데이터베이스 migration·seed와 배포가 없다. `.env.example`에는 자리표시자만 기록하며 실제 Secret을 저장하지 않는다.
+
+## 검증 방법
+
+`npm run test:run`, `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`를 모두 실행하고 결과를 `study/validation.md`에 기록한다.
+
+## Rollback
+
+Task 1 커밋을 일반 `git revert`로 되돌릴 수 있다. `context/`와 승인 문서는 변경하지 않는다.
+
+## 후속 Task
+
+Task 2 이후는 이번 실행 범위에서 제외하며 시작하지 않는다.
