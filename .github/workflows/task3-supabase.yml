@@ -55,7 +55,7 @@ jobs:
           set -euo pipefail
           npm exec supabase -- gen types --local --lang typescript > /tmp/generated-types.ts
           node -e 'new TextDecoder("utf-8", { fatal: true }).decode(require("node:fs").readFileSync("/tmp/generated-types.ts"))'
-          npx tsc --noEmit --target ES2020 --module esnext --moduleResolution bundler --skipLibCheck /tmp/generated-types.ts
+          npx tsc --noEmit --ignoreConfig --target ES2020 --module esnext --moduleResolution bundler --skipLibCheck /tmp/generated-types.ts
 
       - name: 전체 단위 테스트
         run: npm run test:run
@@ -203,7 +203,7 @@ jobs:
           set -euo pipefail
           npm exec supabase -- gen types --linked --lang typescript > /tmp/generated-types.ts
           node -e 'new TextDecoder("utf-8", { fatal: true }).decode(require("node:fs").readFileSync("/tmp/generated-types.ts"))'
-          npx tsc --noEmit --target ES2020 --module esnext --moduleResolution bundler --skipLibCheck /tmp/generated-types.ts
+          npx tsc --noEmit --ignoreConfig --target ES2020 --module esnext --moduleResolution bundler --skipLibCheck /tmp/generated-types.ts
           if [[ -f src/lib/supabase/types.ts ]] && cmp -s /tmp/generated-types.ts src/lib/supabase/types.ts; then
             echo 'match=true' >> "$GITHUB_OUTPUT"
           else
