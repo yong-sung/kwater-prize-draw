@@ -135,13 +135,8 @@ jobs:
           }
           echo "전용 개발 프로젝트 이름 검증 완료: $EXPECTED_PROJECT_NAME"
 
-      - name: linked project marker 준비
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p supabase/.temp
-          umask 077
-          printf '%s' "$SUPABASE_PROJECT_ID" > supabase/.temp/project-ref
+      - name: 전용 개발 프로젝트 연결
+        run: npm exec supabase -- link --project-ref "$SUPABASE_PROJECT_ID"
 
       - name: 적용 전 migration 상태 확인
         id: migration-state

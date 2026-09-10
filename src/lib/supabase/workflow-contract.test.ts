@@ -46,6 +46,7 @@ describe("Task 3 Supabase CI 계약", () => {
     expect(workflow).not.toContain("supabase@latest");
     expect(workflow.match(/tsc --noEmit --ignoreConfig/g)).toHaveLength(2);
     expect(workflow).toContain("db push --dry-run --linked");
+    expect(workflow).toContain('link --project-ref "$SUPABASE_PROJECT_ID"');
     expect(workflow).toContain("db push --linked");
     expect(workflow).not.toContain("db reset --linked");
     expect(workflow).toContain("test db --linked");
