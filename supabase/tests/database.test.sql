@@ -111,6 +111,8 @@ values ('00000000-0000-0000-0000-000000000035', '35명 더미 행사', 'CLOSED')
 
 select extensions.throws_ok(
   $$insert into public.events(id, title) values ('00000000-0000-0000-0000-000000000099', '중복 운영 행사')$$,
+  '23505',
+  'duplicate key value violates unique constraint "only_one_live_event"',
   '동시에 운영 가능한 미삭제 행사는 하나뿐이다'
 );
 
@@ -147,6 +149,8 @@ select extensions.throws_ok(
     select event_id, 'dummy', 'dummy', 'dummy', phone_hash,
       repeat('f', 64), statement_timestamp()
     from public.participants limit 1$$,
+  '23505',
+  'duplicate key value violates unique constraint "participants_event_phone_hash_key"',
   '같은 행사에서 동일 연락처 해시 중복 응모를 거부한다'
 );
 
@@ -210,6 +214,8 @@ select extensions.throws_ok(
     from public.draw_results as dr
     where event_id = '00000000-0000-0000-0000-000000000035'
     limit 1$$,
+  '23505',
+  'duplicate key value violates unique constraint "draw_results_event_participant_key"',
   '동일 참석자의 중복 당첨을 거부한다'
 );
 
@@ -330,6 +336,8 @@ insert into public.events(id, title, status)
 values ('00000000-0000-0000-0000-000000000002', '잘못된 상태 더미 행사', 'SETUP');
 select extensions.throws_ok(
   $$select public.execute_draw('00000000-0000-0000-0000-000000000002')$$,
+  'P0001',
+  'EVENT_NOT_CLOSED',
   '허용되지 않은 행사 상태에서 추첨을 거부한다'
 );
 update public.events
@@ -358,6 +366,8 @@ select public.execute_draw('00000000-0000-0000-0000-000000000003');
 
 select extensions.throws_ok(
   $$select public.publish_results('00000000-0000-0000-0000-000000000003')$$,
+  'P0001',
+  'REVEAL_NOT_COMPLETE',
   '모든 공개 전에는 결과 공유를 거부한다'
 );
 
@@ -447,6 +457,8 @@ select extensions.throws_ok(
       'UNSAFE_TEST',
       '{"name":"dummy-personal-value"}'::jsonb
     )$$,
+  '23514',
+  'new row for relation "audit_logs" violates check constraint "audit_logs_detail_check"',
   '감사 로그는 개인정보 필드를 거부한다'
 );
 select extensions.ok(
