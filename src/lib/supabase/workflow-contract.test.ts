@@ -43,6 +43,9 @@ describe("Task 3 Supabase CI 계약", () => {
       workflow.indexOf("run: node tools/supabase-management-ci.mjs"),
     ).toBeLessThan(workflow.indexOf("SUPABASE_ACCESS_TOKEN:"));
     expect(workflow).toContain("Secret·Git 추적 대상 검사");
+    expect(workflow).toContain(
+      "npm exec supabase -- start > /tmp/supabase-start.log 2>&1",
+    );
   });
 
   it("필요한 최소 권한 API와 migration 중복 방지 계약을 고정한다", () => {

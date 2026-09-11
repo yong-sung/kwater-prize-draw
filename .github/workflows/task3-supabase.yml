@@ -36,7 +36,7 @@ jobs:
       - name: Supabase CLI 버전 확인
         run: npm exec supabase -- --version
       - name: Supabase 임시 DB 시작과 migration 적용
-        run: npm exec supabase -- start
+        run: npm exec supabase -- start > /tmp/supabase-start.log 2>&1
       - name: 로컬 pgTAP 실행
         run: npm exec supabase -- test db --local
       - name: 로컬 생성 타입 구문 확인
@@ -61,7 +61,7 @@ jobs:
         run: |
           set -euo pipefail
           test -z "$(git ls-files '.env.local' '.supabase/**')"
-          if git grep -I -E -q 'sbp_[A-Za-z0-9_-]{16,}|postgres(ql)?://[^[:space:]]+|SUPABASE_(ACCESS_TOKEN|DB_PASSWORD)[[:space:]]*=[[:space:]]*[^[:space:]$]' -- .; then
+          if git grep -I -E -q 'sbp_[A-Za-z0-9_-]{16,}|sb_(secret|publishable)_[A-Za-z0-9_-]{20,}|postgres(ql)?://[^[:space:]]+|SUPABASE_(ACCESS_TOKEN|DB_PASSWORD)[[:space:]]*=[[:space:]]*[^[:space:]$]' -- .; then
             echo 'Git 추적 파일에서 Secret 유사 패턴을 발견했습니다.' >&2
             exit 1
           fi

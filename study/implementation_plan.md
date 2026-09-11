@@ -46,7 +46,7 @@ Task 2 이후는 이번 실행 범위에서 제외하며 시작하지 않는다.
 ## Task 3 실행 계획 갱신
 
 - 실행 범위: Supabase 스키마, RLS, 함수 권한, 원자적 추첨·대체 추첨·공개·결과 공유·만료 삭제 함수와 관련 테스트
-- migration: 적용된 20260910003438_initial.sql은 불변으로 보존하고, 코드 리뷰 보정은 20260911114700_task3_review_fixes.sql에 추가한다. 운영 데이터와 seed는 사용하지 않는다.
+- migration: 적용된 20260910003438_initial.sql과 20260911114700_task3_review_fixes.sql은 불변으로 보존하고, 최종 리뷰 보정은 20260911133000_task3_reveal_state_fix.sql에 추가한다. 운영 데이터와 seed는 사용하지 않는다.
 - 원격 안전장치: 최소 권한 Management API로 project ref의 프로젝트명이 정확히 kwater-prize-draw-dev인지 확인한 뒤 transaction rollback dry-run과 공식 migration 적용 API를 실행한다. supabase link, db reset --linked는 사용하지 않는다.
 - 검증 순서: GitHub Actions Ubuntu runner 로컬 migration·pgTAP, 전용 개발 프로젝트 식별·migration 이력·dry-run·적용, query API 원격 pgTAP·DB 계약, 타입 생성 API, Security/Performance Advisors, 전체 품질 검사와 Secret 검사
 - 완료 조건: 모든 필수 검증 통과 후 Task 3 PR만 squash merge하며 Task 4는 시작하지 않는다.
