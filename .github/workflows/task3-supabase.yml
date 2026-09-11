@@ -171,6 +171,9 @@ jobs:
         if: steps.migration-state.outputs.already-applied != 'true'
         run: npm exec supabase -- db push --linked
 
+      - name: 원격 pgTAP 실행
+        run: npm exec supabase -- test db --linked
+
       - name: migration 버전 일치 확인
         shell: bash
         run: |
@@ -181,15 +184,6 @@ jobs:
             exit 1
           }
           echo "migration 버전 일치: $EXPECTED_MIGRATION"
-
-      - name: 원격 pgTAP 실행
-        run: npm exec supabase -- test db --linked
-
-      - name: Database Advisors security
-        run: npm exec supabase -- db advisors --linked --type security --level info --fail-on error
-
-      - name: Database Advisors performance
-        run: npm exec supabase -- db advisors --linked --type performance --level info --fail-on error
 
       - name: 원격 타입 생성과 UTF-8·구문 검증
         id: generated-types
@@ -205,6 +199,12 @@ jobs:
             echo 'match=false' >> "$GITHUB_OUTPUT"
             echo '생성 타입이 저장소 파일과 다릅니다.' >&2
           fi
+
+      - name: Database Advisors security
+        run: npm exec supabase -- db advisors --linked --type security --level info --fail-on error
+
+      - name: Database Advisors performance
+        run: npm exec supabase -- db advisors --linked --type performance --level info --fail-on error
 
       - name: 생성 타입 보관
         if: steps.generated-types.outputs.match != 'true'

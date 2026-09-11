@@ -60,5 +60,14 @@ describe("Task 3 Supabase CI 계약", () => {
     expect(workflow.indexOf("Database Advisors security")).toBeLessThan(
       workflow.indexOf("생성 타입 일치 강제"),
     );
+    expect(workflow.indexOf("원격 pgTAP 실행")).toBeLessThan(
+      workflow.indexOf("migration 버전 일치 확인"),
+    );
+    expect(workflow.indexOf("migration 버전 일치 확인")).toBeLessThan(
+      workflow.indexOf("원격 타입 생성과 UTF-8·구문 검증"),
+    );
+    expect(workflow.indexOf("원격 타입 생성과 UTF-8·구문 검증")).toBeLessThan(
+      workflow.indexOf("Database Advisors security"),
+    );
   });
 });
