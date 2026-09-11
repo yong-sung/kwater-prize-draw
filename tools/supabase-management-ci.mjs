@@ -137,8 +137,14 @@ function advisorFailures(response, type) {
   const lints = Array.isArray(response?.lints) ? response.lints : [];
   const blockingLevels =
     type === "security" ? new Set(["WARN", "ERROR"]) : new Set(["ERROR"]);
+  const levels = lints.reduce((summary, lint) => {
+    const level = String(lint?.level ?? "UNKNOWN").toUpperCase();
+    summary[level] = (summary[level] ?? 0) + 1;
+    return summary;
+  }, {});
   return {
     total: lints.length,
+    levels,
     blocking: lints.filter((lint) =>
       blockingLevels.has(String(lint?.level).toUpperCase()),
     ),
@@ -357,7 +363,7 @@ async function main() {
     "performance",
   );
   console.log(
-    `Database Advisors 조회 PASS: security=${security.total}, performance=${performance.total}`,
+    `Database Advisors 조회 PASS: security=${security.total} ${JSON.stringify(security.levels)}, performance=${performance.total} ${JSON.stringify(performance.levels)}`,
   );
   if (security.blocking.length || performance.blocking.length) {
     throw new Error(

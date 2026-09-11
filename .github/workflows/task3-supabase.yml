@@ -90,6 +90,7 @@ jobs:
         run: |
           set -euo pipefail
           node -e 'new TextDecoder("utf-8", { fatal: true }).decode(require("node:fs").readFileSync("/tmp/generated-types.ts"))'
+          npx prettier --write /tmp/generated-types.ts
           npx tsc --noEmit --ignoreConfig --target ES2020 --module esnext --moduleResolution bundler --skipLibCheck /tmp/generated-types.ts
       - name: 생성 타입 일치 확인
         id: generated-types
