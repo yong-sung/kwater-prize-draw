@@ -9,65 +9,51 @@ const workflowPath = join(
   "workflows",
   "task3-supabase.yml",
 );
+const managementScriptPath = join(
+  process.cwd(),
+  "tools",
+  "supabase-management-ci.mjs",
+);
 
 describe("Task 3 Supabase CI 계약", () => {
-  it("최소 권한의 Ubuntu 워크플로가 존재한다", () => {
+  it("최소 권한 Ubuntu workflow와 안전한 원격 실행 경계를 유지한다", () => {
     expect(existsSync(workflowPath)).toBe(true);
-    if (!existsSync(workflowPath)) return;
-
     const workflow = readFileSync(workflowPath, "utf8");
     expect(workflow).toContain("permissions:\n  contents: read");
     expect(workflow).toContain("runs-on: ubuntu-latest");
     expect(workflow).toContain("timeout-minutes:");
     expect(workflow).toContain("concurrency:");
-  });
-
-  it("로컬 DB 검증 이후에만 전용 개발 프로젝트를 배포한다", () => {
-    expect(existsSync(workflowPath)).toBe(true);
-    if (!existsSync(workflowPath)) return;
-
-    const workflow = readFileSync(workflowPath, "utf8");
-    expect(workflow).toContain("local-db-test:");
-    expect(workflow).toContain("deploy-and-test-development:");
     expect(workflow).toContain("needs: local-db-test");
-    expect(workflow).not.toContain("environment: supabase-development");
     expect(workflow).toContain("github.event.repository.fork == false");
     expect(workflow).toContain("refs/heads/task/3-supabase-ci");
     expect(workflow).not.toContain("pull_request_target");
+    expect(workflow).not.toContain("environment: supabase-development");
   });
 
-  it("고정 CLI와 안전한 원격 검증 순서를 사용한다", () => {
-    expect(existsSync(workflowPath)).toBe(true);
-    if (!existsSync(workflowPath)) return;
-
+  it("link 없이 공식 Management API만 사용한다", () => {
     const workflow = readFileSync(workflowPath, "utf8");
-    expect(workflow).toContain("npm ci");
-    expect(workflow).toContain("npm exec supabase --");
-    expect(workflow).not.toContain("supabase@latest");
-    expect(workflow.match(/tsc --noEmit --ignoreConfig/g)).toHaveLength(2);
-    expect(workflow).toContain("db push --dry-run --linked");
-    expect(workflow).toContain('link --project-ref "$SUPABASE_PROJECT_ID"');
-    expect(workflow).toContain("db push --linked");
-    expect(workflow).not.toContain("db reset --linked");
-    expect(workflow).toContain("test db --linked");
-    expect(workflow).toContain("db advisors --linked --type security");
-    expect(workflow).toContain("db advisors --linked --type performance");
-    expect(workflow).toContain("^[a-z0-9]{20}$");
-    expect(workflow).toContain("id: migration-state");
-    expect(workflow).toContain(
-      "if: steps.migration-state.outputs.already-applied != 'true'",
-    );
-    expect(workflow.indexOf("Database Advisors security")).toBeLessThan(
-      workflow.indexOf("생성 타입 일치 강제"),
-    );
-    expect(workflow.indexOf("원격 pgTAP 실행")).toBeLessThan(
-      workflow.indexOf("migration 버전 일치 확인"),
-    );
-    expect(workflow.indexOf("migration 버전 일치 확인")).toBeLessThan(
-      workflow.indexOf("원격 타입 생성과 UTF-8·구문 검증"),
-    );
-    expect(workflow.indexOf("원격 타입 생성과 UTF-8·구문 검증")).toBeLessThan(
-      workflow.indexOf("Database Advisors security"),
-    );
+    expect(workflow).not.toContain("supabase -- link");
+    expect(workflow).not.toContain("--linked");
+    expect(workflow).not.toContain("db reset");
+    expect(workflow).toContain("node tools/supabase-management-ci.mjs");
+    expect(workflow).toContain("SUPABASE_ACCESS_TOKEN");
+    expect(workflow).toContain("SUPABASE_PROJECT_ID");
+  });
+
+  it("필요한 최소 권한 API와 migration 중복 방지 계약을 고정한다", () => {
+    expect(existsSync(managementScriptPath)).toBe(true);
+    if (!existsSync(managementScriptPath)) return;
+    const script = readFileSync(managementScriptPath, "utf8");
+    expect(script).toContain("/v1/projects/${projectRef}");
+    expect(script).toContain("/database/migrations");
+    expect(script).toContain("/database/query");
+    expect(script).toContain("/types/typescript");
+    expect(script).toContain("/advisors/security");
+    expect(script).toContain("/advisors/performance");
+    expect(script).toContain("kwater-prize-draw-dev");
+    expect(script).toContain("^[a-z0-9]{20}$");
+    expect(script).toContain("alreadyApplied");
+    expect(script).toContain("BEGIN;");
+    expect(script).toContain("ROLLBACK;");
   });
 });
