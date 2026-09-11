@@ -1,5 +1,19 @@
 # 변경이력
 
+## 2026-09-11 - Task 3
+
+- 행사·경품·참석자·추첨 결과·공개 상태·감사 및 관리자 로그인 시도 스키마와 제약·인덱스·RLS를 초기 migration으로 추가했다.
+- 원자적 추첨, 대체 추첨, 순차 공개, 결과 공개, 7일 만료 삭제 SECURITY DEFINER 함수와 최소 실행 권한을 추가했다.
+- DB 계약과 함수 시나리오를 검증하는 pgTAP 116개 assertion 및 TypeScript 계약 테스트를 추가했다.
+- 초기 migration은 불변으로 유지하고 교차 행사 결과 참조와 후보 없는 대체 추첨의 공개 수 정합성을 보장하는 보정 migration을 추가했다.
+- 적용된 migration을 변경하지 않고 후보 없는 대체 추첨의 공개 완료 상태를 유지하는 후속 보정 migration을 추가했다.
+- supabase link를 제거하고 전용 개발 프로젝트만 확인하는 최소 권한 Management API CI로 교체했다.
+- 공식 migration/query/types/advisors API를 통해 원격 migration, rollback pgTAP, RLS·실제 역할 권한, 생성 타입과 Advisors를 검증했다.
+- migration 이름·고정 원격 version·상세 SQL을 함께 비교해 중복 적용을 차단하고, 원격 단계의 Secret 범위를 최소화하며 CI Secret·Git 추적 대상 검사를 추가했다.
+- SQL 비교에서 문자열 리터럴 내부 공백을 보존하고 Supabase 로컬 기동 로그를 억제해 CI 로그 위생을 보강했다.
+- GitHub Actions Ubuntu runner로 로컬 Docker 검증을 수행해 nested virtualization이 비활성화된 Xen 개발 PC 제약을 분리했다.
+- 운영 데이터와 실제 개인정보를 사용하지 않았고 context/, docs/ 원본을 변경하지 않았다.
+
 ## 2026-09-10 - Task 2
 
 - 행사 상태와 경품 코드 타입, 허용 상태 전환 규칙을 추가했다.

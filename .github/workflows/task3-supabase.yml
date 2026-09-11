@@ -1,0 +1,130 @@
+name: Task 3 Supabase 검증
+
+on:
+  push:
+    branches:
+      - task/3-supabase-ci
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: task3-supabase-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  local-db-test:
+    name: 임시 로컬 DB와 전체 검증
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: 소스 체크아웃
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: 고정 의존성 설치
+        run: npm ci
+      - name: Docker 실행 상태 확인
+        run: docker info --format '{{json .ServerVersion}}'
+      - name: Supabase CLI 버전 확인
+        run: npm exec supabase -- --version
+      - name: Supabase 임시 DB 시작과 migration 적용
+        run: npm exec supabase -- start > /tmp/supabase-start.log 2>&1
+      - name: 로컬 pgTAP 실행
+        run: npm exec supabase -- test db --local
+      - name: 로컬 생성 타입 구문 확인
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm exec supabase -- gen types --local --lang typescript > /tmp/generated-types.ts
+          node -e 'new TextDecoder("utf-8", { fatal: true }).decode(require("node:fs").readFileSync("/tmp/generated-types.ts"))'
+          npx tsc --noEmit --ignoreConfig --target ES2020 --module esnext --moduleResolution bundler --skipLibCheck /tmp/generated-types.ts
+      - name: 전체 단위 테스트
+        run: npm run test:run
+      - name: TypeScript 검사
+        run: npm run typecheck
+      - name: ESLint 검사
+        run: npm run lint
+      - name: Prettier 검사
+        run: npm run format:check
+      - name: Production build
+        run: npm run build
+      - name: Secret·Git 추적 대상 검사
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git ls-files '.env.local' '.supabase/**')"
+          if git grep -I -E -q 'sbp_[A-Za-z0-9_-]{16,}|sb_(secret|publishable)_[A-Za-z0-9_-]{20,}|postgres(ql)?://[^[:space:]]+|SUPABASE_(ACCESS_TOKEN|DB_PASSWORD)[[:space:]]*=[[:space:]]*[^[:space:]$]' -- .; then
+            echo 'Git 추적 파일에서 Secret 유사 패턴을 발견했습니다.' >&2
+            exit 1
+          fi
+      - name: 실패 시 안전한 컨테이너 상태 출력
+        if: failure()
+        run: docker ps -a --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
+      - name: Supabase 컨테이너 정리
+        if: always()
+        run: npm exec supabase -- stop --no-backup
+
+  deploy-and-test-development:
+    name: 최소 권한 Management API 원격 검증
+    needs: local-db-test
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/task/3-supabase-ci' &&
+      github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: 소스 체크아웃
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: 고정 의존성 설치
+        run: npm ci
+      - name: 프로젝트 식별·migration·원격 검증·타입·Advisors
+        run: node tools/supabase-management-ci.mjs
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      - name: 생성 타입 UTF-8·구문 검증
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e 'new TextDecoder("utf-8", { fatal: true }).decode(require("node:fs").readFileSync("/tmp/generated-types.ts"))'
+          npx prettier --write /tmp/generated-types.ts
+          npx tsc --noEmit --ignoreConfig --target ES2020 --module esnext --moduleResolution bundler --skipLibCheck /tmp/generated-types.ts
+      - name: 생성 타입 일치 확인
+        id: generated-types
+        shell: bash
+        run: |
+          if [[ -f src/lib/supabase/types.ts ]] && cmp -s /tmp/generated-types.ts src/lib/supabase/types.ts; then
+            echo 'match=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'match=false' >> "$GITHUB_OUTPUT"
+            echo '생성 타입이 저장소 파일과 다릅니다.' >&2
+          fi
+      - name: 생성 타입 보관
+        if: steps.generated-types.outputs.match != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: task3-generated-types
+          path: /tmp/generated-types.ts
+          retention-days: 1
+      - name: 생성 타입 일치 강제
+        if: steps.generated-types.outputs.match != 'true'
+        run: exit 1
+      - name: 임시 파일 정리
+        if: always()
+        run: rm -f /tmp/generated-types.ts
