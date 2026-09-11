@@ -31,4 +31,17 @@ describe("Supabase 스키마 계약", () => {
       readFileSync(join(migrationsDirectory, migration), "utf8"),
     ).not.toContain("�");
   });
+
+  it("적용된 초기 migration을 변경하지 않고 리뷰 보정 migration을 추가한다", () => {
+    const correction = readdirSync(migrationsDirectory).find((file) =>
+      file.endsWith("_task3_review_fixes.sql"),
+    );
+    expect(correction).toBeDefined();
+    if (!correction) return;
+
+    const sql = readFileSync(join(migrationsDirectory, correction), "utf8");
+    expect(sql).toContain("draw_results_event_participant_fkey");
+    expect(sql).toContain("draw_results_event_prize_fkey");
+    expect(sql).toContain("if v_was_revealed then");
+  });
 });

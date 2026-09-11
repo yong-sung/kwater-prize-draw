@@ -76,6 +76,36 @@ from unnest(array[
   'public.purge_expired_events()'
 ]) as functions(function_name);
 
+set local role anon;
+select extensions.throws_ok(
+  $$select * from public.events limit 1$$,
+  '42501',
+  'permission denied for table events',
+  'anon 역할의 실제 행사 테이블 조회가 거부된다'
+);
+select extensions.throws_ok(
+  $$select public.execute_draw('00000000-0000-0000-0000-000000000000')$$,
+  '42501',
+  'permission denied for function execute_draw',
+  'anon 역할의 실제 추첨 함수 호출이 거부된다'
+);
+reset role;
+
+set local role authenticated;
+select extensions.throws_ok(
+  $$select * from public.events limit 1$$,
+  '42501',
+  'permission denied for table events',
+  'authenticated 역할의 실제 행사 테이블 조회가 거부된다'
+);
+select extensions.throws_ok(
+  $$select public.execute_draw('00000000-0000-0000-0000-000000000000')$$,
+  '42501',
+  'permission denied for function execute_draw',
+  'authenticated 역할의 실제 추첨 함수 호출이 거부된다'
+);
+reset role;
+
 select extensions.ok(
   pg_catalog.has_function_privilege('service_role', function_name, 'EXECUTE'),
   format('service_role 역할은 %s 실행 권한이 있다', function_name)
@@ -286,6 +316,7 @@ values (
   repeat('1', 64), repeat('2', 64), statement_timestamp()
 );
 select public.execute_draw('00000000-0000-0000-0000-000000000001');
+select public.reveal_next('00000000-0000-0000-0000-000000000001');
 select public.draw_replacement(
   '00000000-0000-0000-0000-000000000001',
   (select id from public.draw_results where event_id = '00000000-0000-0000-0000-000000000001'),
@@ -298,6 +329,24 @@ select extensions.ok(
     where event_id = '00000000-0000-0000-0000-000000000001'
   ),
   '대체 후보가 없으면 해당 슬롯을 미추첨 처리한다'
+);
+select extensions.is(
+  (
+    select revealed_count
+    from public.reveal_state
+    where event_id = '00000000-0000-0000-0000-000000000001'
+  ),
+  0,
+  '공개된 슬롯을 미추첨 처리하면 공개 수가 감소한다'
+);
+select extensions.is(
+  (
+    select status::text
+    from public.events
+    where id = '00000000-0000-0000-0000-000000000001'
+  ),
+  'REVEALING',
+  '공개된 슬롯을 미추첨 처리하면 행사 상태를 공개 중으로 되돌린다'
 );
 
 update public.events
@@ -331,6 +380,54 @@ select extensions.is(
 update public.events
 set status = 'PURGED', updated_at = statement_timestamp()
 where id = '00000000-0000-0000-0000-000000000020';
+
+insert into public.events(id, title, status)
+values
+  ('00000000-0000-0000-0000-000000000071', '교차 행사 A', 'PURGED'),
+  ('00000000-0000-0000-0000-000000000072', '교차 행사 B', 'PURGED');
+insert into public.prizes(id, event_id, code, name, quantity, reveal_order)
+values
+  ('00000000-0000-0000-0000-000000000171', '00000000-0000-0000-0000-000000000071', 'SCANNER', '더미 A 경품', 1, 1),
+  ('00000000-0000-0000-0000-000000000172', '00000000-0000-0000-0000-000000000072', 'SCANNER', '더미 B 경품', 1, 1);
+insert into public.participants(
+  id, event_id, name_ciphertext, phone_ciphertext, department_ciphertext,
+  phone_hash, access_token_hash, consented_at
+)
+values
+  (
+    '00000000-0000-0000-0000-000000000271', '00000000-0000-0000-0000-000000000071',
+    'dummy-a-name', 'dummy-a-phone', 'dummy-a-department',
+    repeat('7', 64), repeat('8', 64), statement_timestamp()
+  ),
+  (
+    '00000000-0000-0000-0000-000000000272', '00000000-0000-0000-0000-000000000072',
+    'dummy-b-name', 'dummy-b-phone', 'dummy-b-department',
+    repeat('9', 64), repeat('a', 64), statement_timestamp()
+  );
+select extensions.throws_ok(
+  $$insert into public.draw_results(event_id, participant_id, prize_id, reveal_position)
+    values (
+      '00000000-0000-0000-0000-000000000071',
+      '00000000-0000-0000-0000-000000000272',
+      '00000000-0000-0000-0000-000000000171',
+      1
+    )$$,
+  '23503',
+  'insert or update on table "draw_results" violates foreign key constraint "draw_results_event_participant_fkey"',
+  '다른 행사의 참석자를 추첨 결과에 연결할 수 없다'
+);
+select extensions.throws_ok(
+  $$insert into public.draw_results(event_id, participant_id, prize_id, reveal_position)
+    values (
+      '00000000-0000-0000-0000-000000000071',
+      '00000000-0000-0000-0000-000000000271',
+      '00000000-0000-0000-0000-000000000172',
+      1
+    )$$,
+  '23503',
+  'insert or update on table "draw_results" violates foreign key constraint "draw_results_event_prize_fkey"',
+  '다른 행사의 경품을 추첨 결과에 연결할 수 없다'
+);
 
 insert into public.events(id, title, status)
 values ('00000000-0000-0000-0000-000000000002', '잘못된 상태 더미 행사', 'SETUP');

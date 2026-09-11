@@ -38,6 +38,11 @@ describe("Task 3 Supabase CI 계약", () => {
     expect(workflow).toContain("node tools/supabase-management-ci.mjs");
     expect(workflow).toContain("SUPABASE_ACCESS_TOKEN");
     expect(workflow).toContain("SUPABASE_PROJECT_ID");
+    expect(workflow.match(/SUPABASE_ACCESS_TOKEN:/g)).toHaveLength(1);
+    expect(
+      workflow.indexOf("run: node tools/supabase-management-ci.mjs"),
+    ).toBeLessThan(workflow.indexOf("SUPABASE_ACCESS_TOKEN:"));
+    expect(workflow).toContain("Secret·Git 추적 대상 검사");
   });
 
   it("필요한 최소 권한 API와 migration 중복 방지 계약을 고정한다", () => {
@@ -52,7 +57,9 @@ describe("Task 3 Supabase CI 계약", () => {
     expect(script).toContain("/advisors/performance");
     expect(script).toContain("kwater-prize-draw-dev");
     expect(script).toContain("^[a-z0-9]{20}$");
-    expect(script).toContain("alreadyApplied");
+    expect(script).toContain("KNOWN_REMOTE_VERSIONS");
+    expect(script).toContain("sameName.length > 1");
+    expect(script).toContain("EXPECTED_ASSERTIONS = 116");
     expect(script).toContain("BEGIN;");
     expect(script).toContain("ROLLBACK;");
   });

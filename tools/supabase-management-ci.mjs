@@ -8,9 +8,12 @@ import { basename, join } from "node:path";
 
 const API_ORIGIN = "https://api.supabase.com";
 const EXPECTED_PROJECT_NAME = "kwater-prize-draw-dev";
-const EXPECTED_ASSERTIONS = 108;
+const EXPECTED_ASSERTIONS = 116;
 const PROJECT_REF_PATTERN = /^[a-z0-9]{20}$/;
 const MIGRATION_FILE_PATTERN = /^(\d{14})_([a-z0-9_]+)\.sql$/;
+const KNOWN_REMOTE_VERSIONS = new Map([
+  ["20260910003438_initial", "20260911021758"],
+]);
 
 function requiredEnvironment(name) {
   const value = process.env[name];
@@ -156,6 +159,35 @@ function appendSummary(lines) {
   if (path) appendFileSync(path, `${lines.join("\n")}\n`, "utf8");
 }
 
+function normalizeSql(sql) {
+  return sql
+    .replace(/\r\n/g, "\n")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/;$/, "");
+}
+
+async function verifyMigrationDetails(
+  projectRef,
+  token,
+  migration,
+  expectedSql,
+) {
+  const details = await managementRequest(
+    projectRef,
+    token,
+    `/database/migrations/${migration.version}`,
+  );
+  if (
+    details?.version !== migration.version ||
+    details?.name !== migration.name ||
+    !Array.isArray(details?.statements) ||
+    normalizeSql(details.statements.join(";\n")) !== normalizeSql(expectedSql)
+  ) {
+    throw new Error(`원격 migration 상세 SQL 계약 불일치: ${migration.name}`);
+  }
+}
+
 const verificationSql = String.raw`
 with
 expected_tables(name) as (
@@ -166,7 +198,8 @@ expected_indexes(name) as (
   values ('only_one_live_event'), ('prizes_event_id_idx'),
          ('participants_event_id_idx'), ('draw_results_event_id_idx'),
          ('draw_results_participant_id_idx'), ('draw_results_prize_id_idx'),
-         ('audit_logs_event_id_idx')
+         ('audit_logs_event_id_idx'), ('participants_event_id_id_key'),
+         ('prizes_event_id_id_key')
 ),
 expected_functions(signature) as (
   values ('execute_draw(uuid)'), ('draw_replacement(uuid,uuid,text)'),
@@ -185,7 +218,7 @@ select 'constraints_valid',
        )
 union all
 select 'indexes_exist',
-       (select count(*) = 7 from expected_indexes e
+       (select count(*) = 9 from expected_indexes e
         where to_regclass('public.' || e.name) is not null)
 union all
 select 'rls_enabled',
@@ -233,23 +266,26 @@ async function main() {
   }
 
   const migrationDirectory = join(process.cwd(), "supabase", "migrations");
-  const migrationFiles = readdirSync(migrationDirectory).filter((name) =>
-    name.endsWith(".sql"),
-  );
-  if (migrationFiles.length !== 1)
-    throw new Error("Task 3 migration 파일은 정확히 한 개여야 합니다.");
-  const migrationFile = migrationFiles[0];
-  const match = MIGRATION_FILE_PATTERN.exec(migrationFile);
-  if (!match)
+  const localMigrations = readdirSync(migrationDirectory)
+    .filter((name) => name.endsWith(".sql"))
+    .sort()
+    .map((file) => {
+      const match = MIGRATION_FILE_PATTERN.exec(file);
+      if (!match)
+        throw new Error(
+          "migration 파일명이 승인된 timestamp_name 형식이 아닙니다.",
+        );
+      return {
+        file,
+        localVersion: match[1],
+        name: basename(file, ".sql"),
+        sql: readFileSync(join(migrationDirectory, file), "utf8"),
+      };
+    });
+  if (localMigrations.length !== 2)
     throw new Error(
-      "migration 파일명이 승인된 timestamp_name 형식이 아닙니다.",
+      "Task 3 migration 파일은 초기와 보정 migration 두 개여야 합니다.",
     );
-  const [, localVersion] = match;
-  const migrationName = basename(migrationFile, ".sql");
-  const migrationSql = readFileSync(
-    join(migrationDirectory, migrationFile),
-    "utf8",
-  );
 
   const project = await managementRequest(projectRef, token, "");
   if (project?.name !== EXPECTED_PROJECT_NAME) {
@@ -264,48 +300,53 @@ async function main() {
   );
   if (!Array.isArray(migrations))
     throw new Error("migration 이력 응답 형식이 올바르지 않습니다.");
-  const versionEntry = migrations.find(
-    (item) => item?.version === localVersion,
-  );
-  if (versionEntry && versionEntry.name !== migrationName) {
-    throw new Error(
-      "동일 version에 다른 migration이 기록되어 안전하게 중단합니다.",
+  const appliedMigrations = [];
+  for (const local of localMigrations) {
+    const sameName = migrations.filter((item) => item?.name === local.name);
+    if (sameName.length > 1)
+      throw new Error(`중복 migration 이력 발견: ${local.name}`);
+    const knownVersion = KNOWN_REMOTE_VERSIONS.get(local.name);
+    if (
+      sameName.length === 1 &&
+      knownVersion &&
+      sameName[0].version !== knownVersion
+    ) {
+      throw new Error(`고정 원격 migration version 불일치: ${local.name}`);
+    }
+    let applied = sameName[0];
+    if (!applied) {
+      await managementRequest(projectRef, token, "/database/query", {
+        method: "POST",
+        body: JSON.stringify({ query: `BEGIN;\n${local.sql}\nROLLBACK;` }),
+      });
+      console.log(`원격 migration dry-run PASS: ${local.localVersion}`);
+      await managementRequest(projectRef, token, "/database/migrations", {
+        method: "POST",
+        body: JSON.stringify({ query: local.sql, name: local.name }),
+      });
+      console.log(`원격 migration 적용 PASS: ${local.localVersion}`);
+      migrations = await managementRequest(
+        projectRef,
+        token,
+        "/database/migrations",
+      );
+      const newlyApplied = migrations.filter(
+        (item) => item?.name === local.name,
+      );
+      if (newlyApplied.length !== 1)
+        throw new Error(
+          `적용 후 migration 이력을 확정할 수 없습니다: ${local.name}`,
+        );
+      applied = newlyApplied[0];
+    } else {
+      console.log(`원격 migration 중복 적용 방지 PASS: ${local.localVersion}`);
+    }
+    await verifyMigrationDetails(projectRef, token, applied, local.sql);
+    appliedMigrations.push({ ...local, remoteVersion: applied.version });
+    console.log(
+      `원격 migration 이력·SQL PASS: local=${local.localVersion}, remote=${applied.version}`,
     );
   }
-  const alreadyApplied = migrations.find(
-    (item) => item?.version === localVersion || item?.name === migrationName,
-  );
-
-  if (!alreadyApplied) {
-    await managementRequest(projectRef, token, "/database/query", {
-      method: "POST",
-      body: JSON.stringify({ query: `BEGIN;\n${migrationSql}\nROLLBACK;` }),
-    });
-    console.log(`원격 migration dry-run PASS: ${localVersion}`);
-    await managementRequest(projectRef, token, "/database/migrations", {
-      method: "POST",
-      body: JSON.stringify({ query: migrationSql, name: migrationName }),
-    });
-    console.log(`원격 migration 적용 PASS: ${localVersion}`);
-  } else {
-    console.log(`원격 migration 중복 적용 방지 PASS: ${localVersion}`);
-  }
-
-  migrations = await managementRequest(
-    projectRef,
-    token,
-    "/database/migrations",
-  );
-  const applied = Array.isArray(migrations)
-    ? migrations.find(
-        (item) =>
-          item?.version === localVersion || item?.name === migrationName,
-      )
-    : undefined;
-  if (!applied) throw new Error("적용 후 migration 이력을 확인할 수 없습니다.");
-  console.log(
-    `원격 migration 이력 PASS: local=${localVersion}, remote=${applied.version}`,
-  );
 
   const pgTapSql = buildRemotePgTap(
     readFileSync(
@@ -375,7 +416,7 @@ async function main() {
     "## Task 3 원격 Supabase 검증",
     "",
     `- 프로젝트 식별: PASS (${EXPECTED_PROJECT_NAME})`,
-    `- migration: PASS (local ${localVersion}, remote ${applied.version})`,
+    `- migrations: PASS (${appliedMigrations.map((item) => `${item.localVersion}->${item.remoteVersion}`).join(", ")})`,
     `- pgTAP: PASS (${EXPECTED_ASSERTIONS}/${EXPECTED_ASSERTIONS})`,
     "- RLS·DB 계약: PASS (8/8)",
     `- Advisors: PASS (security ${security.total}, performance ${performance.total})`,

@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: 소스 체크아웃
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Node.js 설정
         uses: actions/setup-node@v4
         with:
@@ -54,6 +56,15 @@ jobs:
         run: npm run format:check
       - name: Production build
         run: npm run build
+      - name: Secret·Git 추적 대상 검사
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git ls-files '.env.local' '.supabase/**')"
+          if git grep -I -E -q 'sbp_[A-Za-z0-9_-]{16,}|postgres(ql)?://[^[:space:]]+|SUPABASE_(ACCESS_TOKEN|DB_PASSWORD)[[:space:]]*=[[:space:]]*[^[:space:]$]' -- .; then
+            echo 'Git 추적 파일에서 Secret 유사 패턴을 발견했습니다.' >&2
+            exit 1
+          fi
       - name: 실패 시 안전한 컨테이너 상태 출력
         if: failure()
         run: docker ps -a --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
@@ -70,12 +81,11 @@ jobs:
       github.event.repository.fork == false
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
     steps:
       - name: 소스 체크아웃
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Node.js 설정
         uses: actions/setup-node@v4
         with:
@@ -85,6 +95,9 @@ jobs:
         run: npm ci
       - name: 프로젝트 식별·migration·원격 검증·타입·Advisors
         run: node tools/supabase-management-ci.mjs
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
       - name: 생성 타입 UTF-8·구문 검증
         shell: bash
         run: |
