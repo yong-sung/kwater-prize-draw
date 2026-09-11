@@ -15,6 +15,7 @@ const KNOWN_REMOTE_VERSIONS = new Map([
   ["20260910003438_initial", "20260911021758"],
   ["20260911114700_task3_review_fixes", "20260911025534"],
   ["20260911133000_task3_reveal_state_fix", "20260911042952"],
+  ["20260911170000_admin_login_rate_limit", "20260911060930"],
 ]);
 
 function requiredEnvironment(name) {

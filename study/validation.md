@@ -62,3 +62,28 @@
 | 로컬 Windows DB 검증           | BLOCKED | nested virtualization이 비활성화된 Xen VM이라 Docker/WSL 2 실행 불가                                         |
 
 supabase link는 API key, Auth, Storage, Realtime, 네트워크와 pooler 설정까지 추가 조회해 Scoped Token의 범위를 벗어나므로 제거했다. 프로젝트 조회, migration, query, types, advisors의 공식 Management API만 사용했다. migration API가 제출 버전을 직접 지정하지 않으므로 로컬 파일명과 고정된 원격 version을 함께 검증하고, 상세 API의 SQL을 문자열 리터럴 내부 공백을 보존하며 정규화해 로컬 파일과 일치하는지 확인했다. 코드 리뷰에서 발견한 교차 행사 결과 참조, 후보 없는 대체 추첨의 공개 수·상태 정합성, 실제 anon/authenticated 역할 권한, CI Secret 범위·로그와 추적 대상 검사를 보정했다. 샌드박스 ACL로 일반 파일 도구가 실패한 경우 승인된 workspace 범위에서 patch 전용 실행 경로를 사용했으며 프로젝트 파일 생성·수정과 검증은 정상 완료했다.
+
+## Task 4
+
+검증 실행: GitHub Actions 34568449898 (2026-09-11), branch task/4-admin-auth
+
+| 항목                                 | 상태    | 실제 결과                                                                                                |
+| ------------------------------------ | ------- | -------------------------------------------------------------------------------------------------------- |
+| TDD RED                              | PASS    | 세션·제한·API·UI 모듈 부재로 4개 suite가 예상대로 실패했고, workflow 손상 회귀 계약도 기대한 이유로 실패 |
+| Task 4 단위·계약 테스트              | PASS    | 세션, 로그인 제한, login/logout API, 관리자 로그인 UI와 workflow 계약 22개 통과                          |
+| 전체 단위 테스트                     | PASS    | 로컬 70개 통과, DB 통합 2개는 환경 조건으로 skip                                                         |
+| Ubuntu local migration               | PASS    | 깨끗한 Supabase DB에 Task 3 migration 3개와 Task 4 migration 적용                                        |
+| local pgTAP                          | PASS    | 119/119 assertion 통과                                                                                   |
+| 로그인 제한 DB 통합                  | PASS    | 순차 누적·삭제와 병렬 5회 원자 누적 2개 통과                                                             |
+| 대상 프로젝트 식별                   | PASS    | 전용 개발 프로젝트 `kwater-prize-draw-dev` 일치 후에만 원격 변경                                         |
+| 원격 migration dry-run·적용          | PASS    | 20260911170000 dry-run 후 적용, 원격 version 20260911060930과 상세 SQL 일치                              |
+| 원격 pgTAP·DB 권한                   | PASS    | 119/119, RLS·제약·인덱스·함수 권한 8/8                                                                   |
+| 생성 TypeScript 타입                 | PASS    | 공식 API 생성 artifact의 UTF-8·구문을 확인하고 함수 타입 반영                                            |
+| Security / Performance Advisors      | PASS    | security 7건 INFO, performance 3건 INFO; 차단 경고 없음                                                  |
+| Typecheck·ESLint·Prettier·build      | PASS    | 오류·경고 없이 통과, login/logout 동적 Route Handler build 확인                                          |
+| API·화면 동작                        | PASS    | 200/401/429/503, 쿠키 속성, 남은 차단시간 UI를 검증하고 데스크톱·모바일에서 입력·오류·overflow 확인      |
+| Secret·민감 파일                     | PASS    | 실제 Secret 미출력·미추적, `.env.local`·`.supabase/` 미추적                                              |
+| context/·docs/·Task 3 migration 보존 | PASS    | 미추적 원본을 commit에서 제외하고 기존 migration 3개 diff 없음                                           |
+| 로컬 Windows DB                      | BLOCKED | nested virtualization이 비활성화된 Xen VM 제약; Ubuntu runner로 대체 검증                                |
+
+첫 CI는 모든 로컬·원격 DB 검증과 Advisors를 통과한 뒤 생성 타입 차이를 의도대로 차단했다. 공식 타입 artifact와 원격 migration version을 저장소 계약에 반영한 후 CI를 재실행한다. 코드 리뷰의 원자성 HIGH, workflow 구문 HIGH, 신뢰 프록시 IP MEDIUM을 모두 수정했다. Vercel에서는 공식 `x-vercel-forwarded-for` 값을 우선하고 주소를 IPv4/IPv6로 검증·정규화한다.

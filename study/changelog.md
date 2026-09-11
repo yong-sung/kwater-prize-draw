@@ -1,5 +1,15 @@
 # 변경이력
 
+## 2026-09-11 - Task 4
+
+- bcrypt 관리자 비밀번호 검증, 8시간 HS256 관리자 JWT와 HttpOnly·SameSite Strict 세션 쿠키, 로그인·로그아웃 Route Handler를 추가했다.
+- IP 원문 대신 HMAC-SHA-256 식별자를 저장하고 10분 내 5회 실패 시 15분 차단하며 성공 시 기록을 삭제하도록 구현했다.
+- 병렬 실패의 lost update를 차단하는 SECURITY DEFINER 원자 함수를 새 migration으로 추가하고 service_role에만 실행 권한을 부여했다.
+- Vercel 공식 전달 헤더를 우선하고 IPv4·IPv6 주소를 검증·정규화해 임의 헤더 회전에 의한 제한 우회를 차단했다.
+- 비밀번호 입력, 오류와 남은 차단 시간을 제공하는 반응형 관리자 로그인 컴포넌트를 추가했다.
+- Ubuntu runner에서 local pgTAP 119개와 로그인 제한 DB 통합 테스트 2개를 실행하고 전용 개발 프로젝트에 migration을 적용했다.
+- context/, docs/와 Task 3 migration을 변경하지 않았고 Task 5 기능은 시작하지 않았다.
+
 ## 2026-09-11 - Task 3
 
 - 행사·경품·참석자·추첨 결과·공개 상태·감사 및 관리자 로그인 시도 스키마와 제약·인덱스·RLS를 초기 migration으로 추가했다.
