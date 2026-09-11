@@ -13,6 +13,7 @@ const PROJECT_REF_PATTERN = /^[a-z0-9]{20}$/;
 const MIGRATION_FILE_PATTERN = /^(\d{14})_([a-z0-9_]+)\.sql$/;
 const KNOWN_REMOTE_VERSIONS = new Map([
   ["20260910003438_initial", "20260911021758"],
+  ["20260911114700_task3_review_fixes", "20260911025534"],
 ]);
 
 function requiredEnvironment(name) {
@@ -100,7 +101,12 @@ function assertPgTap(response) {
 function buildRemotePgTap(source) {
   const withCollector = source.replace(
     /^begin;\s*/i,
-    "begin;\ncreate temp table pg_temp.tap_results(line text) on commit drop;\n",
+    [
+      "begin;",
+      "create temp table pg_temp.tap_results(line text) on commit drop;",
+      "grant insert, select on pg_temp.tap_results to anon, authenticated;",
+      "",
+    ].join("\n"),
   );
   const withAssertions = withCollector.replace(
     /^select extensions\.(ok|is|lives_ok|results_eq|throws_ok)\b/gm,
