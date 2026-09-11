@@ -26,6 +26,10 @@ describe("Task 3 Supabase CI 계약", () => {
     expect(workflow).toContain("needs: local-db-test");
     expect(workflow).toContain("github.event.repository.fork == false");
     expect(workflow).toContain("refs/heads/task/3-supabase-ci");
+    expect(workflow).toContain("task/4-admin-auth");
+    expect(workflow).toContain(
+      "src/lib/security/rate-limit.integration.test.ts",
+    );
     expect(workflow).not.toContain("pull_request_target");
     expect(workflow).not.toContain("environment: supabase-development");
   });
@@ -63,7 +67,7 @@ describe("Task 3 Supabase CI 계약", () => {
     expect(script).toContain("KNOWN_REMOTE_VERSIONS");
     expect(script).toContain("20260911025534");
     expect(script).toContain("sameName.length > 1");
-    expect(script).toContain("EXPECTED_ASSERTIONS = 116");
+    expect(script).toContain("EXPECTED_ASSERTIONS = 119");
     expect(script).toContain("BEGIN;");
     expect(script).toContain("ROLLBACK;");
   });
@@ -71,5 +75,13 @@ describe("Task 3 Supabase CI 계약", () => {
   it("migration SQL 비교가 문자열 내부의 의미 있는 공백을 보존한다", () => {
     const script = readFileSync(managementScriptPath, "utf8");
     expect(script).not.toContain('.replace(/\\s+/g, " ")');
+  });
+
+  it("Task 4 통합 테스트 환경변수와 원격 브랜치 조건이 올바른 Bash 구문이다", () => {
+    const workflow = readFileSync(workflowPath, "utf8");
+    expect(workflow).toContain('NEXT_PUBLIC_SUPABASE_URL="$API_URL" \\\n');
+    expect(workflow).toContain('SUPABASE_SECRET_KEY="$SERVICE_ROLE_KEY" \\\n');
+    expect(workflow).not.toContain('"$API_URL" +');
+    expect(workflow).toContain("refs/heads/task/4-admin-auth");
   });
 });

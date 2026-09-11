@@ -322,6 +322,13 @@ export type Database = {
       execute_draw: { Args: { p_event_id: string }; Returns: number };
       publish_results: { Args: { p_event_id: string }; Returns: Json };
       purge_expired_events: { Args: never; Returns: Json };
+      record_admin_login_failure: {
+        Args: { p_ip_hash: string; p_now?: string };
+        Returns: {
+          blocked: boolean;
+          blocked_until: string;
+        }[];
+      };
       reveal_next: { Args: { p_event_id: string }; Returns: Json };
     };
     Enums: {

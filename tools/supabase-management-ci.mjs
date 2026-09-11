@@ -8,13 +8,14 @@ import { basename, join } from "node:path";
 
 const API_ORIGIN = "https://api.supabase.com";
 const EXPECTED_PROJECT_NAME = "kwater-prize-draw-dev";
-const EXPECTED_ASSERTIONS = 116;
+const EXPECTED_ASSERTIONS = 119;
 const PROJECT_REF_PATTERN = /^[a-z0-9]{20}$/;
 const MIGRATION_FILE_PATTERN = /^(\d{14})_([a-z0-9_]+)\.sql$/;
 const KNOWN_REMOTE_VERSIONS = new Map([
   ["20260910003438_initial", "20260911021758"],
   ["20260911114700_task3_review_fixes", "20260911025534"],
   ["20260911133000_task3_reveal_state_fix", "20260911042952"],
+  ["20260911170000_admin_login_rate_limit", "20260911060930"],
 ]);
 
 function requiredEnvironment(name) {
@@ -239,7 +240,8 @@ expected_indexes(name) as (
 expected_functions(signature) as (
   values ('execute_draw(uuid)'), ('draw_replacement(uuid,uuid,text)'),
          ('reveal_next(uuid)'), ('publish_results(uuid)'),
-         ('purge_expired_events()')
+         ('purge_expired_events()'),
+         ('record_admin_login_failure(text,timestamp with time zone)')
 )
 select 'tables_exist' as check_name,
        (select count(*) = 7 from expected_tables e
@@ -265,7 +267,7 @@ select 'no_permissive_policies',
        not exists (select 1 from pg_policies where schemaname = 'public')
 union all
 select 'functions_hardened',
-       (select count(*) = 5 from expected_functions e
+       (select count(*) = 6 from expected_functions e
         join pg_proc p on p.oid = to_regprocedure('public.' || e.signature)
         where p.prosecdef
           and exists (
@@ -317,9 +319,9 @@ async function main() {
         sql: readFileSync(join(migrationDirectory, file), "utf8"),
       };
     });
-  if (localMigrations.length !== 3)
+  if (localMigrations.length !== 4)
     throw new Error(
-      "Task 3 migration 파일은 초기와 보정 migration 세 개여야 합니다.",
+      "Task 3 migration 세 개와 Task 4 보정 migration 한 개여야 합니다.",
     );
 
   const project = await managementRequest(projectRef, token, "");

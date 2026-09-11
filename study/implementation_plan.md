@@ -58,3 +58,15 @@ Task 2 이후는 이번 실행 범위에서 제외하며 시작하지 않는다.
 ### Rollback
 
 코드 변경은 squash commit을 일반 git revert로 되돌린다. 원격 migration은 자동 삭제하거나 reset하지 않고 후속 보정 migration으로만 되돌린다. context 원본과 승인된 docs 문서는 수정하지 않는다.
+
+## Task 4 실행 계획
+
+- 실행 범위: 공용 관리자 비밀번호 검증, IP HMAC 기반 10분 실패 횟수 제한과 15분 차단, 8시간 관리자 JWT 세션, 로그인·로그아웃 Route Handler, 관리자 로그인 컴포넌트
+- 보안 경계: 비밀번호와 IP 원문은 저장·로그·응답하지 않고, 서버 전용 환경변수와 admin_login_attempts만 사용한다. 세션 쿠키는 HttpOnly, SameSite=Strict, / 경로와 production Secure를 적용한다.
+- 데이터 변경: Task 3 migration은 불변으로 보존한다. 병렬 로그인 실패가 횟수를 덮어쓰지 않도록 `20260911170000_admin_login_rate_limit.sql`에서 행 잠금 기반 원자 함수를 추가하며 운영 데이터는 사용하지 않는다.
+- TDD 순서: 세션·속도 제한·로그인/로그아웃·UI 계약 테스트를 먼저 실패시키고, 최소 구현 후 전체 테스트와 API·화면 흐름을 검증한다.
+- 완료 조건: Task 4 테스트, 전체 테스트, typecheck, ESLint, Prettier, production build, Secret 검사, 코드 리뷰와 CI 통과 후 Task 4 PR만 squash merge한다.
+
+### Task 4 환경 제약과 Rollback
+
+로컬 Docker는 Xen nested virtualization 제약으로 사용하지 않는다. DB 검증은 GitHub Actions Ubuntu runner와 운영에서 분리된 `kwater-prize-draw-dev`에서 수행한다. 코드 변경은 squash commit을 일반 git revert로 되돌리고, 적용된 DB 함수는 기존 migration을 수정하거나 reset하지 않고 후속 보정 migration으로만 되돌린다. Task 3 migration과 context/, docs/ 원본은 변경하지 않는다.

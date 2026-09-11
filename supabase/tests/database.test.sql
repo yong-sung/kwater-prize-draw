@@ -43,7 +43,7 @@ select extensions.is(
     where n.nspname = 'public'
       and p.proname = any(array[
         'execute_draw', 'draw_replacement', 'reveal_next',
-        'publish_results', 'purge_expired_events'
+        'publish_results', 'purge_expired_events', 'record_admin_login_failure'
       ])
       and acl.grantee = 0
       and acl.privilege_type = 'EXECUTE'
@@ -61,7 +61,8 @@ from unnest(array[
   'public.draw_replacement(uuid,uuid,text)',
   'public.reveal_next(uuid)',
   'public.publish_results(uuid)',
-  'public.purge_expired_events()'
+  'public.purge_expired_events()',
+  'public.record_admin_login_failure(text,timestamp with time zone)'
 ]) as functions(function_name);
 
 select extensions.ok(
@@ -73,7 +74,8 @@ from unnest(array[
   'public.draw_replacement(uuid,uuid,text)',
   'public.reveal_next(uuid)',
   'public.publish_results(uuid)',
-  'public.purge_expired_events()'
+  'public.purge_expired_events()',
+  'public.record_admin_login_failure(text,timestamp with time zone)'
 ]) as functions(function_name);
 
 set local role anon;
@@ -115,7 +117,8 @@ from unnest(array[
   'public.draw_replacement(uuid,uuid,text)',
   'public.reveal_next(uuid)',
   'public.publish_results(uuid)',
-  'public.purge_expired_events()'
+  'public.purge_expired_events()',
+  'public.record_admin_login_failure(text,timestamp with time zone)'
 ]) as functions(function_name);
 
 select extensions.is(

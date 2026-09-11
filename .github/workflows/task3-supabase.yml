@@ -1,9 +1,10 @@
-name: Task 3 Supabase 검증
+name: Task 3·4 Supabase 검증
 
 on:
   push:
     branches:
       - task/3-supabase-ci
+      - task/4-admin-auth
   pull_request:
   workflow_dispatch:
 
@@ -39,6 +40,15 @@ jobs:
         run: npm exec supabase -- start > /tmp/supabase-start.log 2>&1
       - name: 로컬 pgTAP 실행
         run: npm exec supabase -- test db --local
+      - name: Task 4 로그인 제한 DB 통합 테스트
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +x
+          eval "$(npm exec supabase -- status -o env)"
+          NEXT_PUBLIC_SUPABASE_URL="$API_URL" \
+            SUPABASE_SECRET_KEY="$SERVICE_ROLE_KEY" \
+            npm run test:run -- src/lib/security/rate-limit.integration.test.ts
       - name: 로컬 생성 타입 구문 확인
         shell: bash
         run: |
@@ -77,7 +87,8 @@ jobs:
     needs: local-db-test
     if: >-
       github.event_name == 'push' &&
-      github.ref == 'refs/heads/task/3-supabase-ci' &&
+      (github.ref == 'refs/heads/task/3-supabase-ci' ||
+       github.ref == 'refs/heads/task/4-admin-auth') &&
       github.event.repository.fork == false
     runs-on: ubuntu-latest
     timeout-minutes: 20
