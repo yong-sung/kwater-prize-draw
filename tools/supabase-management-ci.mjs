@@ -196,7 +196,7 @@ select 'functions_hardened',
         where p.prosecdef
           and exists (
             select 1 from unnest(coalesce(p.proconfig, array[]::text[])) setting
-            where setting = 'search_path='
+            where setting in ('search_path=', 'search_path=""')
           ))
 union all
 select 'anon_authenticated_table_denied',
