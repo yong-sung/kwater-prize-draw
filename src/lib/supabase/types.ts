@@ -119,6 +119,20 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "draw_results_event_participant_fkey";
+            columns: ["event_id", "participant_id"];
+            isOneToOne: true;
+            referencedRelation: "participants";
+            referencedColumns: ["event_id", "id"];
+          },
+          {
+            foreignKeyName: "draw_results_event_prize_fkey";
+            columns: ["event_id", "prize_id"];
+            isOneToOne: false;
+            referencedRelation: "prizes";
+            referencedColumns: ["event_id", "id"];
+          },
+          {
             foreignKeyName: "draw_results_participant_id_fkey";
             columns: ["participant_id"];
             isOneToOne: false;
