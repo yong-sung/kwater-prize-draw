@@ -94,6 +94,31 @@ function assertPgTap(response) {
   }
 }
 
+function buildRemotePgTap(source) {
+  const withCollector = source.replace(
+    /^begin;\s*/i,
+    "begin;\ncreate temp table pg_temp.tap_results(line text) on commit drop;\n",
+  );
+  const withAssertions = withCollector.replace(
+    /^select extensions\.(ok|is|lives_ok|results_eq|throws_ok)\b/gm,
+    "insert into pg_temp.tap_results(line) select extensions.$1",
+  );
+  const completed = withAssertions.replace(
+    /^select \* from extensions\.finish\(\);\s*$/m,
+    [
+      "insert into pg_temp.tap_results(line) select * from extensions.finish();",
+      "select line from pg_temp.tap_results;",
+    ].join("\n"),
+  );
+  if (
+    completed === source ||
+    !completed.includes("select line from pg_temp.tap_results;")
+  ) {
+    throw new Error("원격 pgTAP 수집 SQL을 안전하게 구성하지 못했습니다.");
+  }
+  return completed;
+}
+
 function assertDatabaseChecks(response) {
   const checks = collectChecks(response);
   const failed = checks.filter((check) => check.passed !== true);
@@ -276,9 +301,11 @@ async function main() {
     `원격 migration 이력 PASS: local=${localVersion}, remote=${applied.version}`,
   );
 
-  const pgTapSql = readFileSync(
-    join(process.cwd(), "supabase", "tests", "database.test.sql"),
-    "utf8",
+  const pgTapSql = buildRemotePgTap(
+    readFileSync(
+      join(process.cwd(), "supabase", "tests", "database.test.sql"),
+      "utf8",
+    ),
   );
   const pgTapResult = await managementRequest(
     projectRef,
