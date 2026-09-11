@@ -64,4 +64,9 @@ describe("Task 3 Supabase CI 계약", () => {
     expect(script).toContain("BEGIN;");
     expect(script).toContain("ROLLBACK;");
   });
+
+  it("migration SQL 비교가 문자열 내부의 의미 있는 공백을 보존한다", () => {
+    const script = readFileSync(managementScriptPath, "utf8");
+    expect(script).not.toContain('.replace(/\\s+/g, " ")');
+  });
 });

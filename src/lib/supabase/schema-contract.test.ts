@@ -44,4 +44,16 @@ describe("Supabase 스키마 계약", () => {
     expect(sql).toContain("draw_results_event_prize_fkey");
     expect(sql).toContain("if v_was_revealed then");
   });
+
+  it("후보 없는 공개 슬롯 보정은 별도 migration에서 REVEALED 상태를 유지한다", () => {
+    const correction = readdirSync(migrationsDirectory).find((file) =>
+      file.endsWith("_task3_reveal_state_fix.sql"),
+    );
+    expect(correction).toBeDefined();
+    if (!correction) return;
+
+    const sql = readFileSync(join(migrationsDirectory, correction), "utf8");
+    expect(sql).toContain("v_replacement_participant_id is not null");
+    expect(sql).toContain("set status = 'REVEALING'");
+  });
 });

@@ -166,11 +166,39 @@ function appendSummary(lines) {
 }
 
 function normalizeSql(sql) {
-  return sql
-    .replace(/\r\n/g, "\n")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/;$/, "");
+  let normalized = "";
+  let quote = null;
+  let pendingSpace = false;
+  const source = sql.replace(/\r\n/g, "\n").trim().replace(/;$/, "");
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote) {
+      normalized += character;
+      if (character === quote) {
+        if (source[index + 1] === quote) {
+          normalized += source[index + 1];
+          index += 1;
+        } else {
+          quote = null;
+        }
+      }
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      if (pendingSpace && normalized) normalized += " ";
+      pendingSpace = false;
+      quote = character;
+      normalized += character;
+    } else if (/\s/.test(character)) {
+      pendingSpace = true;
+    } else {
+      if (pendingSpace && normalized) normalized += " ";
+      pendingSpace = false;
+      normalized += character;
+    }
+  }
+  return normalized;
 }
 
 async function verifyMigrationDetails(
@@ -288,9 +316,9 @@ async function main() {
         sql: readFileSync(join(migrationDirectory, file), "utf8"),
       };
     });
-  if (localMigrations.length !== 2)
+  if (localMigrations.length !== 3)
     throw new Error(
-      "Task 3 migration 파일은 초기와 보정 migration 두 개여야 합니다.",
+      "Task 3 migration 파일은 초기와 보정 migration 세 개여야 합니다.",
     );
 
   const project = await managementRequest(projectRef, token, "");

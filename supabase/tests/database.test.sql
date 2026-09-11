@@ -345,8 +345,8 @@ select extensions.is(
     from public.events
     where id = '00000000-0000-0000-0000-000000000001'
   ),
-  'REVEALING',
-  '공개된 슬롯을 미추첨 처리하면 행사 상태를 공개 중으로 되돌린다'
+  'REVEALED',
+  '공개된 슬롯을 미추첨 처리해도 더 공개할 당첨자가 없으면 공개 완료를 유지한다'
 );
 
 update public.events
