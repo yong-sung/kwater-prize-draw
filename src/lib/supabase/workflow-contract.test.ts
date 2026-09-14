@@ -18,7 +18,7 @@ const managementScriptPath = join(
 describe("Task 3 Supabase CI 계약", () => {
   it("최소 권한 Ubuntu workflow와 안전한 원격 실행 경계를 유지한다", () => {
     expect(existsSync(workflowPath)).toBe(true);
-    const workflow = readFileSync(workflowPath, "utf8");
+    const workflow = readFileSync(workflowPath, "utf8").replace(/\r\n/g, "\n");
     expect(workflow).toContain("permissions:\n  contents: read");
     expect(workflow).toContain("runs-on: ubuntu-latest");
     expect(workflow).toContain("timeout-minutes:");
@@ -35,7 +35,7 @@ describe("Task 3 Supabase CI 계약", () => {
   });
 
   it("link 없이 공식 Management API만 사용한다", () => {
-    const workflow = readFileSync(workflowPath, "utf8");
+    const workflow = readFileSync(workflowPath, "utf8").replace(/\r\n/g, "\n");
     expect(workflow).not.toContain("supabase -- link");
     expect(workflow).not.toContain("--linked");
     expect(workflow).not.toContain("db reset");
@@ -78,7 +78,7 @@ describe("Task 3 Supabase CI 계약", () => {
   });
 
   it("Task 4 통합 테스트 환경변수와 원격 브랜치 조건이 올바른 Bash 구문이다", () => {
-    const workflow = readFileSync(workflowPath, "utf8");
+    const workflow = readFileSync(workflowPath, "utf8").replace(/\r\n/g, "\n");
     expect(workflow).toContain('NEXT_PUBLIC_SUPABASE_URL="$API_URL" \\\n');
     expect(workflow).toContain('SUPABASE_SECRET_KEY="$SERVICE_ROLE_KEY" \\\n');
     expect(workflow).not.toContain('"$API_URL" +');
