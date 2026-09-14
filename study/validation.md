@@ -101,3 +101,10 @@ supabase link는 API key, Auth, Storage, Realtime, 네트워크와 pooler 설정
 | 원격 DB 상태별 화면  | NOT TESTED | 운영 데이터 없이 mock API로 UI 검증; Task 7 미시작                                                              |
 
 기존 Task 6 브랜치의 Task 5 선행 커밋과 context/docs 포함 상태를 확인했으며, 최신 main 기반 복구 브랜치에는 UI와 공개 이미지 자산만 재구성했다. 사용자 변경은 보존 커밋 `c7fc717`에 남겼다.
+
+## Task 7 관리자 추첨 API
+
+- 대상 테스트 16/16, 전체 테스트 97 PASS·2 SKIP
+- Typecheck, ESLint, Production build PASS
+- workflow 계약 테스트는 LF/CRLF 정규화 후 PASS
+- UI·원격 DB 검증: 해당 없음 (기존 SECURITY DEFINER RPC 사용)
