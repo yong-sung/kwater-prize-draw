@@ -5,6 +5,7 @@ on:
     branches:
       - task/3-supabase-ci
       - task/4-admin-auth
+      - task/6-participant-app-finalize
   pull_request:
   workflow_dispatch:
 

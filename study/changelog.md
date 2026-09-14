@@ -1,5 +1,13 @@
 # 변경이력
 
+## 2026-09-14 - Task 5·6 복구
+
+- Task 5 PR #3을 실제 확인 후 `8b1d2e7`로 main에 squash merge했다.
+- 최신 main에서 Task 6 복구 브랜치를 만들고 UI 고유 변경만 재구성했다.
+- 참석자 화면을 `/` Route에 연결하고 방울이 이미지를 `next/image`로 전환했다.
+- 전체 86개 테스트, 정적 검사, production build와 3개 viewport Playwright 흐름을 통과했다.
+- Task 7은 시작하지 않았다.
+
 ## 2026-09-11 - Task 4
 
 - bcrypt 관리자 비밀번호 검증, 8시간 HS256 관리자 JWT와 HttpOnly·SameSite Strict 세션 쿠키, 로그인·로그아웃 Route Handler를 추가했다.

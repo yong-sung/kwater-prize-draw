@@ -70,8 +70,9 @@ export async function GET(request: Request) {
         : true);
 
     if (hasPrize) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const drawResult = Array.isArray(participant.draw_results) ? participant.draw_results[0] : (participant.draw_results as any);
+      const drawResult = Array.isArray(participant.draw_results)
+        ? participant.draw_results[0]
+        : participant.draw_results;
       const prize = Array.isArray(drawResult?.prizes)
         ? drawResult.prizes[0]
         : drawResult?.prizes;

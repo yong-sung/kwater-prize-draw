@@ -87,3 +87,17 @@ supabase link는 API key, Auth, Storage, Realtime, 네트워크와 pooler 설정
 | 로컬 Windows DB                      | BLOCKED | nested virtualization이 비활성화된 Xen VM 제약; Ubuntu runner로 대체 검증                                |
 
 첫 CI는 모든 로컬·원격 DB 검증과 Advisors를 통과한 뒤 생성 타입 차이를 의도대로 차단했다. 공식 타입 artifact와 원격 migration version을 저장소 계약에 반영한 후 CI를 재실행한다. 코드 리뷰의 원자성 HIGH, workflow 구문 HIGH, 신뢰 프록시 IP MEDIUM을 모두 수정했다. Vercel에서는 공식 `x-vercel-forwarded-for` 값을 우선하고 주소를 IPv4/IPv6로 검증·정규화한다.
+
+## Task 5·6 복구 실제 검증
+
+| 항목                 | 상태       | 실제 증거                                                                                                       |
+| -------------------- | ---------- | --------------------------------------------------------------------------------------------------------------- |
+| Task 5 기준·범위     | PASS       | main 기준 API 6개 파일 커밋 `016bee9` 확인                                                                      |
+| Task 5 API·전체 품질 | PASS       | API 10개 및 전체 86개 테스트, typecheck·ESLint·Prettier·build 통과                                              |
+| Task 5 PR·병합       | PASS       | PR #3, https://github.com/yong-sung/kwater-prize-draw/pull/3, squash `8b1d2e7a0c674ca41772c2c6ca722b6b687101db` |
+| Task 6 계보·Route    | PASS       | 최신 main에서 복구 브랜치 생성, `/`에 ParticipantApp 연결                                                       |
+| Task 6 UI·브라우저   | PASS       | 전체 86개 통과; Playwright 375×812, 390×844, 1440×900 응모·WAITING 및 overflow 없음                             |
+| 이미지·원본 경계     | PASS       | `public/images` 2개 추적, context/docs 미변경·미커밋                                                            |
+| 원격 DB 상태별 화면  | NOT TESTED | 운영 데이터 없이 mock API로 UI 검증; Task 7 미시작                                                              |
+
+기존 Task 6 브랜치의 Task 5 선행 커밋과 context/docs 포함 상태를 확인했으며, 최신 main 기반 복구 브랜치에는 UI와 공개 이미지 자산만 재구성했다. 사용자 변경은 보존 커밋 `c7fc717`에 남겼다.
