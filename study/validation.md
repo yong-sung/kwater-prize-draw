@@ -108,6 +108,7 @@ supabase link는 API key, Auth, Storage, Realtime, 네트워크와 pooler 설정
 - Typecheck, ESLint, Production build PASS
 - workflow 계약 테스트는 LF/CRLF 정규화 후 PASS
 - UI·원격 DB 검증: 해당 없음 (기존 SECURITY DEFINER RPC 사용)
+
 ## Task 8 최종 검증
 
 - stale Turbopack 자식 프로세스가 원인이었으며 production webServer로 재검증했다.
