@@ -108,3 +108,10 @@ supabase link는 API key, Auth, Storage, Realtime, 네트워크와 pooler 설정
 - Typecheck, ESLint, Production build PASS
 - workflow 계약 테스트는 LF/CRLF 정규화 후 PASS
 - UI·원격 DB 검증: 해당 없음 (기존 SECURITY DEFINER RPC 사용)
+## Task 8 최종 검증
+
+- stale Turbopack 자식 프로세스가 원인이었으며 production webServer로 재검증했다.
+- Playwright 375×812, 390×844, 1440×900 모두 PASS
+- 전체 테스트 98 PASS, 2 SKIP; Typecheck, ESLint, Prettier, build, diff check, Secret 검사 PASS
+- 운영 DB와 실제 개인정보 복호화는 사용하지 않고 더미 API 흐름만 검증했다.
+- Task 9는 시작하지 않았다.
