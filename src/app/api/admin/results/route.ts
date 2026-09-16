@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const { data, error } = await createServerClient()
     .from("draw_results")
     .select(
-      "id,participant_id,prize_id,revealed_at,unawarded_at,prizes(name,code)",
+      "id,participant_id,prize_id,revealed_at,unawarded_at,prizes!draw_results_prize_id_fkey(name,code)",
     )
     .eq("event_id", eventId);
   if (error) return NextResponse.json({ code: "LOAD_FAILED" }, { status: 500 });
