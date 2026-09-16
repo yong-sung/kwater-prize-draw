@@ -13,7 +13,7 @@ type Result = {
   unawarded: boolean;
 };
 type Data = {
-  event: { id: string; name: string; status: string };
+  event: { id: string; title: string; status: string };
   participants?: number;
   prizes?: number;
 };
@@ -33,7 +33,7 @@ export function AdminDashboard() {
       if (!r.ok) throw Error();
       const d = await r.json();
       setData(d);
-      setTitle(d.event?.name ?? "");
+      setTitle(d.event?.title ?? "");
       if (d.event) {
         setDetailLoading(true);
         const [p, q] = await Promise.all([
@@ -86,7 +86,7 @@ export function AdminDashboard() {
     <section className="mx-auto max-w-5xl space-y-5">
       <header>
         <p className="text-sm font-semibold text-sky-700">관리자 대시보드</p>
-        <h1 className="text-3xl font-bold text-slate-950">{e.name}</h1>
+        <h1 className="text-3xl font-bold text-slate-950">{e.title}</h1>
         <p className="mt-2 text-slate-600">현재 상태: {e.status}</p>
       </header>
       <form

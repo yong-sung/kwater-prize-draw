@@ -12,7 +12,7 @@ export async function GET() {
   const db = createServerClient();
   const { data, error } = await db
     .from("events")
-    .select("id,name,status")
+    .select("id,title,status")
     .limit(1)
     .maybeSingle();
   if (error) return NextResponse.json({ code: "LOAD_FAILED" }, { status: 500 });
