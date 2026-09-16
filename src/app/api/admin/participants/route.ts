@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/security/admin-session";
 import { createServerClient } from "@/lib/supabase/server";
+import { decryptPii } from "@/lib/security/pii";
 export async function GET() {
   try {
     await requireAdmin();
@@ -9,11 +10,21 @@ export async function GET() {
   }
   const { data, error } = await createServerClient()
     .from("participants")
-    .select("id,event_id,department,created_at,disqualified_at")
+    .select("id,event_id,department_ciphertext,created_at,disqualified_at")
     .limit(500);
   if (error) return NextResponse.json({ code: "LOAD_FAILED" }, { status: 500 });
+  const participants = (data ?? []).map((participant) => ({
+    id: participant.id,
+    event_id: participant.event_id,
+    department: decryptPii(
+      participant.department_ciphertext,
+      process.env.PII_ENCRYPTION_KEY ?? "",
+    ),
+    created_at: participant.created_at,
+    disqualified_at: participant.disqualified_at,
+  }));
   return NextResponse.json(
-    { participants: data ?? [] },
+    { participants },
     { headers: { "Cache-Control": "no-store" } },
   );
 }
