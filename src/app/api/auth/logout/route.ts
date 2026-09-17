@@ -9,7 +9,7 @@ export async function POST() {
   );
   response.cookies.set(ADMIN_SESSION_COOKIE, "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "strict",
     path: "/",
     maxAge: 0,

@@ -50,14 +50,20 @@ export default function RevealStage({
           </article>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={onReveal}
-        disabled={busy || status === "REVEALED"}
-        className="mx-auto rounded-xl bg-cyan-400 px-8 py-4 text-lg font-bold text-slate-950 disabled:opacity-40"
-      >
-        {busy ? "공개 중..." : "Enter로 다음 당첨자 공개"}
-      </button>
+      {status === "REVEALED" ? (
+        <p className="mx-auto rounded-xl px-8 py-4 text-lg font-bold text-cyan-300">
+          모든 당첨자 공개 완료
+        </p>
+      ) : (
+        <button
+          type="button"
+          onClick={onReveal}
+          disabled={busy}
+          className="mx-auto rounded-xl bg-cyan-400 px-8 py-4 text-lg font-bold text-slate-950 disabled:opacity-40"
+        >
+          {busy ? "공개 중..." : "Enter로 다음 당첨자 공개"}
+        </button>
+      )}
     </section>
   );
 }
