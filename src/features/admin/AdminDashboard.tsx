@@ -9,6 +9,7 @@ type Participant = {
 type Result = {
   id: string;
   participantId: string | null;
+  winner: { name: string; department: string } | null;
   prize: { name: string; code: string } | null;
   unawarded: boolean;
 };
@@ -178,8 +179,8 @@ export function AdminDashboard() {
                 className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
               >
                 <span>
-                  {r.participantId
-                    ? `참가자 ${r.participantId.slice(0, 8)}`
+                  {r.winner
+                    ? `${r.winner.name} · ${r.winner.department}`
                     : "미배정"}
                 </span>
                 <span>{r.prize?.name ?? "경품 없음"}</span>
