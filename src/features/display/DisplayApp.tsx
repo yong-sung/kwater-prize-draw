@@ -18,7 +18,7 @@ export default function DisplayApp() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const load = useCallback(async () => {
-    const response = await fetch("/api/public/event", { cache: "no-store" });
+    const response = await fetch("/api/display/event", { cache: "no-store" });
     if (!response.ok) throw new Error("EVENT_NOT_FOUND");
     const data = (await response.json()) as EventData;
     return data;
@@ -39,7 +39,7 @@ export default function DisplayApp() {
     setBusy(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/reveal", {
+      const response = await fetch("/api/display/reveal", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ eventId: event.id }),
