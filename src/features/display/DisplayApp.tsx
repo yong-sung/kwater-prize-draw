@@ -5,7 +5,12 @@ import QrStage from "./QrStage";
 import RevealStage, { type RevealGroup } from "./RevealStage";
 import { useEnterReveal } from "./useEnterReveal";
 
-type EventData = { id: string; title: string; status: string };
+type EventData = {
+  id: string;
+  title: string;
+  status: string;
+  groups?: RevealGroup[];
+};
 export default function DisplayApp() {
   const [event, setEvent] = useState<EventData | null>(null);
   const [groups, setGroups] = useState<RevealGroup[]>([]);
@@ -23,6 +28,7 @@ export default function DisplayApp() {
       .then((data) => {
         setEvent(data);
         setStatus(data.status);
+        setGroups(data.groups ?? []);
       })
       .catch(() => {
         queueMicrotask(() => setError("??깃텢???븍뜄???????곷뮸??덈뼄."));

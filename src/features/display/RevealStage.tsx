@@ -50,7 +50,7 @@ export default function RevealStage({
           </article>
         ))}
       </div>
-      {status === "REVEALED" ? (
+      {status === "REVEALED" || status === "PUBLISHED" ? (
         <p className="mx-auto rounded-xl px-8 py-4 text-lg font-bold text-cyan-300">
           모든 당첨자 공개 완료
         </p>

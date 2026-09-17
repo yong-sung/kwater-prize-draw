@@ -18,3 +18,16 @@ describe("RevealStage", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+it("PUBLISHED 상태도 완료 문구를 표시하고 공개 버튼을 숨긴다", () => {
+  render(
+    <RevealStage
+      groups={[]}
+      status="PUBLISHED"
+      onReveal={() => undefined}
+      busy={false}
+    />,
+  );
+  expect(screen.getByText("모든 당첨자 공개 완료")).toBeInTheDocument();
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
+});
