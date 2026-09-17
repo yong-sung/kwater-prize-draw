@@ -115,7 +115,7 @@ export async function POST(request: Request) {
     const response = json({ ok: true }, 200);
     response.cookies.set(ADMIN_SESSION_COOKIE, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "strict",
       path: "/",
       maxAge: ADMIN_SESSION_TTL_SECONDS,

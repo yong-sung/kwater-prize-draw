@@ -58,6 +58,7 @@ describe("관리자 인증 API", () => {
     const cookie = response.headers.get("set-cookie") ?? "";
     expect(cookie).toContain("admin_session=");
     expect(cookie).toContain("HttpOnly");
+    expect(cookie).toContain("Secure");
     expect(cookie).toContain("SameSite=strict");
     expect(cookie).toContain("Max-Age=28800");
     expect(rateMocks.clear).toHaveBeenCalledWith("dummy-ip-hmac");
@@ -99,6 +100,7 @@ describe("관리자 인증 API", () => {
     expect(cookie).toContain("admin_session=");
     expect(cookie).toContain("Max-Age=0");
     expect(cookie).toContain("HttpOnly");
+    expect(cookie).toContain("Secure");
   });
 
   it("production 쿠키에는 Secure를 적용한다", async () => {
