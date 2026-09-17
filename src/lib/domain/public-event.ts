@@ -1,3 +1,9 @@
+export type PublicRevealGroup = {
+  prizeCode: string;
+  prizeName: string;
+  winners: Array<{ name: string; department: string }>;
+};
+
 export type PublicEventResponse = {
   id: string;
   title: string;
@@ -15,4 +21,5 @@ export type PublicEventResponse = {
     | "PURGED";
   participantCount: number;
   privacy: { items: string[]; purpose: string; retentionDays: 7 };
+  groups?: PublicRevealGroup[];
 };
