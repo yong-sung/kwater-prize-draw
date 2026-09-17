@@ -151,9 +151,9 @@ select extensions.throws_ok(
 
 insert into public.prizes(event_id, code, name, quantity, reveal_order)
 values
-  ('00000000-0000-0000-0000-000000000035', 'SCANNER', '더미 스캔기기', 10, 1),
-  ('00000000-0000-0000-0000-000000000035', 'TUMBLER', '더미 텀블러', 10, 2),
-  ('00000000-0000-0000-0000-000000000035', 'KEYBOARD', '더미 키보드', 10, 3);
+  ('00000000-0000-0000-0000-000000000035', 'SCANNER', '더미 스캔기기', 15, 1),
+  ('00000000-0000-0000-0000-000000000035', 'TUMBLER', '더미 텀블러', 15, 2),
+  ('00000000-0000-0000-0000-000000000035', 'KEYBOARD', '더미 키보드', 15, 3);
 
 insert into public.participants(
   event_id,
@@ -172,7 +172,7 @@ select
   encode(extensions.digest('dummy-phone-' || value, 'sha256'), 'hex'),
   encode(extensions.digest('dummy-token-' || value, 'sha256'), 'hex'),
   statement_timestamp()
-from generate_series(1, 35) as series(value);
+from generate_series(1, 46) as series(value);
 
 select extensions.throws_ok(
   $$insert into public.participants(
@@ -189,8 +189,8 @@ select extensions.throws_ok(
 
 select extensions.is(
   public.execute_draw('00000000-0000-0000-0000-000000000035'),
-  30,
-  '35명과 경품 30개일 때 정확히 30명이 당첨된다'
+  45,
+  '46명과 경품 45개일 때 정확히 45명이 당첨된다'
 );
 select extensions.is(
   (
@@ -198,7 +198,7 @@ select extensions.is(
     from public.draw_results
     where event_id = '00000000-0000-0000-0000-000000000035'
   ),
-  30::bigint,
+  45::bigint,
   '모든 당첨자는 중복되지 않는다'
 );
 select extensions.ok(
@@ -223,7 +223,7 @@ where event_id = '00000000-0000-0000-0000-000000000035';
 
 select extensions.is(
   public.execute_draw('00000000-0000-0000-0000-000000000035'),
-  30,
+  45,
   '추첨 재호출은 기존 당첨 수를 반환한다'
 );
 select extensions.is(
@@ -360,9 +360,9 @@ insert into public.events(id, title, status)
 values ('00000000-0000-0000-0000-000000000020', '20명 더미 행사', 'CLOSED');
 insert into public.prizes(event_id, code, name, quantity, reveal_order)
 values
-  ('00000000-0000-0000-0000-000000000020', 'SCANNER', '더미 스캔기기', 10, 1),
-  ('00000000-0000-0000-0000-000000000020', 'TUMBLER', '더미 텀블러', 10, 2),
-  ('00000000-0000-0000-0000-000000000020', 'KEYBOARD', '더미 키보드', 10, 3);
+  ('00000000-0000-0000-0000-000000000020', 'SCANNER', '더미 스캔기기', 15, 1),
+  ('00000000-0000-0000-0000-000000000020', 'TUMBLER', '더미 텀블러', 15, 2),
+  ('00000000-0000-0000-0000-000000000020', 'KEYBOARD', '더미 키보드', 15, 3);
 insert into public.participants(
   event_id, name_ciphertext, phone_ciphertext, department_ciphertext,
   phone_hash, access_token_hash, consented_at
@@ -377,7 +377,7 @@ from generate_series(1, 20) as series(value);
 select extensions.is(
   public.execute_draw('00000000-0000-0000-0000-000000000020'),
   20,
-  '20명과 경품 30개일 때 정확히 20명이 당첨된다'
+  '20명과 경품 45개일 때 정확히 20명이 당첨된다'
 );
 
 update public.events
@@ -572,5 +572,103 @@ select extensions.ok(
   '감사 로그에 개인정보 원문이나 암호문을 남기지 않는다'
 );
 
+-- 기본 경품 15개씩(총 45개)과 응모 규모별 상한을 검증한다.
+create temporary table quantity_contract_events (
+  event_id uuid primary key,
+  participant_count integer not null,
+  expected_winners integer not null
+);
+
+insert into quantity_contract_events(event_id, participant_count, expected_winners)
+values
+  ('00000000-0000-0000-0000-000000000030', 30, 30),
+  ('00000000-0000-0000-0000-000000000045', 45, 45),
+  ('00000000-0000-0000-0000-000000000500', 500, 45);
+
+create temporary table quantity_contract_results (
+  event_id uuid primary key,
+  expected_winners integer not null,
+  winner_count integer not null
+);
+
+create temporary table quantity_contract_active_checks (
+  event_id uuid primary key,
+  active_event_count bigint not null
+);
+do $$
+declare
+  contract record;
+begin
+  for contract in select * from quantity_contract_events loop
+    update public.events set status = 'PURGED', updated_at = statement_timestamp()
+    where id in ('00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000020','00000000-0000-0000-0000-000000000035')
+      and status <> 'PURGED';
+    insert into public.events(id, title, status) values (contract.event_id, 'quantity-contract-' || contract.participant_count, 'CLOSED');
+    insert into public.prizes(event_id, code, name, quantity, reveal_order) values
+      (contract.event_id, 'SCANNER', 'contract scanner', 15, 1),
+      (contract.event_id, 'TUMBLER', 'contract tumbler', 15, 2),
+      (contract.event_id, 'KEYBOARD', 'contract keyboard', 15, 3);
+    insert into public.participants(event_id, name_ciphertext, phone_ciphertext, department_ciphertext, phone_hash, access_token_hash, consented_at)
+    select contract.event_id, 'contract-name-' || value, 'contract-phone-' || value, 'contract-department-' || value,
+      encode(extensions.digest('contract-phone-hash-' || value || contract.event_id::text, 'sha256'), 'hex'),
+      encode(extensions.digest('contract-token-' || value || contract.event_id::text, 'sha256'), 'hex'), statement_timestamp()
+    from generate_series(1, contract.participant_count) as series(value);
+    insert into quantity_contract_active_checks(event_id, active_event_count)
+    select contract.event_id, count(*) from public.events where status <> 'PURGED';
+    insert into quantity_contract_results(event_id, expected_winners, winner_count)
+    values (contract.event_id, contract.expected_winners, public.execute_draw(contract.event_id));
+    update public.events set status = 'PURGED', updated_at = statement_timestamp() where id = contract.event_id;
+  end loop;
+end $$;
+
+select extensions.is(
+  active_event_count,
+  1::bigint,
+  '수량 검증 fixture는 한 번에 하나의 활성 행사만 유지한다'
+)
+from quantity_contract_active_checks
+order by event_id;
+
+select extensions.is(
+  winner_count,
+  expected_winners,
+  '30/45/500명 응모의 당첨 수가 경품 총량 상한과 일치한다'
+)
+from quantity_contract_results
+order by event_id;
+
+select extensions.is(
+  (select sum(quantity) from public.prizes where prizes.event_id = results.event_id),
+  45::bigint,
+  '기본 총 경품 수는 45개다'
+)
+from quantity_contract_results as results
+order by results.event_id;
+
+select extensions.ok(
+  not exists (
+    select 1
+    from public.draw_results as dr
+    join public.prizes as p on p.id = dr.prize_id
+    where dr.event_id = results.event_id
+    group by p.id, p.quantity
+    having count(*) > 15
+  ),
+  '경품별 당첨 수량은 15개를 넘지 않는다'
+)
+from quantity_contract_results as results
+order by results.event_id;
+
+select extensions.is(
+  (
+    select count(distinct participant_id)
+    from public.draw_results
+    where draw_results.event_id = results.event_id
+  ),
+  results.expected_winners::bigint,
+  '참가자는 최대 1개 경품만 당첨된다'
+)
+from quantity_contract_results as results
+order by results.event_id;
 select * from extensions.finish();
 rollback;
