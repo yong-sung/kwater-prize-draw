@@ -585,42 +585,49 @@ values
   ('00000000-0000-0000-0000-000000000045', 45, 45),
   ('00000000-0000-0000-0000-000000000500', 500, 45);
 
+create temporary table quantity_contract_results (
+  event_id uuid primary key,
+  expected_winners integer not null,
+  winner_count integer not null
+);
+
+create temporary table quantity_contract_active_checks (
+  event_id uuid primary key,
+  active_event_count bigint not null
+);
 do $$
 declare
   contract record;
 begin
   for contract in select * from quantity_contract_events loop
-    insert into public.events(id, title, status)
-    values (contract.event_id, 'quantity-contract-' || contract.participant_count, 'CLOSED');
-
-    insert into public.prizes(event_id, code, name, quantity, reveal_order)
-    values
+    update public.events set status = 'PURGED', updated_at = statement_timestamp()
+    where id in ('00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000020','00000000-0000-0000-0000-000000000035')
+      and status <> 'PURGED';
+    insert into public.events(id, title, status) values (contract.event_id, 'quantity-contract-' || contract.participant_count, 'CLOSED');
+    insert into public.prizes(event_id, code, name, quantity, reveal_order) values
       (contract.event_id, 'SCANNER', 'contract scanner', 15, 1),
       (contract.event_id, 'TUMBLER', 'contract tumbler', 15, 2),
       (contract.event_id, 'KEYBOARD', 'contract keyboard', 15, 3);
-
-    insert into public.participants(
-      event_id, name_ciphertext, phone_ciphertext, department_ciphertext,
-      phone_hash, access_token_hash, consented_at
-    )
-    select
-      contract.event_id,
-      'contract-name-' || value,
-      'contract-phone-' || value,
-      'contract-department-' || value,
+    insert into public.participants(event_id, name_ciphertext, phone_ciphertext, department_ciphertext, phone_hash, access_token_hash, consented_at)
+    select contract.event_id, 'contract-name-' || value, 'contract-phone-' || value, 'contract-department-' || value,
       encode(extensions.digest('contract-phone-hash-' || value || contract.event_id::text, 'sha256'), 'hex'),
-      encode(extensions.digest('contract-token-' || value || contract.event_id::text, 'sha256'), 'hex'),
-      statement_timestamp()
+      encode(extensions.digest('contract-token-' || value || contract.event_id::text, 'sha256'), 'hex'), statement_timestamp()
     from generate_series(1, contract.participant_count) as series(value);
+    insert into quantity_contract_active_checks(event_id, active_event_count)
+    select contract.event_id, count(*) from public.events where status <> 'PURGED';
+    insert into quantity_contract_results(event_id, expected_winners, winner_count)
+    values (contract.event_id, contract.expected_winners, public.execute_draw(contract.event_id));
+    update public.events set status = 'PURGED', updated_at = statement_timestamp() where id = contract.event_id;
   end loop;
 end $$;
 
-create temporary table quantity_contract_results as
-select
-  event_id,
-  expected_winners,
-  public.execute_draw(event_id) as winner_count
-from quantity_contract_events;
+select extensions.is(
+  active_event_count,
+  1::bigint,
+  '수량 검증 fixture는 한 번에 하나의 활성 행사만 유지한다'
+)
+from quantity_contract_active_checks
+order by event_id;
 
 select extensions.is(
   winner_count,
