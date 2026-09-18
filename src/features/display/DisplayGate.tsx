@@ -1,14 +1,43 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DisplayApp from "./DisplayApp";
 
+type SessionStatus = "checking" | "authenticated" | "unauthenticated";
+
 export default function DisplayGate() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus>("checking");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  if (authenticated) return <DisplayApp />;
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/display/auth/session", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return false;
+        const body = (await response.json()) as { authenticated?: boolean };
+        return body.authenticated === true;
+      })
+      .catch(() => false)
+      .then((authenticated) => {
+        if (active) {
+          setSessionStatus(authenticated ? "authenticated" : "unauthenticated");
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (sessionStatus === "checking") {
+    return (
+      <main className="flex min-h-[100dvh] items-center justify-center bg-slate-950 p-8 text-xl text-white">
+        강연장 화면을 준비하고 있습니다.
+      </main>
+    );
+  }
+
+  if (sessionStatus === "authenticated") return <DisplayApp />;
 
   return (
     <main className="flex min-h-[100dvh] items-center justify-center bg-slate-950 p-8 text-white">
@@ -16,16 +45,16 @@ export default function DisplayGate() {
         className="w-full max-w-xl space-y-6 rounded-3xl bg-white/10 p-8 shadow-2xl backdrop-blur sm:p-12"
         onSubmit={async (e) => {
           e.preventDefault();
-          const r = await fetch("/api/display/auth/login", {
+          const response = await fetch("/api/display/auth/login", {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ password }),
           });
-          if (!r.ok) {
+          if (!response.ok) {
             setError("공용 비밀번호가 올바르지 않습니다.");
             return;
           }
-          setAuthenticated(true);
+          setSessionStatus("authenticated");
         }}
       >
         <h1 className="text-center text-4xl font-bold sm:text-5xl">
@@ -55,7 +84,7 @@ export default function DisplayGate() {
             role="alert"
             className="text-center text-lg font-semibold text-red-300"
           >
-            비밀번호가 올바르지 않습니다.
+            {error}
           </p>
         )}
       </form>
