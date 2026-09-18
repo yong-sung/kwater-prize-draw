@@ -1,5 +1,5 @@
-import DisplayApp from "@/features/display/DisplayApp";
+import DisplayGate from "@/features/display/DisplayGate";
 
 export default function DisplayPage() {
-  return <DisplayApp />;
+  return <DisplayGate />;
 }
