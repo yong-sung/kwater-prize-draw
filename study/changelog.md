@@ -64,3 +64,10 @@
 - 실제 Supabase URL project ref까지 확인하는 Preview 전용 초기화 guard/API/UI를 추가했다.
 - 응모·상태 전환·초기화가 동일 행사 advisory lock을 사용하도록 migration과 미실행 pgTAP 계약을 추가했다.
 - 리허설 초기화가 개인정보·추첨·공개·기존 감사 기록을 삭제하고 행사·경품 설정을 보존하도록 SQL을 작성했다.
+
+### 2026-09-29 - 최종 리뷰 보정
+
+- purge_expired_events의 잠금 순서를 행사별 advisory lock 후 행사 행 잠금으로 변경하고, 잠금 뒤 PUBLISHED 상태와 만료 시각을 다시 확인하도록 수정했다.
+- 초기화와 cron 만료 삭제의 잠금 순서가 동일함을 확인하는 정적 회귀 테스트를 추가했다.
+- 관리자 Playwright mock의 미인증 응답을 바로잡은 상태에서 Chromium 3개 뷰포트를 재검증했다.
+- DB와 Preview 검증은 실행 조건이 없어 BLOCKED로 유지하고 Production에는 변경을 적용하지 않았다.

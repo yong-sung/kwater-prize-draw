@@ -94,3 +94,62 @@ revoke all on function public.reset_rehearsal_event(uuid,text) from public, anon
 grant execute on function public.transition_event_status(uuid, public.event_status, public.event_status) to service_role;
 grant execute on function public.register_participant(uuid,text,text,text,text,text,timestamptz) to service_role;
 grant execute on function public.reset_rehearsal_event(uuid,text) to service_role;
+-- 행사별 변경은 모두 advisory lock을 먼저 획득한 뒤 행사 행을 잠근다.
+-- 초기화와 만료 삭제가 서로 반대 순서로 잠금을 기다리는 교착을 방지한다.
+create or replace function public.purge_expired_events()
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_candidate record;
+  v_event record;
+  v_purged_event_ids uuid[] := array[]::uuid[];
+begin
+  for v_candidate in
+    select e.id
+      from public.events as e
+     where e.status = 'PUBLISHED'
+       and e.purge_at <= statement_timestamp()
+     order by e.purge_at
+  loop
+    perform pg_catalog.pg_advisory_xact_lock(
+      pg_catalog.hashtextextended(v_candidate.id::text, 0)
+    );
+
+    select e.id, e.status, e.purge_at
+      into v_event
+      from public.events as e
+     where e.id = v_candidate.id
+     for update;
+
+    if not found
+      or v_event.status <> 'PUBLISHED'
+      or v_event.purge_at > statement_timestamp()
+    then
+      continue;
+    end if;
+
+    delete from public.participants where event_id = v_event.id;
+    delete from public.reveal_state where event_id = v_event.id;
+
+    update public.events
+       set status = 'PURGED', updated_at = statement_timestamp()
+     where id = v_event.id;
+
+    insert into public.audit_logs(event_id, action)
+    values (v_event.id, 'EVENT_PURGED');
+
+    v_purged_event_ids := array_append(v_purged_event_ids, v_event.id);
+  end loop;
+
+  return pg_catalog.jsonb_build_object(
+    'purgedEventIds',
+    pg_catalog.to_jsonb(v_purged_event_ids)
+  );
+end;
+$$;
+
+revoke all on function public.purge_expired_events() from public, anon, authenticated;
+grant execute on function public.purge_expired_events() to service_role;
