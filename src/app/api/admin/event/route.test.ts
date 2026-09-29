@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   requireAdmin: vi.fn(),
   from: vi.fn(),
   select: vi.fn(),
+  rpc: vi.fn(),
 }));
 
 vi.mock("@/lib/security/admin-session", () => ({
@@ -12,10 +13,10 @@ vi.mock("@/lib/security/admin-session", () => ({
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createServerClient: () => ({ from: mocks.from }),
+  createServerClient: () => ({ from: mocks.from, rpc: mocks.rpc }),
 }));
 
-import { GET } from "./route";
+import { GET, PATCH } from "./route";
 
 describe("관리자 행사 조회 API", () => {
   beforeEach(() => {
@@ -47,6 +48,38 @@ describe("관리자 행사 조회 API", () => {
         title: "Preview 검증 행사",
         status: "OPEN",
       },
+    });
+  });
+});
+
+describe("관리자 행사 상태 전환", () => {
+  it("CLOSED에서 OPEN 재개를 DB RPC로 원자 처리한다", async () => {
+    mocks.from.mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: { status: "CLOSED" },
+            error: null,
+          }),
+        }),
+      }),
+    });
+    mocks.rpc.mockResolvedValue({ data: "OPEN", error: null });
+    const response = await PATCH(
+      new Request("http://localhost/api/admin/event", {
+        method: "PATCH",
+        body: JSON.stringify({
+          eventId: "e1",
+          status: "OPEN",
+          expectedStatus: "CLOSED",
+        }),
+      }),
+    );
+    expect(response.status).toBe(200);
+    expect(mocks.rpc).toHaveBeenCalledWith("transition_event_status", {
+      p_event_id: "e1",
+      p_expected_status: "CLOSED",
+      p_next_status: "OPEN",
     });
   });
 });

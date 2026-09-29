@@ -57,4 +57,30 @@ describe("관리자 대시보드", () => {
     expect(screen.getByText("텀블러")).toBeInTheDocument();
     expect(screen.queryByText(/internal-/)).not.toBeInTheDocument();
   });
+
+  it("CLOSED 상태에서만 응모 재개 버튼을 활성화한다", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            event: { id: "event-1", title: "가짜 리허설", status: "CLOSED" },
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ participants: [] }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ results: [] }),
+        }),
+    );
+    render(<AdminDashboard />);
+    expect(
+      await screen.findByRole("button", { name: "응모 재개" }),
+    ).toBeEnabled();
+  });
 });

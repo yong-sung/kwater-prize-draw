@@ -116,3 +116,24 @@ supabase link는 API key, Auth, Storage, Realtime, 네트워크와 pooler 설정
 - 전체 테스트 98 PASS, 2 SKIP; Typecheck, ESLint, Prettier, build, diff check, Secret 검사 PASS
 - 운영 DB와 실제 개인정보 복호화는 사용하지 않고 더미 API 흐름만 검증했다.
 - Task 9는 시작하지 않았다.
+
+## 강연장 리허설 준비
+
+| 항목                           | 상태           | 결과                                                               |
+| ------------------------------ | -------------- | ------------------------------------------------------------------ |
+| 강연장 한국어 문구             | PASS           | 로딩·조회 실패·공개 실패 문구 회귀 테스트                          |
+| 응모 재개 UI/API               | PASS           | CLOSED 전용 UI, 서버 상태 검증과 RPC 호출 계약                     |
+| Preview 초기화 guard/API       | PASS           | Production·변수 누락·프로젝트 불일치 시 RPC 미호출                 |
+| DB 동시성                      | NOT TESTED     | 동일 advisory lock SQL을 작성했으나 DB 실행 검증 전                |
+| 개인정보 삭제와 설정 보존      | NOT TESTED     | pgTAP 계약을 작성했으나 DB 실행 검증 전                            |
+| 단위 테스트                    | PASS           | 164 PASS, 2 SKIP                                                   |
+| Typecheck                      | PASS           | 오류 없음                                                          |
+| ESLint                         | PASS           | 오류·경고 없음                                                     |
+| Production build               | PASS           | Next.js 16.3.4 build 성공                                          |
+| Playwright 관리자 화면         | PASS           | 375x812, 390x844, 1440x900 3건 통과                                |
+| Prettier 전체 기준선           | FAIL           | origin/main의 기존 103개 파일이 비정형; 이번 변경 파일은 별도 포맷 |
+| 로컬 Supabase migration/pgTAP  | BLOCKED        | Docker와 Podman이 설치되지 않음                                    |
+| Preview Supabase/Vercel 리허설 | BLOCKED        | 초기화 허용 변수와 Preview project ID 계약이 없음                  |
+| 전체 실제 행사 E2E             | BLOCKED        | 실행 가능한 격리 DB와 Preview 연결이 없음                          |
+| 실제 스마트폰·프로젝터 QR      | NOT TESTED     | Preview URL이 생성되지 않아 외부 기기 확인 불가                    |
+| Production 변경                | NOT APPLICABLE | DB·환경변수·배포·push 모두 수행하지 않음                           |

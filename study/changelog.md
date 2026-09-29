@@ -56,3 +56,11 @@
 
 - 관리자 대시보드와 운영 API UI 검증을 완료했다.
 - stale 개발 서버 원인을 확인하고 production Playwright 검증을 통과시켰다.
+
+## 2026-09-29 - 강연장 리허설 준비
+
+- 강연장 화면의 깨진 한국어 문구를 복구했다.
+- 관리자 CLOSED → OPEN 응모 재개 버튼과 원자 상태 전환 RPC를 추가했다.
+- 실제 Supabase URL project ref까지 확인하는 Preview 전용 초기화 guard/API/UI를 추가했다.
+- 응모·상태 전환·초기화가 동일 행사 advisory lock을 사용하도록 migration과 미실행 pgTAP 계약을 추가했다.
+- 리허설 초기화가 개인정보·추첨·공개·기존 감사 기록을 삭제하고 행사·경품 설정을 보존하도록 SQL을 작성했다.

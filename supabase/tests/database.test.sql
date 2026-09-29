@@ -670,5 +670,25 @@ select extensions.is(
 )
 from quantity_contract_results as results
 order by results.event_id;
+
+-- Preview 리허설 초기화는 설정을 보존하고 개인정보 연결 데이터를 원자 삭제한다.
+update public.events set status='PURGED', updated_at=statement_timestamp() where status <> 'PURGED';
+insert into public.events(id,title,description,venue,status) values('00000000-0000-0000-0000-000000000090','가짜 리허설','설명 보존','장소 보존','OPEN');
+insert into public.prizes(id,event_id,code,name,quantity,reveal_order) values('00000000-0000-0000-0000-000000000190','00000000-0000-0000-0000-000000000090','SCANNER','보존 경품',1,1);
+insert into public.participants(id,event_id,name_ciphertext,phone_ciphertext,department_ciphertext,phone_hash,access_token_hash,consented_at)
+values('00000000-0000-0000-0000-000000000290','00000000-0000-0000-0000-000000000090','dummy-name','dummy-phone','dummy-dept',repeat('b',64),repeat('c',64),statement_timestamp());
+insert into public.draw_results(event_id,participant_id,prize_id,reveal_position) values('00000000-0000-0000-0000-000000000090','00000000-0000-0000-0000-000000000290','00000000-0000-0000-0000-000000000190',1);
+insert into public.reveal_state(event_id,revealed_count) values('00000000-0000-0000-0000-000000000090',1);
+insert into public.audit_logs(event_id,action,reason,detail) values('00000000-0000-0000-0000-000000000090','OLD_ACTION','개인정보 가능 메모','{"note":"old"}');
+select public.reset_rehearsal_event('00000000-0000-0000-0000-000000000090','가짜 리허설');
+
+select extensions.is((select status::text from public.events where id='00000000-0000-0000-0000-000000000090'),'SETUP','초기화 후 SETUP으로 복귀한다');
+select extensions.is((select count(*) from public.participants where event_id='00000000-0000-0000-0000-000000000090'),0::bigint,'참석자 개인정보를 삭제한다');
+select extensions.is((select count(*) from public.draw_results where event_id='00000000-0000-0000-0000-000000000090'),0::bigint,'추첨 결과를 삭제한다');
+select extensions.is((select count(*) from public.reveal_state where event_id='00000000-0000-0000-0000-000000000090'),0::bigint,'공개 상태를 삭제한다');
+select extensions.is((select count(*) from public.prizes where event_id='00000000-0000-0000-0000-000000000090'),1::bigint,'경품 설정을 보존한다');
+select extensions.is((select count(*) from public.audit_logs where event_id='00000000-0000-0000-0000-000000000090' and action='REHEARSAL_RESET' and reason is null and detail='{}'::jsonb),1::bigint,'PII 없는 초기화 이력만 남긴다');
+select extensions.ok(not (select prosecdef from pg_catalog.pg_proc where oid='public.reset_rehearsal_event(uuid,text)'::regprocedure),'초기화 함수는 SECURITY INVOKER다');
+select extensions.ok(not pg_catalog.has_function_privilege('anon','public.reset_rehearsal_event(uuid,text)','EXECUTE') and not pg_catalog.has_function_privilege('authenticated','public.reset_rehearsal_event(uuid,text)','EXECUTE') and pg_catalog.has_function_privilege('service_role','public.reset_rehearsal_event(uuid,text)','EXECUTE'),'서버 역할만 초기화 함수를 실행한다');
 select * from extensions.finish();
 rollback;

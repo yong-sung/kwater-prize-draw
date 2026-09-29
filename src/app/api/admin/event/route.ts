@@ -46,6 +46,20 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ code: "INVALID_TRANSITION" }, { status: 409 });
     }
   }
+  if (body.status) {
+    const expectedStatus = body.expectedStatus ?? current.status;
+    const { data: status, error } = await db.rpc(
+      "transition_event_status" as never,
+      {
+        p_event_id: body.eventId,
+        p_expected_status: expectedStatus,
+        p_next_status: body.status,
+      } as never,
+    );
+    if (error)
+      return NextResponse.json({ code: "INVALID_TRANSITION" }, { status: 409 });
+    return NextResponse.json({ event: { id: body.eventId, status } });
+  }
   const updates = {
     title: typeof body.title === "string" ? body.title.trim() : undefined,
     description:
