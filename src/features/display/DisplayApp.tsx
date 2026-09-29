@@ -31,7 +31,7 @@ export default function DisplayApp() {
         setGroups(data.groups ?? []);
       })
       .catch(() => {
-        queueMicrotask(() => setError("??깃텢???븍뜄???????곷뮸??덈뼄."));
+        queueMicrotask(() => setError("행사 정보를 불러오지 못했습니다."));
       });
   }, [load]);
   const reveal = useCallback(async () => {
@@ -49,7 +49,7 @@ export default function DisplayApp() {
       setStatus(data.eventStatus);
       setGroups(data.groups ?? []);
     } catch {
-      setError("??????????????????됰꽡???怨?????덊렡.");
+      setError("다음 당첨자를 공개하지 못했습니다.");
     } finally {
       setBusy(false);
     }
@@ -67,7 +67,7 @@ export default function DisplayApp() {
   if (!event)
     return (
       <main className="flex min-h-screen items-center justify-center p-8">
-        ??됰씭??????몄툗 濚?..
+        행사 정보를 불러오는 중…
       </main>
     );
   if (["DRAWN", "REVEALING", "REVEALED", "PUBLISHED"].includes(status))

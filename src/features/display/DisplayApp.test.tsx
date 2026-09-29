@@ -111,3 +111,15 @@ it("DRAWN 행사에 직접 진입하면 공개 시작 동작을 유지한다", a
     screen.getByRole("button", { name: /다음 당첨자 공개/ }),
   ).toBeEnabled();
 });
+
+it("강연장 로딩 문구를 정상 한국어로 표시한다", () => {
+  vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+  render(<DisplayApp />);
+  expect(screen.getByText("행사 정보를 불러오는 중…")).toBeInTheDocument();
+});
+
+it("행사 조회 실패를 정상 한국어로 안내한다", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 500 })));
+  render(<DisplayApp />);
+  expect(await screen.findByRole("alert")).toHaveTextContent("행사 정보를 불러오지 못했습니다.");
+});
