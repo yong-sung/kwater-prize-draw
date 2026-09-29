@@ -137,3 +137,16 @@ supabase link는 API key, Auth, Storage, Realtime, 네트워크와 pooler 설정
 | 전체 실제 행사 E2E             | BLOCKED        | 실행 가능한 격리 DB와 Preview 연결이 없음                          |
 | 실제 스마트폰·프로젝터 QR      | NOT TESTED     | Preview URL이 생성되지 않아 외부 기기 확인 불가                    |
 | Production 변경                | NOT APPLICABLE | DB·환경변수·배포·push 모두 수행하지 않음                           |
+
+### Preview migration 허용 목록 보정 (2026-09-29)
+
+| 항목                         | 상태           | 결과                                         |
+| ---------------------------- | -------------- | -------------------------------------------- |
+| 승인 migration 5개 순서 검증 | PASS           | 실제 디렉터리의 고정 목록과 순서가 일치      |
+| 미승인 migration 거부        | PASS           | 같은 개수라도 파일명 또는 순서가 다르면 실패 |
+| pgTAP 기대값 동기화          | PASS           | 리허설 계약 8개를 포함해 127개로 보정        |
+| 전체 단위·계약 테스트        | PASS           | 167 PASS, 2 SKIP                             |
+| Typecheck                    | PASS           | 오류 없음                                    |
+| ESLint                       | PASS           | 오류·경고 없음                               |
+| Production build             | PASS           | Next.js 16.3.4 build 성공                    |
+| 외부 API·DB·배포·push        | NOT APPLICABLE | 실행하지 않음                                |

@@ -71,3 +71,9 @@
 - 초기화와 cron 만료 삭제의 잠금 순서가 동일함을 확인하는 정적 회귀 테스트를 추가했다.
 - 관리자 Playwright mock의 미인증 응답을 바로잡은 상태에서 Chromium 3개 뷰포트를 재검증했다.
 - DB와 Preview 검증은 실행 조건이 없어 BLOCKED로 유지하고 Production에는 변경을 적용하지 않았다.
+
+### 2026-09-29 - Preview migration 목록 안전장치 보정
+
+- Management API migration 실행 전에 승인된 5개 파일명과 정렬 순서를 정확히 비교하도록 변경했다.
+- 같은 개수라도 예상하지 못한 migration이 있으면 외부 API 호출 전에 실패하는 회귀 테스트를 추가했다.
+- 리허설 DB 계약 8개를 포함하도록 원격 pgTAP 기대값을 127로 동기화했다.
