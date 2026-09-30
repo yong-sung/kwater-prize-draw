@@ -31,8 +31,9 @@ describe("참석자 모바일 화면", () => {
 
     expect(await screen.findByLabelText(/참석자 성함/i)).toBeInTheDocument();
     expect(
-      screen.getByLabelText(/연락처 \(010-0000-0000\)/i),
+      screen.getByLabelText(/연락처 \(01012345678\)/i),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText(/연락처/i)).toHaveAttribute("pattern", "^010\\d{8}$");
     expect(screen.getByLabelText(/소속부서명/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/동의합니다/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/동의하지 않습니다/i)).toBeInTheDocument();
