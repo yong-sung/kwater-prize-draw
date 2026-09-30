@@ -82,9 +82,9 @@ begin
   delete from public.reveal_state where event_id = p_event_id;
   delete from public.participants where event_id = p_event_id;
   delete from public.audit_logs where event_id = p_event_id;
-  update public.events set status='SETUP', published_at=null, purge_at=null, updated_at=statement_timestamp() where id=p_event_id;
+  update public.events set status='OPEN', published_at=null, purge_at=null, updated_at=statement_timestamp() where id=p_event_id;
   insert into public.audit_logs(event_id, action, reason, detail) values(p_event_id, 'REHEARSAL_RESET', null, '{}'::jsonb);
-  return pg_catalog.jsonb_build_object('eventId', p_event_id, 'status', 'SETUP', 'participantsDeleted', v_participants, 'resultsDeleted', v_results);
+  return pg_catalog.jsonb_build_object('eventId', p_event_id, 'status', 'OPEN', 'participantsDeleted', v_participants, 'resultsDeleted', v_results);
 end;
 $$;
 

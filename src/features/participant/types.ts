@@ -6,4 +6,5 @@ export type ParticipantView =
   | { kind: "WINNER"; name: string; prizeName: string }
   | { kind: "NOT_WINNER"; name: string }
   | { kind: "PURGED" }
-  | { kind: "LOADING" };
+  | { kind: "LOADING" }
+  | { kind: "ERROR"; message: string };

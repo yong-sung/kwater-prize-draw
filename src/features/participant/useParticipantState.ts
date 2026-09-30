@@ -2,6 +2,20 @@ import { useCallback, useEffect, useState } from "react";
 import { ParticipantView } from "./types";
 import { useEventSignal } from "./useEventSignal";
 
+const REQUEST_TIMEOUT_MS = 8_000;
+
+async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(
+    () => controller.abort(),
+    REQUEST_TIMEOUT_MS,
+  );
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
 // Note: Re-exporting generateAccessToken internally or defining here.
 function generateAccessToken() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
@@ -21,11 +35,11 @@ export function useParticipantState() {
   const refreshFromApi = useCallback(async () => {
     const token = localStorage.getItem("kwater-prize-access-token");
     const response = token
-      ? await fetch("/api/participants/result", {
+      ? await fetchWithTimeout("/api/participants/result", {
           headers: { Authorization: `Bearer ${token}` },
           cache: "no-store",
         })
-      : await fetch("/api/public/event", { cache: "no-store" });
+      : await fetchWithTimeout("/api/public/event", { cache: "no-store" });
     if (!response.ok) return;
     const data = await response.json();
     if (data.state === "WAITING") setView({ kind: "WAITING", name: "" });
@@ -47,7 +61,7 @@ export function useParticipantState() {
       try {
         const token = localStorage.getItem("kwater-prize-access-token");
         if (token) {
-          const res = await fetch("/api/participants/result", {
+          const res = await fetchWithTimeout("/api/participants/result", {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (res.ok) {
@@ -67,7 +81,7 @@ export function useParticipantState() {
           }
         }
 
-        const res = await fetch("/api/public/event");
+        const res = await fetchWithTimeout("/api/public/event");
         if (res.ok) {
           const data = await res.json();
           if (typeof data.id === "string") setEventId(data.id);
@@ -79,10 +93,18 @@ export function useParticipantState() {
             setView({ kind: "CLOSED" });
           }
         } else {
-          setView({ kind: "CLOSED" });
+          setView({
+            kind: "ERROR",
+            message:
+              "행사 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+          });
         }
       } catch {
-        setView({ kind: "CLOSED" });
+        setView({
+          kind: "ERROR",
+          message:
+            "행사 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        });
       }
     }
     loadState();
@@ -96,7 +118,7 @@ export function useParticipantState() {
   }) => {
     try {
       const accessToken = generateAccessToken();
-      const res = await fetch("/api/participants", {
+      const res = await fetchWithTimeout("/api/participants", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, accessToken }),

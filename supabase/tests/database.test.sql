@@ -682,7 +682,7 @@ insert into public.reveal_state(event_id,revealed_count) values('00000000-0000-0
 insert into public.audit_logs(event_id,action,reason,detail) values('00000000-0000-0000-0000-000000000090','OLD_ACTION','개인정보 가능 메모','{"note":"old"}');
 select public.reset_rehearsal_event('00000000-0000-0000-0000-000000000090','가짜 리허설');
 
-select extensions.is((select status::text from public.events where id='00000000-0000-0000-0000-000000000090'),'SETUP','초기화 후 SETUP으로 복귀한다');
+select extensions.is((select status::text from public.events where id='00000000-0000-0000-0000-000000000090'),'OPEN','초기화 후 즉시 응모 가능한 OPEN으로 복귀한다');
 select extensions.is((select count(*) from public.participants where event_id='00000000-0000-0000-0000-000000000090'),0::bigint,'참석자 개인정보를 삭제한다');
 select extensions.is((select count(*) from public.draw_results where event_id='00000000-0000-0000-0000-000000000090'),0::bigint,'추첨 결과를 삭제한다');
 select extensions.is((select count(*) from public.reveal_state where event_id='00000000-0000-0000-0000-000000000090'),0::bigint,'공개 상태를 삭제한다');

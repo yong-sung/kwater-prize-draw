@@ -1,10 +1,24 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import DisplayApp from "./DisplayApp";
 
-type SessionStatus = "checking" | "authenticated" | "unauthenticated";
+type SessionStatus = "checking" | "authenticated" | "unauthenticated" | "error";
 
+const REQUEST_TIMEOUT_MS = 8_000;
+
+async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(
+    () => controller.abort(),
+    REQUEST_TIMEOUT_MS,
+  );
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
 export default function DisplayGate() {
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>("checking");
   const [password, setPassword] = useState("");
@@ -12,17 +26,19 @@ export default function DisplayGate() {
 
   useEffect(() => {
     let active = true;
-    void fetch("/api/display/auth/session", { cache: "no-store" })
+    void fetchWithTimeout("/api/display/auth/session", { cache: "no-store" })
       .then(async (response) => {
-        if (!response.ok) return false;
+        if (response.status === 401 || response.status === 403) return false;
+        if (!response.ok) throw new Error("DISPLAY_SESSION_FAILED");
         const body = (await response.json()) as { authenticated?: boolean };
         return body.authenticated === true;
       })
-      .catch(() => false)
       .then((authenticated) => {
-        if (active) {
+        if (active)
           setSessionStatus(authenticated ? "authenticated" : "unauthenticated");
-        }
+      })
+      .catch(() => {
+        if (active) setSessionStatus("error");
       });
     return () => {
       active = false;
@@ -39,13 +55,23 @@ export default function DisplayGate() {
 
   if (sessionStatus === "authenticated") return <DisplayApp />;
 
+  if (sessionStatus === "error") {
+    return (
+      <main className="flex min-h-[100dvh] items-center justify-center bg-slate-950 p-8 text-center text-white">
+        <p role="alert">
+          강연장 인증 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.
+        </p>
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-[100dvh] items-center justify-center bg-slate-950 p-8 text-white">
       <form
         className="w-full max-w-xl space-y-6 rounded-3xl bg-white/10 p-8 shadow-2xl backdrop-blur sm:p-12"
         onSubmit={async (e) => {
           e.preventDefault();
-          const response = await fetch("/api/display/auth/login", {
+          const response = await fetchWithTimeout("/api/display/auth/login", {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ password }),

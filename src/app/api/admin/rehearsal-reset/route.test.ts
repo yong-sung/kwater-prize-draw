@@ -50,7 +50,7 @@ describe("리허설 초기화 API", () => {
     Object.assign(process.env, env);
     mocks.requireAdmin.mockResolvedValue({ role: "admin" });
     mocks.from.mockReturnValue(event());
-    mocks.rpc.mockResolvedValue({ data: { status: "SETUP" }, error: null });
+    mocks.rpc.mockResolvedValue({ data: { status: "OPEN" }, error: null });
   });
   it("Production이면 RPC 전에 거부한다", async () => {
     process.env.VERCEL_ENV = "production";

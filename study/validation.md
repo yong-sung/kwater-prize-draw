@@ -150,3 +150,11 @@ supabase link는 API key, Auth, Storage, Realtime, 네트워크와 pooler 설정
 | ESLint                       | PASS           | 오류·경고 없음                               |
 | Production build             | PASS           | Next.js 16.3.4 build 성공                    |
 | 외부 API·DB·배포·push        | NOT APPLICABLE | 실행하지 않음                                |
+
+## 2026-09-30 Preview 리허설 화면 점검
+
+- PASS: 참가자 행사 조회의 HTTP 실패와 8초 초과를 오류 화면으로 표시하는 회귀 테스트.
+- PASS: 강연장 세션 조회의 서버 오류와 8초 초과를 오류 화면으로 표시하는 회귀 테스트.
+- PASS: `reset_rehearsal_event` 계약을 초기화 후 즉시 응모 가능한 `OPEN` 복귀로 보정했다. 로컬 DB 컨테이너가 없어 pgTAP은 미실행이다.
+- BLOCKED: 기존 Preview `kwater-prize-draw-preview-4lj2vz69k-week1profile.vercel.app`에 `PUBLISHED` 행사와 참석자 1명이 확인됐다. 데이터 보호 조건에 따라 migration, 초기화, 배포 및 가짜 데이터 E2E를 실행하지 않았다.
+- NOT TESTED: 실제 Preview의 관리자 로그인, 응모·중복 차단, 추첨·순차 공개, 결과 공유, 초기화 후 재응모. 빈 개발 행사에서만 실행한다.
