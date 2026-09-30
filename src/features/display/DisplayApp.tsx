@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import QrStage from "./QrStage";
 import RevealStage, { type RevealGroup } from "./RevealStage";
 import { useEnterReveal } from "./useEnterReveal";
+import { useEventSignal } from "@/features/participant/useEventSignal";
 
 type EventData = {
   id: string;
@@ -17,23 +18,33 @@ export default function DisplayApp() {
   const [status, setStatus] = useState("SETUP");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const refreshing = useRef(false);
   const load = useCallback(async () => {
-    const response = await fetch("/api/display/event", { cache: "no-store" });
+    const response = await fetch("/api/display/event", {
+      cache: "no-store",
+    });
     if (!response.ok) throw new Error("EVENT_NOT_FOUND");
-    const data = (await response.json()) as EventData;
-    return data;
+    return (await response.json()) as EventData;
   }, []);
-  useEffect(() => {
-    void load()
-      .then((data) => {
-        setEvent(data);
-        setStatus(data.status);
-        setGroups(data.groups ?? []);
-      })
-      .catch(() => {
-        queueMicrotask(() => setError("행사 정보를 불러오지 못했습니다."));
-      });
+  const refresh = useCallback(async () => {
+    if (refreshing.current) return;
+    refreshing.current = true;
+    try {
+      const data = await load();
+      setEvent(data);
+      setStatus(data.status);
+      setGroups(data.groups ?? []);
+      setError(null);
+    } catch {
+      setError("행사 정보를 불러오지 못했습니다.");
+    } finally {
+      refreshing.current = false;
+    }
   }, [load]);
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+  useEventSignal({ eventId: event?.id, onRefresh: refresh });
   const reveal = useCallback(async () => {
     if (!event || status === "REVEALED" || busy) return;
     setBusy(true);
@@ -47,13 +58,13 @@ export default function DisplayApp() {
       if (!response.ok) throw new Error("REVEAL_FAILED");
       const data = await response.json();
       setStatus(data.eventStatus);
-      setGroups(data.groups ?? []);
+      await refresh();
     } catch {
       setError("다음 당첨자를 공개하지 못했습니다.");
     } finally {
       setBusy(false);
     }
-  }, [event, status, busy]);
+  }, [event, status, busy, refresh]);
   useEnterReveal({
     enabled: status === "DRAWN" || status === "REVEALING",
     onReveal: reveal,
