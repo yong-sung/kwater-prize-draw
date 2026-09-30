@@ -7,7 +7,7 @@ import {
 } from "@/lib/realtime/events";
 import { createRealtimeClient } from "@/lib/supabase/browser";
 
-const DEFAULT_POLL_INTERVAL_MS = 5_000;
+const DEFAULT_POLL_INTERVAL_MS = 3_000;
 
 export function useEventSignal({
   eventId,
@@ -21,25 +21,15 @@ export function useEventSignal({
   useEffect(() => {
     let disposed = false;
     let stopSubscription: (() => void) | undefined;
-    let pollingTimer: number | undefined;
-
     const refreshFromApi = () => {
       if (disposed) return;
       void Promise.resolve(onRefresh()).catch(() => undefined);
     };
-    const stopPolling = () => {
-      if (pollingTimer === undefined) return;
-      window.clearInterval(pollingTimer);
-      pollingTimer = undefined;
-    };
-    const startPolling = () => {
-      if (disposed || pollingTimer !== undefined) return;
-      pollingTimer = window.setInterval(refreshFromApi, pollIntervalMs);
-    };
+    const pollingTimer = window.setInterval(refreshFromApi, pollIntervalMs);
 
     const connect = async () => {
       try {
-        if (!eventId) throw new Error("EVENT_ID_MISSING");
+        if (!eventId) return;
         if (disposed) return;
         const client = createRealtimeClient();
         stopSubscription = subscribeEventSignal(
@@ -47,19 +37,18 @@ export function useEventSignal({
           eventId,
           {
             onSignal: refreshFromApi,
-            onConnectionFailure: startPolling,
-            onConnected: stopPolling,
+            onConnectionFailure: () => undefined,
           },
         );
       } catch {
-        startPolling();
+        // Polling continues when Realtime is unavailable.
       }
     };
 
     void connect();
     return () => {
       disposed = true;
-      stopPolling();
+      window.clearInterval(pollingTimer);
       stopSubscription?.();
     };
   }, [eventId, onRefresh, pollIntervalMs]);
