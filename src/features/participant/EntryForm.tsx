@@ -51,7 +51,7 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
 
         <div className="flex flex-col gap-1">
           <label htmlFor="phone" className="font-semibold text-gray-700">
-            연락처 (010-0000-0000)
+            연락처 (01012345678)
           </label>
           <input
             id="phone"
