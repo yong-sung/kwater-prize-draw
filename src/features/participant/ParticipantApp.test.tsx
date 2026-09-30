@@ -77,7 +77,7 @@ describe("참석자 모바일 화면", () => {
 
     await screen.findByLabelText(/참석자 성함/i);
     await userEvent.type(screen.getByLabelText(/참석자 성함/i), "홍길동");
-    await userEvent.type(screen.getByLabelText(/연락처/i), "010-1234-5678");
+    await userEvent.type(screen.getByLabelText(/연락처/i), "01012345678");
     await userEvent.type(screen.getByLabelText(/소속부서명/i), "개발부");
     await userEvent.click(screen.getByLabelText(/동의합니다/i));
 
