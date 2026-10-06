@@ -38,14 +38,7 @@ jobs:
       - name: Supabase CLI 버전 확인
         run: npm exec supabase -- --version
       - name: Supabase 임시 DB 시작과 migration 적용
-        shell: bash
-        run: |
-          set +e
-          npm exec supabase -- start > /tmp/supabase-start.log 2>&1
-          start_status=$?
-          set -e
-          sed -E '/(anon|service[_ -]?role|secret|publishable|JWT|password|token|postgres(ql)?:\/\/)/I s/.*/[REDACTED SUPABASE CLI OUTPUT]/' /tmp/supabase-start.log
-          exit "$start_status"
+        run: npm exec supabase -- start > /tmp/supabase-start.log 2>&1
       - name: 로컬 pgTAP 실행
         run: npm exec supabase -- test db --local
       - name: Task 4 로그인 제한 DB 통합 테스트
