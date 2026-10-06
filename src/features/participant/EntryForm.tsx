@@ -62,7 +62,7 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
             onChange={(e) => setPhone(e.target.value)}
             className="border p-3 rounded-lg min-h-[56px] bg-[#F5F7FA]"
             required
-            pattern="^010\\d{8}$"
+            pattern="^010\d{8}$"
           />
         </div>
 
