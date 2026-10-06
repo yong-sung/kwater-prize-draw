@@ -1,0 +1,25 @@
+name: Preview 400-registration load test
+
+on:
+  push:
+    branches:
+      - test/preview-register-load-400
+
+permissions:
+  contents: read
+
+jobs:
+  preview-registration-load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Submit 400 synthetic participants concurrently
+        env:
+          BASE_URL: https://kwater-prize-draw-preview-pdo89plnz-week1profile.vercel.app
+          EXPECTED_EVENT_ID: 6833f277-746c-4033-9aef-30016cbba712
+          USERS: "400"
+        run: node tools/preview-registration-load-test.mjs
