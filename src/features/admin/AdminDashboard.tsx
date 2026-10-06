@@ -4,6 +4,8 @@ import { useEventSignal } from "@/features/participant/useEventSignal";
 type Participant = {
   id: string;
   event_id: string;
+  name: string;
+  phone: string;
   department: string;
   disqualified_at?: string | null;
 };
@@ -231,7 +233,10 @@ export function AdminDashboard() {
           <ul className="divide-y">
             {participants.map((p) => (
               <li key={p.id} className="flex justify-between py-3 text-sm">
-                <span>{p.department || "소속 미입력"}</span>
+                <span>
+                  {p.name || "성함 미입력"} · {p.phone || "연락처 미입력"} ·{" "}
+                  {p.department || "소속 미입력"}
+                </span>
                 <span>{p.disqualified_at ? "제외됨" : "응모"}</span>
               </li>
             ))}
