@@ -22,7 +22,7 @@ describe("참석자 모바일 화면", () => {
     localStorage.clear();
   });
 
-  it("OPEN이면 네 개 필수 항목과 응모 버튼을 표시하고 숫자 연락처 예시를 안내한다", async () => {
+  it("OPEN에서 숫자 연락처 예시를 표시한다", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ status: "OPEN" }), { status: 200 }),
     );
@@ -30,9 +30,7 @@ describe("참석자 모바일 화면", () => {
     render(<ParticipantApp />);
 
     expect(await screen.findByLabelText(/참석자 성함/i)).toBeInTheDocument();
-    const phoneInput = screen.getByLabelText(
-      /연락처 예시\(01012345678\)/i,
-    );
+    const phoneInput = screen.getByLabelText(/연락처 예시\(01012345678\)/i);
     expect(phoneInput).toHaveAttribute("pattern", "^010\\d{8}$");
     expect(screen.getByLabelText(/소속부서명/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/동의합니다/i)).toBeInTheDocument();
@@ -63,7 +61,7 @@ describe("참석자 모바일 화면", () => {
     expect(button).toBeDisabled();
   });
 
-  it("응모 성공 후 대기 화면을 표시하며 하이픈 없는 010 연락처를 전송한다", async () => {
+  it("하이픈 없는 010 연락처로 응모한다", async () => {
     fetchMock
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ status: "OPEN" }), { status: 200 }),
