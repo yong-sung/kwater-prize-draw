@@ -20,9 +20,16 @@ describe("DisplayApp API 계약", () => {
         ),
       )
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ eventStatus: "REVEALING", groups: [] }), {
-          status: 200,
-        }),
+        new Response(
+          JSON.stringify({
+            eventStatus: "REVEALING",
+            prizeCode: null,
+            groupComplete: true,
+          }),
+          {
+            status: 200,
+          },
+        ),
       );
     vi.stubGlobal("fetch", fetchMock);
     render(<DisplayApp />);

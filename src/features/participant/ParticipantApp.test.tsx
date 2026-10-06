@@ -105,6 +105,7 @@ describe("참석자 모바일 화면", () => {
         JSON.stringify({
           state: "WINNER",
           name: "홍길동",
+          prizeCode: "TUMBLER",
           prizeName: "스마트 텀블러",
         }),
         { status: 200 },
@@ -113,7 +114,7 @@ describe("참석자 모바일 화면", () => {
 
     render(<ParticipantApp />);
 
-    expect(await screen.findByAltText("기뻐하는 방울이")).toBeInTheDocument();
+    expect(await screen.findByAltText("행복해하는 방울이")).toBeInTheDocument();
     expect(screen.getByText(/스마트 텀블러/)).toBeInTheDocument();
     expect(screen.getByText(/당첨/)).toBeInTheDocument();
   });

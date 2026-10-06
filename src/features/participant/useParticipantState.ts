@@ -44,7 +44,12 @@ export function useParticipantState() {
     const data = await response.json();
     if (data.state === "WAITING") setView({ kind: "WAITING", name: "" });
     if (data.state === "WINNER")
-      setView({ kind: "WINNER", name: data.name, prizeName: data.prizeName });
+      setView({
+        kind: "WINNER",
+        name: data.name,
+        prizeCode: data.prizeCode,
+        prizeName: data.prizeName,
+      });
     if (data.state === "NOT_WINNER")
       setView({ kind: "NOT_WINNER", name: data.name });
     if (!token && data.status === "OPEN") setView({ kind: "FORM" });
@@ -72,6 +77,7 @@ export function useParticipantState() {
               setView({
                 kind: "WINNER",
                 name: data.name,
+                prizeCode: data.prizeCode,
                 prizeName: data.prizeName,
               });
             } else if (data.state === "NOT_WINNER") {

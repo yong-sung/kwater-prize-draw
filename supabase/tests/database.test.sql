@@ -42,7 +42,7 @@ select extensions.is(
     ) as acl
     where n.nspname = 'public'
       and p.proname = any(array[
-        'execute_draw', 'draw_replacement', 'reveal_next',
+        'execute_draw', 'draw_replacement', 'reveal_next', 'reveal_next_in_group',
         'publish_results', 'purge_expired_events', 'record_admin_login_failure'
       ])
       and acl.grantee = 0
@@ -60,6 +60,7 @@ from unnest(array[
   'public.execute_draw(uuid)',
   'public.draw_replacement(uuid,uuid,text)',
   'public.reveal_next(uuid)',
+  'public.reveal_next_in_group(uuid,public.prize_code)',
   'public.publish_results(uuid)',
   'public.purge_expired_events()',
   'public.record_admin_login_failure(text,timestamp with time zone)'
@@ -73,6 +74,7 @@ from unnest(array[
   'public.execute_draw(uuid)',
   'public.draw_replacement(uuid,uuid,text)',
   'public.reveal_next(uuid)',
+  'public.reveal_next_in_group(uuid,public.prize_code)',
   'public.publish_results(uuid)',
   'public.purge_expired_events()',
   'public.record_admin_login_failure(text,timestamp with time zone)'
@@ -116,6 +118,7 @@ from unnest(array[
   'public.execute_draw(uuid)',
   'public.draw_replacement(uuid,uuid,text)',
   'public.reveal_next(uuid)',
+  'public.reveal_next_in_group(uuid,public.prize_code)',
   'public.publish_results(uuid)',
   'public.purge_expired_events()',
   'public.record_admin_login_failure(text,timestamp with time zone)'

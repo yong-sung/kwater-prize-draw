@@ -61,31 +61,26 @@ describe("useEventSignal", () => {
     expect(refresh).toHaveBeenCalledTimes(1);
   });
 
-  it("Realtime 실패 후에만 5초 간격 polling을 시작한다", async () => {
+  it("Realtime 연결 상태와 무관하게 3초 간격 polling을 유지한다", async () => {
     const refresh = vi.fn().mockResolvedValue(undefined);
+    vi.useFakeTimers();
     renderHook(() =>
       useEventSignal({ eventId: "event-1", onRefresh: refresh }),
     );
-    await waitFor(() => expect(mocks.channel).toHaveBeenCalled());
-    vi.useFakeTimers();
 
-    act(() => mocks.statusHandler?.("CHANNEL_ERROR"));
-    await act(async () => vi.advanceTimersByTimeAsync(4_999));
+    await act(async () => vi.advanceTimersByTimeAsync(2_999));
     expect(refresh).not.toHaveBeenCalled();
     await act(async () => vi.advanceTimersByTimeAsync(1));
     expect(refresh).toHaveBeenCalledTimes(1);
   });
 
-  it("정상 구독 상태에서는 polling을 실행하지 않는다", async () => {
+  it("정상 구독 상태에서도 polling을 실행한다", async () => {
     const refresh = vi.fn().mockResolvedValue(undefined);
+    vi.useFakeTimers();
     renderHook(() =>
       useEventSignal({ eventId: "event-1", onRefresh: refresh }),
     );
-    await waitFor(() => expect(mocks.channel).toHaveBeenCalled());
-    vi.useFakeTimers();
-
-    act(() => mocks.statusHandler?.("SUBSCRIBED"));
     await act(async () => vi.advanceTimersByTimeAsync(10_000));
-    expect(refresh).not.toHaveBeenCalled();
+    expect(refresh).toHaveBeenCalledTimes(3);
   });
 });

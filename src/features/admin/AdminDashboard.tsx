@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { useEventSignal } from "@/features/participant/useEventSignal";
 type Participant = {
   id: string;
   event_id: string;
@@ -29,8 +30,8 @@ export function AdminDashboard() {
   const [title, setTitle] = useState("");
   const [resetTitle, setResetTitle] = useState("");
   const [resetConfirmation, setResetConfirmation] = useState("");
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     try {
       const r = await fetch("/api/admin/event");
       if (!r.ok) throw Error();
@@ -38,7 +39,7 @@ export function AdminDashboard() {
       setData(d);
       setTitle(d.event?.title ?? "");
       if (d.event) {
-        setDetailLoading(true);
+        if (showLoading) setDetailLoading(true);
         const [p, q] = await Promise.all([
           fetch("/api/admin/participants"),
           fetch(`/api/admin/results?eventId=${encodeURIComponent(d.event.id)}`),
@@ -50,14 +51,15 @@ export function AdminDashboard() {
     } catch {
       setError("관리자 정보를 불러오지 못했습니다.");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
       setDetailLoading(false);
     }
   }, []);
   useEffect(() => {
-    const timer = window.setTimeout(() => void load(), 0);
+    const timer = window.setTimeout(() => void load(true), 0);
     return () => window.clearTimeout(timer);
   }, [load]);
+  useEventSignal({ eventId: data?.event?.id, onRefresh: load });
   async function call(path: string, body: object, next?: string) {
     if (busy || !data) return;
     setBusy(true);

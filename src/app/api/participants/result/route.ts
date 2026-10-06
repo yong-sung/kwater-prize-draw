@@ -47,7 +47,10 @@ export async function GET(request: Request) {
 
   const event = firstRelation(participant.events);
   if (!event) {
-    return json({ code: "EVENT_NOT_FOUND", error: "행사를 찾을 수 없습니다." }, 404);
+    return json(
+      { code: "EVENT_NOT_FOUND", error: "행사를 찾을 수 없습니다." },
+      404,
+    );
   }
 
   if (["DRAWN", "REVEALING", "REVEALED"].includes(event.status)) {
@@ -58,18 +61,29 @@ export async function GET(request: Request) {
     const name = decryptPii(participant.name_ciphertext, piiKey);
     const { data: drawResult, error: resultError } = await supabase
       .from("draw_results")
-      .select("prizes!draw_results_prize_id_fkey(name)")
+      .select("prizes!draw_results_prize_id_fkey(code,name)")
       .eq("participant_id", participant.id)
       .limit(1)
       .maybeSingle();
 
     if (resultError) {
-      return json({ code: "RESULT_LOAD_FAILED", error: "결과를 불러오지 못했습니다." }, 500);
+      return json(
+        { code: "RESULT_LOAD_FAILED", error: "결과를 불러오지 못했습니다." },
+        500,
+      );
     }
 
     const prize = firstRelation(drawResult?.prizes ?? null);
     return prize
-      ? json({ state: "WINNER", name, prizeName: prize.name }, 200)
+      ? json(
+          {
+            state: "WINNER",
+            name,
+            prizeCode: prize.code,
+            prizeName: prize.name,
+          },
+          200,
+        )
       : json({ state: "NOT_WINNER", name }, 200);
   }
 

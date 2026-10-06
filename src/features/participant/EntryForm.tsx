@@ -84,6 +84,14 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
           <p className="font-semibold text-gray-700">
             개인정보 수집 및 이용 동의
           </p>
+          <div className="rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-600">
+            <p>동의하지 않을 경우, 설문 참여가 제한될 수 있습니다.</p>
+            <ul className="mt-2 space-y-1">
+              <li>수집 및 이용하는 개인정보 항목: 이름, 연락처, 부서</li>
+              <li>수집 및 이용 목적: 참석자 사전조회 및 이벤트 진행</li>
+              <li>보유 및 이용기간: 당첨자 발표 후 1주일간 보관</li>
+            </ul>
+          </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="radio"

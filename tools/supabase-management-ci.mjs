@@ -241,7 +241,7 @@ expected_indexes(name) as (
 ),
 expected_functions(signature) as (
   values ('execute_draw(uuid)'), ('draw_replacement(uuid,uuid,text)'),
-         ('reveal_next(uuid)'), ('publish_results(uuid)'),
+         ('reveal_next(uuid)'), ('reveal_next_in_group(uuid,public.prize_code)'), ('publish_results(uuid)'),
          ('purge_expired_events()'),
          ('record_admin_login_failure(text,timestamp with time zone)')
 )

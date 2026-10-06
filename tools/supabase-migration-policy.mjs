@@ -4,6 +4,7 @@ export const EXPECTED_MIGRATION_FILES = Object.freeze([
   "20260911133000_task3_reveal_state_fix.sql",
   "20260911170000_admin_login_rate_limit.sql",
   "20260929003215_auditorium_rehearsal_reset.sql",
+  "20260930090653_grouped_sequential_reveal.sql",
 ]);
 
 export function assertExpectedMigrationFiles(actualFiles) {

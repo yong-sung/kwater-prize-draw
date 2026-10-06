@@ -28,7 +28,13 @@ export default function ParticipantApp() {
     case "WAITING":
       return <WaitingScreen />;
     case "WINNER":
-      return <ResultScreen isWinner={true} prizeName={view.prizeName} />;
+      return (
+        <ResultScreen
+          isWinner={true}
+          prizeCode={view.prizeCode}
+          prizeName={view.prizeName}
+        />
+      );
     case "NOT_WINNER":
       return <ResultScreen isWinner={false} />;
     case "CLOSED":

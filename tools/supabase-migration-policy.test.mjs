@@ -11,10 +11,11 @@ const expected = [
   "20260911133000_task3_reveal_state_fix.sql",
   "20260911170000_admin_login_rate_limit.sql",
   "20260929003215_auditorium_rehearsal_reset.sql",
+  "20260930090653_grouped_sequential_reveal.sql",
 ];
 
 describe("Supabase migration 허용 목록", () => {
-  it("저장소의 승인된 5개 migration을 적용 순서대로 허용한다", () => {
+  it("저장소의 승인된 6개 migration을 적용 순서대로 허용한다", () => {
     const actual = readdirSync(join(process.cwd(), "supabase", "migrations"))
       .filter((name) => name.endsWith(".sql"))
       .sort();
