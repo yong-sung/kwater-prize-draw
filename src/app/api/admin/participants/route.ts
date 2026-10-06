@@ -10,12 +10,22 @@ export async function GET() {
   }
   const { data, error } = await createServerClient()
     .from("participants")
-    .select("id,event_id,department_ciphertext,created_at,disqualified_at")
+    .select(
+      "id,event_id,name_ciphertext,phone_ciphertext,department_ciphertext,created_at,disqualified_at",
+    )
     .limit(500);
   if (error) return NextResponse.json({ code: "LOAD_FAILED" }, { status: 500 });
   const participants = (data ?? []).map((participant) => ({
     id: participant.id,
     event_id: participant.event_id,
+    name: decryptPii(
+      participant.name_ciphertext,
+      process.env.PII_ENCRYPTION_KEY ?? "",
+    ),
+    phone: decryptPii(
+      participant.phone_ciphertext,
+      process.env.PII_ENCRYPTION_KEY ?? "",
+    ),
     department: decryptPii(
       participant.department_ciphertext,
       process.env.PII_ENCRYPTION_KEY ?? "",
