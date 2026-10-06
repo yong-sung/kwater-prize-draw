@@ -51,7 +51,7 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
 
         <div className="flex flex-col gap-1">
           <label htmlFor="phone" className="font-semibold text-gray-700">
-            연락처 (010-0000-0000)
+            연락처 예시(01012345678)
           </label>
           <input
             id="phone"
@@ -62,7 +62,7 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
             onChange={(e) => setPhone(e.target.value)}
             className="border p-3 rounded-lg min-h-[56px] bg-[#F5F7FA]"
             required
-            pattern="^010-\d{4}-\d{4}$"
+            pattern="^010\\d{8}$"
           />
         </div>
 
