@@ -36,7 +36,7 @@ describe("QrStage", () => {
     qrCapture.props = null;
   });
 
-  it("renders the event QR with a larger Bangwool badge and scan-friendly settings", () => {
+  it("renders a larger Bangwool badge with a high-correction QR", () => {
     render(<QrStage title="제4차 AI 인사이트 라운드 개최" />);
 
     expect(
