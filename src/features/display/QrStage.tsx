@@ -21,8 +21,8 @@ export default function QrStage({ title }: { title: string }) {
           includeMargin
           imageSettings={{
             src: "/images/bangwool-happy.png",
-            width: 56,
-            height: 56,
+            width: 96,
+            height: 96,
             excavate: true,
           }}
           aria-label="응모 페이지 QR 코드"
