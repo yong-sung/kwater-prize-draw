@@ -36,7 +36,7 @@ describe("QrStage", () => {
     qrCapture.props = null;
   });
 
-  it("renders the event QR with the Bangwool badge and scan-friendly settings", () => {
+  it("renders the event QR with a larger Bangwool badge and scan-friendly settings", () => {
     render(<QrStage title="제4차 AI 인사이트 라운드 개최" />);
 
     expect(
@@ -60,8 +60,8 @@ describe("QrStage", () => {
       "aria-label": "응모 페이지 QR 코드",
       imageSettings: {
         src: "/images/bangwool-happy.png",
-        width: 56,
-        height: 56,
+        width: 96,
+        height: 96,
         excavate: true,
       },
     });
