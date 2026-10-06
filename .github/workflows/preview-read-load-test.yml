@@ -1,0 +1,26 @@
+name: Preview 400-read load test
+
+on:
+  push:
+    branches:
+      - test/preview-read-load-400
+
+permissions:
+  contents: read
+
+jobs:
+  preview-read-load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Send 400 concurrent public event reads
+        env:
+          BASE_URL: https://kwater-prize-draw-preview-pdo89plnz-week1profile.vercel.app
+          EXPECTED_EVENT_ID: 6833f277-746c-4033-9aef-30016cbba712
+          USERS: "400"
+          CONCURRENCY: "400"
+        run: node tools/preview-read-load-test.mjs
