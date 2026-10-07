@@ -8,8 +8,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   buildRestorePathspec,
@@ -28,9 +27,7 @@ const validRequest = {
 };
 
 const temporaryDirectories = [];
-const policyScriptPath = fileURLToPath(
-  new URL("./preview-rollback-policy.mjs", import.meta.url),
-);
+const policyScriptPath = resolve("tools/preview-rollback-policy.mjs");
 
 function writeFixtureFile(root, path, contents) {
   const fullPath = join(root, path);
