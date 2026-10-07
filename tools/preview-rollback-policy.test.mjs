@@ -110,7 +110,9 @@ describe("restore path and staged file checks", () => {
     ];
     writeFixtureFile(root, "src/app/page.tsx", "baseline app\n");
     writeFixtureFile(root, "public/logo.svg", "baseline asset\n");
-    for (const path of protectedPaths) writeFixtureFile(root, path, "baseline protected\n");
+    for (const path of protectedPaths) {
+      writeFixtureFile(root, path, "baseline protected\n");
+    }
     git(root, "add", ".");
     git(root, "commit", "-m", "baseline");
     git(root, "tag", "preview-baseline");
@@ -119,7 +121,9 @@ describe("restore path and staged file checks", () => {
     writeFixtureFile(root, "src/app/page.tsx", "changed app\n");
     writeFixtureFile(root, "public/logo.svg", "changed asset\n");
     writeFixtureFile(root, "src/app/new-page.tsx", "new app file\n");
-    for (const path of protectedPaths) writeFixtureFile(root, path, "main protected\n");
+    for (const path of protectedPaths) {
+      writeFixtureFile(root, path, "main protected\n");
+    }
     git(root, "add", ".");
     git(root, "commit", "-m", "main changes");
 
@@ -132,8 +136,10 @@ describe("restore path and staged file checks", () => {
       ...buildRestorePathspec(),
     );
 
-    expect(readFileSync(join(root, "src/app/page.tsx"), "utf8")).toBe("baseline app\n");
-    expect(readFileSync(join(root, "public/logo.svg"), "utf8")).toBe("baseline asset\n");
+    const restoredApp = readFileSync(join(root, "src/app/page.tsx"), "utf8");
+    expect(restoredApp).toBe("baseline app\n");
+    const restoredLogo = readFileSync(join(root, "public/logo.svg"), "utf8");
+    expect(restoredLogo).toBe("baseline asset\n");
     expect(existsSync(join(root, "src/app/new-page.tsx"))).toBe(false);
     for (const path of protectedPaths) {
       expect(readFileSync(join(root, path), "utf8")).toBe("main protected\n");
