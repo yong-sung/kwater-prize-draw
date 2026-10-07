@@ -6,10 +6,15 @@ const mocks = vi.hoisted(() => ({
   from: vi.fn(),
   select: vi.fn(),
   rpc: vi.fn(),
+  canResetRehearsal: vi.fn(),
 }));
 
 vi.mock("@/lib/security/admin-session", () => ({
   requireAdmin: mocks.requireAdmin,
+}));
+
+vi.mock("@/lib/rehearsal/reset-guard", () => ({
+  canResetRehearsal: mocks.canResetRehearsal,
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -22,6 +27,7 @@ describe("관리자 행사 조회 API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.requireAdmin.mockResolvedValue({ role: "admin" });
+    mocks.canResetRehearsal.mockReturnValue(true);
     mocks.from.mockReturnValue({ select: mocks.select });
     mocks.select.mockReturnValue({
       limit: () => ({
@@ -37,7 +43,7 @@ describe("관리자 행사 조회 API", () => {
     });
   });
 
-  it("events의 id, title, status를 조회해 반환한다", async () => {
+  it("events의 id, title, status와 리허설 초기화 가능 여부를 반환한다", async () => {
     const response = await GET();
 
     expect(mocks.select).toHaveBeenCalledWith("id,title,status");
@@ -48,6 +54,18 @@ describe("관리자 행사 조회 API", () => {
         title: "Preview 검증 행사",
         status: "OPEN",
       },
+      rehearsalResetAllowed: true,
+    });
+  });
+
+  it("환경에서 리허설 초기화를 허용하지 않으면 비활성 상태를 반환한다", async () => {
+    mocks.canResetRehearsal.mockReturnValue(false);
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      rehearsalResetAllowed: false,
     });
   });
 });
