@@ -91,7 +91,7 @@ jobs:
           ## 복구 범위
           지정된 Production 기준 commit의 앱 소스와 정적 파일을 복원하는 PR입니다.
 
-          `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`는 변경에서 제외했습니다.
+          `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`, `tools/preview-rollback-policy.mjs`는 변경에서 제외했습니다.
 
           ## 병합 전 확인
           - 변경 파일과 제외 경로를 검토합니다.
