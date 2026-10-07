@@ -193,7 +193,7 @@ describe("rollback policy CLI", () => {
       [
         `baseline_sha=${baselineSha}`,
         "branch_name=rollback/preview-baseline-456",
-      ].join("\n"),
+      ].join("\n") + "\n",
     );
   });
 
