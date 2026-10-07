@@ -64,9 +64,9 @@ export async function GET() {
       .from("draw_results")
       .select("reveal_position,prizes!draw_results_prize_id_fkey(code,name)")
       .eq("event_id", event.id)
-      .is("revealed_at", "is", null)
+      .is("revealed_at", null)
       .not("participant_id", "is", null)
-      .is("unawarded_at", "is", null)
+      .is("unawarded_at", null)
       .order("reveal_position");
     if (upcomingError)
       return NextResponse.json({ code: "LOAD_FAILED" }, { status: 500 });
@@ -76,13 +76,22 @@ export async function GET() {
         revealPosition: row.reveal_position,
         prize: firstRelation(row.prizes),
       }))
-      .filter((row) => row.prize !== null)
+      .filter(
+        (
+          row,
+        ): row is {
+          revealPosition: number;
+          prize: { code: string; name: string };
+        } => row.prize !== null,
+      )
       .sort((left, right) => {
-        const leftOrder = REVEAL_PRIORITY.get(left.prize!.code) ?? Number.MAX_SAFE_INTEGER;
-        const rightOrder = REVEAL_PRIORITY.get(right.prize!.code) ?? Number.MAX_SAFE_INTEGER;
+        const leftOrder =
+          REVEAL_PRIORITY.get(left.prize.code) ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder =
+          REVEAL_PRIORITY.get(right.prize.code) ?? Number.MAX_SAFE_INTEGER;
         return leftOrder - rightOrder || left.revealPosition - right.revealPosition;
       });
-    nextPrizeName = upcoming[0]?.prize?.name ?? null;
+    nextPrizeName = upcoming[0]?.prize.name ?? null;
   }
 
   if (["REVEALING", "REVEALED", "PUBLISHED"].includes(event.status)) {
