@@ -177,6 +177,30 @@ function validateStagedChanges() {
   writeGithubOutput({ staged_count: validatedPaths.length });
 }
 
+function restoreBaseline() {
+  const baselineSha = process.env.ROLLBACK_BASELINE_SHA ?? "";
+  if (!/^[a-f0-9]{40}$/i.test(baselineSha)) {
+    throw new Error("기준 SHA는 40자리 hexadecimal이어야 합니다.");
+  }
+
+  const commit = spawnSync("git", ["cat-file", "-e", `${baselineSha}^{commit}`], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (commit.error) throw commit.error;
+  if (commit.status !== 0) {
+    throw new Error("기준 commit을 찾을 수 없습니다.");
+  }
+
+  runGit([
+    "restore",
+    `--source=${baselineSha}`,
+    "--staged",
+    "--worktree",
+    ...buildRestorePathspec(),
+  ]);
+}
+
 function main(command) {
   if (command === "validate-request") {
     validateRequestFromEnvironment();
@@ -184,6 +208,10 @@ function main(command) {
   }
   if (command === "validate-staged") {
     validateStagedChanges();
+    return;
+  }
+  if (command === "restore") {
+    restoreBaseline();
     return;
   }
   throw new Error("지원하지 않는 복구 검증 명령입니다.");
