@@ -1,0 +1,107 @@
+name: Preview 기준 코드 복구 PR 만들기
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: '확인 문구: PREVIEW BASELINE 복구 PR 생성'
+        required: true
+        type: string
+      baseline_sha:
+        description: 'preview-baseline-2026-10-07 tag가 가리키는 전체 commit SHA'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: preview-baseline-rollback-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  create-rollback-pr:
+    name: 복구 변경 검증 및 PR 생성
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 기본 브랜치 전체 이력과 tag 가져오기
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: 저장소, ref, 확인 문구, baseline tag와 조상 확인
+        id: request
+        run: node tools/preview-rollback-policy.mjs validate-request
+        env:
+          ROLLBACK_CONFIRMATION: ${{ inputs.confirmation }}
+          ROLLBACK_BASELINE_SHA: ${{ inputs.baseline_sha }}
+
+      - name: 기준 commit에서 허용된 코드만 복원
+        run: node tools/preview-rollback-policy.mjs restore
+        env:
+          ROLLBACK_BASELINE_SHA: ${{ steps.request.outputs.baseline_sha }}
+
+      - name: staged 경로와 변경 수 검증
+        id: staged
+        run: node tools/preview-rollback-policy.mjs validate-staged
+
+      - name: main이 바뀌지 않았는지 확인하고 복구 branch에서 commit
+        env:
+          ROLLBACK_BRANCH_NAME: ${{ steps.request.outputs.branch_name }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          if [[ "$(git rev-parse HEAD)" != "$(git rev-parse refs/remotes/origin/main)" ]]; then
+            echo 'Workflow 시작 후 main이 바뀌었습니다. 최신 main에서 다시 실행하세요.' >&2
+            exit 1
+          fi
+          git switch --create "$ROLLBACK_BRANCH_NAME"
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'revert: Preview 기준 코드 복구'
+
+      - name: 복구 branch만 원격에 push
+        env:
+          ROLLBACK_BRANCH_NAME: ${{ steps.request.outputs.branch_name }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          if [[ "$(git rev-parse "${ROLLBACK_BRANCH_NAME}^")" != "$(git rev-parse refs/remotes/origin/main)" ]]; then
+            echo 'branch 생성 후 main이 바뀌었습니다. 최신 main에서 다시 실행하세요.' >&2
+            exit 1
+          fi
+          git push origin "HEAD:refs/heads/$ROLLBACK_BRANCH_NAME"
+
+      - name: 수동 검토용 복구 PR 생성
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ROLLBACK_BRANCH_NAME: ${{ steps.request.outputs.branch_name }}
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/preview-rollback-pr-body.md" <<'PR_BODY'
+          ## 복구 범위
+          지정된 Production 기준 commit의 앱 소스와 정적 파일을 복원하는 PR입니다.
+
+          `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`는 변경에서 제외했습니다.
+
+          ## 병합 전 확인
+          - 변경 파일과 제외 경로를 검토합니다.
+          - GitHub Actions와 Vercel Preview 결과를 확인합니다.
+          - 검토와 승인이 끝난 뒤 담당자가 직접 병합합니다.
+
+          이 PR은 `main`에 직접 push하거나 자동 병합하지 않습니다. Supabase 응모·추첨 데이터와 migration, Vercel 설정·환경변수·도메인도 변경하지 않습니다.
+          PR_BODY
+          gh pr create \
+            --base main \
+            --head "$ROLLBACK_BRANCH_NAME" \
+            --title 'Preview 기준 코드 복구' \
+            --body-file "$RUNNER_TEMP/preview-rollback-pr-body.md"
