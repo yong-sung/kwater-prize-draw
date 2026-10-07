@@ -6,7 +6,9 @@ export default function WaitingScreen() {
           응모가 완료되었습니다!
         </h2>
         <p className="text-gray-600">추첨은 행사 종료 직후 진행됩니다.</p>
-        <p className="text-gray-600 mt-2">해당 페이지에서도 추첨 결과를 확인할 수 있습니다.</p>
+        <p className="text-gray-600 mt-2">
+          해당 페이지에서도 추첨 결과를 확인할 수 있습니다.
+        </p>
       </div>
     </div>
   );
