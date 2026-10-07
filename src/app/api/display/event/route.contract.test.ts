@@ -11,11 +11,14 @@ describe("display event route 계약", () => {
     expect(source).toContain("participants!draw_results_participant_id_fkey");
   });
 
-  it("다음 추첨 경품명을 공개하지 않은 결과에서 결정한다", () => {
-    expect(source).toContain('nextPrizeName');
-    expect(source).toContain('.is("revealed_at", null)');
-    expect(source).toContain("reveal_position");
-  });
+  it(
+    "다음 추첨 경품명을 공개하지 않은 결과에서 결정한다",
+    () => {
+      expect(source).toContain("nextPrizeName");
+      expect(source).toContain('.is("revealed_at", null)');
+      expect(source).toContain("reveal_position");
+    },
+  );
 
   it("공개 최소 필드만 복호화하고 민감 필드를 조회하지 않는다", () => {
     expect(source).toContain("name_ciphertext");
