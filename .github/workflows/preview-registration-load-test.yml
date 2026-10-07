@@ -19,7 +19,7 @@ jobs:
           node-version: 24
       - name: Submit 400 synthetic participants concurrently
         env:
-          BASE_URL: https://kwater-prize-draw-preview-git-fix-rehearsal-dc3e5e-week1profile.vercel.app
+          BASE_URL: https://kwater-prize-draw-preview-git-feat-auditori-055e6e-week1profile.vercel.app
           EXPECTED_EVENT_ID: 6833f277-746c-4033-9aef-30016cbba712
           USERS: "400"
         run: node tools/preview-registration-load-test.mjs
