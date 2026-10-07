@@ -44,7 +44,7 @@ Preview 브랜치 별칭은 다음 배포 때 다른 빌드를 가리킬 수 있
 
 조건을 통과하면 현재 `main`에서 복구 브랜치를 만들고, 기준 커밋의 앱 소스와 정적 파일을 복원한 뒤 복구 PR을 연다. `main`에 직접 push하거나 자동 병합하지 않는다. 복구 PR에도 기존 Actions와 Vercel Preview 검사를 실행하고, 지정된 후임 담당자가 검토·병합한다. 병합 시 Vercel의 기존 Git 연동이 `main`을 배포한다.
 
-복구 PR은 `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`를 덮어쓰지 않는다. 따라서 DB migration 소스, 승인 문서, 개발 규칙, 복구 Workflow 자체를 지우지 않는다.
+복구 PR은 `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`, `tools/preview-rollback-policy.mjs`를 덮어쓰지 않는다. 따라서 DB migration 소스, 승인 문서, 개발 규칙, 복구 Workflow와 그 실행 helper를 지우지 않는다.
 
 ## 대안과 선택 근거
 
