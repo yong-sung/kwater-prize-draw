@@ -186,10 +186,8 @@ function restoreBaseline() {
   const commit = spawnSync(
     "git",
     ["cat-file", "-e", `${baselineSha}^{commit}`],
-    {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+  );
   if (commit.error) throw commit.error;
   if (commit.status !== 0) {
     throw new Error("기준 commit을 찾을 수 없습니다.");
