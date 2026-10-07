@@ -28,7 +28,9 @@ const validRequest = {
 };
 
 const temporaryDirectories = [];
-const policyScriptPath = fileURLToPath(new URL("./preview-rollback-policy.mjs", import.meta.url));
+const policyScriptPath = fileURLToPath(
+  new URL("./preview-rollback-policy.mjs", import.meta.url),
+);
 
 function writeFixtureFile(root, path, contents) {
   const fullPath = join(root, path);
@@ -157,20 +159,21 @@ describe("restore path and staged file checks", () => {
     expect(git(root, "rev-parse", "preview-baseline")).toBe(baselineSha);
   });
 });
+
 describe("rollback policy CLI", () => {
-  it("writes a verified baseline SHA and rollback branch to GITHUB_OUTPUT", () => {
+  it("writes validated baseline outputs to GITHUB_OUTPUT", () => {
     const root = mkdtempSync(join(tmpdir(), "preview-rollback-cli-"));
     temporaryDirectories.push(root);
     git(root, "init");
     git(root, "checkout", "-b", "main");
     git(root, "config", "user.name", "Rollback Policy Test");
     git(root, "config", "user.email", "rollback-test@example.invalid");
-    writeFixtureFile(root, "src/app/page.tsx", "baseline app\\n");
+    writeFixtureFile(root, "src/app/page.tsx", "baseline app\n");
     git(root, "add", ".");
     git(root, "commit", "-m", "baseline");
     git(root, "tag", "preview-baseline-2026-10-07");
     const baselineSha = git(root, "rev-parse", "preview-baseline-2026-10-07");
-    writeFixtureFile(root, "src/app/page.tsx", "main app\\n");
+    writeFixtureFile(root, "src/app/page.tsx", "main app\n");
     git(root, "add", ".");
     git(root, "commit", "-m", "main changes");
     const outputPath = join(root, "workflow-output.txt");
@@ -187,7 +190,10 @@ describe("rollback policy CLI", () => {
     expect(result.status).toBe(0);
     expect(existsSync(outputPath)).toBe(true);
     expect(readFileSync(outputPath, "utf8")).toBe(
-      `baseline_sha=${baselineSha}\\nbranch_name=rollback/preview-baseline-456\\n`,
+      [
+        `baseline_sha=${baselineSha}`,
+        "branch_name=rollback/preview-baseline-456",
+      ].join("\n"),
     );
   });
 
@@ -198,7 +204,7 @@ describe("rollback policy CLI", () => {
     git(root, "checkout", "-b", "main");
     git(root, "config", "user.name", "Rollback Policy Test");
     git(root, "config", "user.email", "rollback-test@example.invalid");
-    writeFixtureFile(root, "src/app/page.tsx", "main app\\n");
+    writeFixtureFile(root, "src/app/page.tsx", "main app\n");
     git(root, "add", ".");
     git(root, "commit", "-m", "main");
     const outputPath = join(root, "workflow-output.txt");
