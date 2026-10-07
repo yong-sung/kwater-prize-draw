@@ -19,9 +19,7 @@ export default function RevealStage({
   onReveal: () => void;
   busy: boolean;
 }) {
-  const startLabel = nextPrizeName
-    ? `${nextPrizeName} 추첨 시작`
-    : "추첨 시작";
+  const startLabel = nextPrizeName ? `${nextPrizeName} 추첨 시작` : "추첨 시작";
 
   return (
     <section
