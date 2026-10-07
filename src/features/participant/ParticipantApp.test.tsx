@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import ParticipantApp from "./ParticipantApp";
@@ -31,8 +31,12 @@ describe("참석자 모바일 화면", () => {
 
     expect(await screen.findByLabelText(/참석자 성함/i)).toBeInTheDocument();
     expect(
-      screen.getByLabelText(/연락처 \(010-0000-0000\)/i),
+      screen.getByLabelText(/연락처 예시\(01012345678\)/i),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText(/연락처/i)).toHaveAttribute(
+      "pattern",
+      "^010\\d{8}$",
+    );
     expect(screen.getByLabelText(/소속부서명/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/동의합니다/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/동의하지 않습니다/i)).toBeInTheDocument();
@@ -77,7 +81,7 @@ describe("참석자 모바일 화면", () => {
 
     await screen.findByLabelText(/참석자 성함/i);
     await userEvent.type(screen.getByLabelText(/참석자 성함/i), "홍길동");
-    await userEvent.type(screen.getByLabelText(/연락처/i), "010-1234-5678");
+    await userEvent.type(screen.getByLabelText(/연락처/i), "01012345678");
     await userEvent.type(screen.getByLabelText(/소속부서명/i), "개발부");
     await userEvent.click(screen.getByLabelText(/동의합니다/i));
 
@@ -101,6 +105,7 @@ describe("참석자 모바일 화면", () => {
         JSON.stringify({
           state: "WINNER",
           name: "홍길동",
+          prizeCode: "TUMBLER",
           prizeName: "스마트 텀블러",
         }),
         { status: 200 },
@@ -109,7 +114,7 @@ describe("참석자 모바일 화면", () => {
 
     render(<ParticipantApp />);
 
-    expect(await screen.findByAltText("기뻐하는 방울이")).toBeInTheDocument();
+    expect(await screen.findByAltText("행복해하는 방울이")).toBeInTheDocument();
     expect(screen.getByText(/스마트 텀블러/)).toBeInTheDocument();
     expect(screen.getByText(/당첨/)).toBeInTheDocument();
   });
@@ -142,5 +147,39 @@ describe("참석자 모바일 화면", () => {
     expect(
       screen.queryByRole("button", { name: /경품 응모/i }),
     ).not.toBeInTheDocument();
+  });
+  it("행사 조회 실패를 숨기지 않고 재시도 안내를 표시한다", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ code: "SUPABASE_CONFIG_ERROR" }), {
+        status: 500,
+      }),
+    );
+
+    render(<ParticipantApp />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "행사 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    );
+  });
+  it("행사 조회가 시간 안에 끝나지 않으면 로딩 대신 오류를 표시한다", async () => {
+    vi.useFakeTimers();
+    fetchMock.mockImplementation(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          (init?.signal as AbortSignal | undefined)?.addEventListener(
+            "abort",
+            () => reject(new DOMException("Aborted", "AbortError")),
+          );
+        }),
+    );
+
+    render(<ParticipantApp />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(8_000);
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "행사 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    );
   });
 });

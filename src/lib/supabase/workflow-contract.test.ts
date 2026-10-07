@@ -67,7 +67,7 @@ describe("Task 3 Supabase CI 계약", () => {
     expect(script).toContain("KNOWN_REMOTE_VERSIONS");
     expect(script).toContain("20260911025534");
     expect(script).toContain("sameName.length > 1");
-    expect(script).toContain("EXPECTED_ASSERTIONS = 119");
+    expect(script).toContain("EXPECTED_ASSERTIONS = 127");
     expect(script).toContain("BEGIN;");
     expect(script).toContain("ROLLBACK;");
   });

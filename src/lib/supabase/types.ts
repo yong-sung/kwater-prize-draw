@@ -330,6 +330,14 @@ export type Database = {
         }[];
       };
       reveal_next: { Args: { p_event_id: string }; Returns: Json };
+      reveal_next_in_group: {
+        Args: {
+          p_event_id: string;
+          p_expected_prize_code:
+            Database["public"]["Enums"]["prize_code"] | null;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       event_status:

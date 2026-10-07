@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 const source = readFileSync("src/app/api/display/reveal/route.ts", "utf8");
 
 describe("display reveal route 계약", () => {
-  it("display 세션만 사용해 reveal_next를 호출한다", () => {
+  it("display 세션만 사용해 reveal_next_in_group을 호출한다", () => {
     expect(source).toContain("requireDisplaySession");
-    expect(source).toContain('rpc("reveal_next"');
+    expect(source).toContain('"reveal_next_in_group"');
     expect(source).not.toContain("requireAdmin");
   });
 

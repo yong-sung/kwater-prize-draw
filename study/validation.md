@@ -116,3 +116,45 @@ supabase link는 API key, Auth, Storage, Realtime, 네트워크와 pooler 설정
 - 전체 테스트 98 PASS, 2 SKIP; Typecheck, ESLint, Prettier, build, diff check, Secret 검사 PASS
 - 운영 DB와 실제 개인정보 복호화는 사용하지 않고 더미 API 흐름만 검증했다.
 - Task 9는 시작하지 않았다.
+
+## 강연장 리허설 준비
+
+| 항목                           | 상태           | 결과                                                               |
+| ------------------------------ | -------------- | ------------------------------------------------------------------ |
+| 강연장 한국어 문구             | PASS           | 로딩·조회 실패·공개 실패 문구 회귀 테스트                          |
+| 응모 재개 UI/API               | PASS           | CLOSED 전용 UI, 서버 상태 검증과 RPC 호출 계약                     |
+| Preview 초기화 guard/API       | PASS           | Production·변수 누락·프로젝트 불일치 시 RPC 미호출                 |
+| DB 동시성                      | NOT TESTED     | cron·초기화 잠금 순서 회귀 계약은 PASS, 실제 DB 동시 실행은 미검증 |
+| 개인정보 삭제와 설정 보존      | NOT TESTED     | pgTAP 계약을 작성했으나 DB 실행 검증 전                            |
+| 단위 테스트                    | PASS           | 165 PASS, 2 SKIP                                                   |
+| Typecheck                      | PASS           | 오류 없음                                                          |
+| ESLint                         | PASS           | 오류·경고 없음                                                     |
+| Production build               | PASS           | Next.js 16.3.4 build 성공                                          |
+| Playwright 관리자 화면         | PASS           | 375x812, 390x844, 1440x900 3건 통과                                |
+| Prettier 전체 기준선           | FAIL           | 저장소 기존 101개 파일이 비정형; 이번 변경 파일은 별도 포맷 PASS   |
+| 로컬 Supabase migration/pgTAP  | BLOCKED        | Docker와 Podman이 설치되지 않음                                    |
+| Preview Supabase/Vercel 리허설 | BLOCKED        | 실제 런타임 설정과 Vercel·Supabase 연결 정보가 없음                |
+| 전체 실제 행사 E2E             | BLOCKED        | 실행 가능한 격리 DB와 Preview 연결이 없음                          |
+| 실제 스마트폰·프로젝터 QR      | NOT TESTED     | Preview URL이 생성되지 않아 외부 기기 확인 불가                    |
+| Production 변경                | NOT APPLICABLE | DB·환경변수·배포·push 모두 수행하지 않음                           |
+
+### Preview migration 허용 목록 보정 (2026-09-29)
+
+| 항목                         | 상태           | 결과                                         |
+| ---------------------------- | -------------- | -------------------------------------------- |
+| 승인 migration 5개 순서 검증 | PASS           | 실제 디렉터리의 고정 목록과 순서가 일치      |
+| 미승인 migration 거부        | PASS           | 같은 개수라도 파일명 또는 순서가 다르면 실패 |
+| pgTAP 기대값 동기화          | PASS           | 리허설 계약 8개를 포함해 127개로 보정        |
+| 전체 단위·계약 테스트        | PASS           | 167 PASS, 2 SKIP                             |
+| Typecheck                    | PASS           | 오류 없음                                    |
+| ESLint                       | PASS           | 오류·경고 없음                               |
+| Production build             | PASS           | Next.js 16.3.4 build 성공                    |
+| 외부 API·DB·배포·push        | NOT APPLICABLE | 실행하지 않음                                |
+
+## 2026-09-30 Preview 리허설 화면 점검
+
+- PASS: 참가자 행사 조회의 HTTP 실패와 8초 초과를 오류 화면으로 표시하는 회귀 테스트.
+- PASS: 강연장 세션 조회의 서버 오류와 8초 초과를 오류 화면으로 표시하는 회귀 테스트.
+- PASS: `reset_rehearsal_event` 계약을 초기화 후 즉시 응모 가능한 `OPEN` 복귀로 보정했다. 로컬 DB 컨테이너가 없어 pgTAP은 미실행이다.
+- BLOCKED: 기존 Preview `kwater-prize-draw-preview-4lj2vz69k-week1profile.vercel.app`에 `PUBLISHED` 행사와 참석자 1명이 확인됐다. 데이터 보호 조건에 따라 migration, 초기화, 배포 및 가짜 데이터 E2E를 실행하지 않았다.
+- NOT TESTED: 실제 Preview의 관리자 로그인, 응모·중복 차단, 추첨·순차 공개, 결과 공유, 초기화 후 재응모. 빈 개발 행사에서만 실행한다.

@@ -13,14 +13,23 @@ export default function QrStage({ title }: { title: string }) {
       <h1 className="text-4xl font-bold text-center leading-tight sm:text-5xl">
         {title}
       </h1>
-      <QRCodeSVG
-        value={url}
-        size={360}
-        bgColor="#ffffff"
-        fgColor="#0f172a"
-        includeMargin
-        aria-label="응모 페이지 QR 코드"
-      />
+      <div className="rounded-[2rem] bg-white p-4 shadow-2xl ring-4 ring-cyan-300/30">
+        <QRCodeSVG
+          value={url}
+          size={360}
+          level="H"
+          bgColor="#ffffff"
+          fgColor="#0f172a"
+          includeMargin
+          imageSettings={{
+            src: "/images/bangwool-happy.png",
+            width: 96,
+            height: 96,
+            excavate: true,
+          }}
+          aria-label="응모 페이지 QR 코드"
+        />
+      </div>
       <p className="text-xl">QR코드를 스캔해 경품에 응모하세요</p>
     </section>
   );

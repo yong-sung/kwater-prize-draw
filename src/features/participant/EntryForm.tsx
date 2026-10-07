@@ -51,7 +51,7 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
 
         <div className="flex flex-col gap-1">
           <label htmlFor="phone" className="font-semibold text-gray-700">
-            연락처 (010-0000-0000)
+            연락처 예시(01012345678)
           </label>
           <input
             id="phone"
@@ -62,7 +62,7 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
             onChange={(e) => setPhone(e.target.value)}
             className="border p-3 rounded-lg min-h-[56px] bg-[#F5F7FA]"
             required
-            pattern="^010-\d{4}-\d{4}$"
+            pattern="^010\d{8}$"
           />
         </div>
 
@@ -84,6 +84,14 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
           <p className="font-semibold text-gray-700">
             개인정보 수집 및 이용 동의
           </p>
+          <div className="rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-600">
+            <p>동의하지 않을 경우, 설문 참여가 제한될 수 있습니다.</p>
+            <ul className="mt-2 space-y-1">
+              <li>수집 및 이용하는 개인정보 항목: 이름, 연락처, 부서</li>
+              <li>수집 및 이용 목적: 참석자 사전조회 및 이벤트 진행</li>
+              <li>보유 및 이용기간: 당첨자 발표 후 1주일간 보관</li>
+            </ul>
+          </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="radio"

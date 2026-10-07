@@ -6,9 +6,11 @@ import {
 } from "node:fs";
 import { basename, join } from "node:path";
 
+import { assertExpectedMigrationFiles } from "./supabase-migration-policy.mjs";
+
 const API_ORIGIN = "https://api.supabase.com";
 const EXPECTED_PROJECT_NAME = "kwater-prize-draw-dev";
-const EXPECTED_ASSERTIONS = 119;
+const EXPECTED_ASSERTIONS = 127;
 const PROJECT_REF_PATTERN = /^[a-z0-9]{20}$/;
 const MIGRATION_FILE_PATTERN = /^(\d{14})_([a-z0-9_]+)\.sql$/;
 const KNOWN_REMOTE_VERSIONS = new Map([
@@ -239,7 +241,7 @@ expected_indexes(name) as (
 ),
 expected_functions(signature) as (
   values ('execute_draw(uuid)'), ('draw_replacement(uuid,uuid,text)'),
-         ('reveal_next(uuid)'), ('publish_results(uuid)'),
+         ('reveal_next(uuid)'), ('reveal_next_in_group(uuid,public.prize_code)'), ('publish_results(uuid)'),
          ('purge_expired_events()'),
          ('record_admin_login_failure(text,timestamp with time zone)')
 )
@@ -303,27 +305,24 @@ async function main() {
   }
 
   const migrationDirectory = join(process.cwd(), "supabase", "migrations");
-  const localMigrations = readdirSync(migrationDirectory)
+  const migrationFiles = readdirSync(migrationDirectory)
     .filter((name) => name.endsWith(".sql"))
-    .sort()
-    .map((file) => {
-      const match = MIGRATION_FILE_PATTERN.exec(file);
-      if (!match)
-        throw new Error(
-          "migration 파일명이 승인된 timestamp_name 형식이 아닙니다.",
-        );
-      return {
-        file,
-        localVersion: match[1],
-        name: basename(file, ".sql"),
-        sql: readFileSync(join(migrationDirectory, file), "utf8"),
-      };
-    });
-  if (localMigrations.length !== 4)
-    throw new Error(
-      "Task 3 migration 세 개와 Task 4 보정 migration 한 개여야 합니다.",
-    );
+    .sort();
+  assertExpectedMigrationFiles(migrationFiles);
 
+  const localMigrations = migrationFiles.map((file) => {
+    const match = MIGRATION_FILE_PATTERN.exec(file);
+    if (!match)
+      throw new Error(
+        "migration 파일명이 승인된 timestamp_name 형식이 아닙니다.",
+      );
+    return {
+      file,
+      localVersion: match[1],
+      name: basename(file, ".sql"),
+      sql: readFileSync(join(migrationDirectory, file), "utf8"),
+    };
+  });
   const project = await managementRequest(projectRef, token, "");
   if (project?.name !== EXPECTED_PROJECT_NAME) {
     throw new Error("대상이 승인된 전용 개발 프로젝트가 아닙니다.");

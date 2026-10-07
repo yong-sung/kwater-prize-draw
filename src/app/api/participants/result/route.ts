@@ -11,6 +11,12 @@ function json(body: object, status: number) {
   });
 }
 
+type Relation<T> = T | T[] | null;
+
+function firstRelation<T>(value: Relation<T>): T | null {
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
 export async function GET(request: Request) {
   const authHeader = request.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -25,20 +31,11 @@ export async function GET(request: Request) {
     return json({ code: "INTERNAL_ERROR", error: "서버 설정 오류" }, 500);
   }
 
-  const tokenHash = hashAccessToken(token, tokenHashSecret);
   const supabase = createServerClient();
-
   const { data: participant, error } = await supabase
     .from("participants")
-    .select(
-      `
-      id, 
-      name_ciphertext,
-      events ( status ),
-      draw_results ( prizes ( name ) )
-    `,
-    )
-    .eq("access_token_hash", tokenHash)
+    .select("id,name_ciphertext,events(status)")
+    .eq("access_token_hash", hashAccessToken(token, tokenHashSecret))
     .single();
 
   if (error || !participant) {
@@ -48,41 +45,48 @@ export async function GET(request: Request) {
     );
   }
 
-  const event = Array.isArray(participant.events)
-    ? participant.events[0]
-    : participant.events;
-  const eventStatus = event?.status;
+  const event = firstRelation(participant.events);
+  if (!event) {
+    return json(
+      { code: "EVENT_NOT_FOUND", error: "행사를 찾을 수 없습니다." },
+      404,
+    );
+  }
 
-  if (
-    eventStatus === "DRAWN" ||
-    eventStatus === "REVEALING" ||
-    eventStatus === "REVEALED"
-  ) {
+  if (["DRAWN", "REVEALING", "REVEALED"].includes(event.status)) {
     return json({ state: "WAITING" }, 200);
   }
 
-  if (eventStatus === "PUBLISHED") {
+  if (event.status === "PUBLISHED") {
     const name = decryptPii(participant.name_ciphertext, piiKey);
-    const hasPrize =
-      participant.draw_results &&
-      (Array.isArray(participant.draw_results)
-        ? participant.draw_results.length > 0
-        : true);
+    const { data: drawResult, error: resultError } = await supabase
+      .from("draw_results")
+      .select("prizes!draw_results_prize_id_fkey(code,name)")
+      .eq("participant_id", participant.id)
+      .limit(1)
+      .maybeSingle();
 
-    if (hasPrize) {
-      const drawResult = Array.isArray(participant.draw_results)
-        ? participant.draw_results[0]
-        : participant.draw_results;
-      const prize = Array.isArray(drawResult?.prizes)
-        ? drawResult.prizes[0]
-        : drawResult?.prizes;
-      const prizeName = prize?.name;
-      return json({ state: "WINNER", name, prizeName }, 200);
-    } else {
-      return json({ state: "NOT_WINNER", name }, 200);
+    if (resultError) {
+      return json(
+        { code: "RESULT_LOAD_FAILED", error: "결과를 불러오지 못했습니다." },
+        500,
+      );
     }
+
+    const prize = firstRelation(drawResult?.prizes ?? null);
+    return prize
+      ? json(
+          {
+            state: "WINNER",
+            name,
+            prizeCode: prize.code,
+            prizeName: prize.name,
+          },
+          200,
+        )
+      : json({ state: "NOT_WINNER", name }, 200);
   }
 
-  // 그 외 상태 (SETUP, OPEN, CLOSED)
+  // 응모 토큰이 있는 사용자는 행사 상태와 무관하게 개인 대기 화면을 유지한다.
   return json({ state: "WAITING" }, 200);
 }

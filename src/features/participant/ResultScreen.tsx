@@ -1,10 +1,16 @@
+import Image from "next/image";
+import type { PrizeCode } from "@/lib/domain/types";
+import { prizeImagePath } from "@/lib/domain/prize-images";
+
 type ResultScreenProps = {
   isWinner: boolean;
+  prizeCode?: PrizeCode;
   prizeName?: string;
 };
 
 export default function ResultScreen({
   isWinner,
+  prizeCode,
   prizeName,
 }: ResultScreenProps) {
   return (
@@ -12,9 +18,18 @@ export default function ResultScreen({
       <div className="card max-w-[720px] w-full p-8 bg-white shadow-sm rounded-[24px] flex flex-col items-center">
         {isWinner ? (
           <>
+            {prizeCode && prizeName ? (
+              <Image
+                src={prizeImagePath(prizeCode)}
+                alt={prizeName + " 경품 사진"}
+                width={480}
+                height={360}
+                className="mb-6 h-64 w-full object-contain"
+              />
+            ) : null}
             <Image
               src="/images/bangwool-happy.png"
-              alt="기뻐하는 방울이"
+              alt="행복해하는 방울이"
               width={192}
               height={192}
               className="w-48 h-48 object-contain mb-6"
@@ -46,4 +61,3 @@ export default function ResultScreen({
     </div>
   );
 }
-import Image from "next/image";

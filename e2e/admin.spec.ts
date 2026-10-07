@@ -10,14 +10,22 @@ for (const viewport of [
   }) => {
     await page.setViewportSize(viewport);
     let status = "OPEN";
-    await page.route("**/api/auth/login", async (route) =>
-      route.fulfill({
+    let loggedIn = false;
+    await page.route("**/api/auth/login", async (route) => {
+      loggedIn = true;
+      return route.fulfill({
         status: 200,
         contentType: "application/json",
         body: "{}",
-      }),
-    );
+      });
+    });
     await page.route("**/api/admin/event", async (route) => {
+      if (!loggedIn)
+        return route.fulfill({
+          status: 401,
+          contentType: "application/json",
+          body: "{}",
+        });
       if (route.request().method() === "PATCH") {
         const body = route.request().postDataJSON();
         status = body.status ?? status;
@@ -27,7 +35,7 @@ for (const viewport of [
           body: JSON.stringify({
             event: {
               id: "00000000-0000-4000-8000-000000000001",
-              name: body.title ?? "더미 행사",
+              title: body.title ?? "더미 행사",
               status,
             },
           }),
@@ -39,7 +47,7 @@ for (const viewport of [
         body: JSON.stringify({
           event: {
             id: "00000000-0000-4000-8000-000000000001",
-            name: "더미 행사",
+            title: "더미 행사",
             status,
           },
           participants: 1,

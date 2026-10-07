@@ -1,8 +1,11 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { useEventSignal } from "@/features/participant/useEventSignal";
 type Participant = {
   id: string;
   event_id: string;
+  name: string;
+  phone: string;
   department: string;
   disqualified_at?: string | null;
 };
@@ -27,8 +30,10 @@ export function AdminDashboard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [title, setTitle] = useState("");
-  const load = useCallback(async () => {
-    setLoading(true);
+  const [resetTitle, setResetTitle] = useState("");
+  const [resetConfirmation, setResetConfirmation] = useState("");
+  const load = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     try {
       const r = await fetch("/api/admin/event");
       if (!r.ok) throw Error();
@@ -36,7 +41,7 @@ export function AdminDashboard() {
       setData(d);
       setTitle(d.event?.title ?? "");
       if (d.event) {
-        setDetailLoading(true);
+        if (showLoading) setDetailLoading(true);
         const [p, q] = await Promise.all([
           fetch("/api/admin/participants"),
           fetch(`/api/admin/results?eventId=${encodeURIComponent(d.event.id)}`),
@@ -48,14 +53,15 @@ export function AdminDashboard() {
     } catch {
       setError("관리자 정보를 불러오지 못했습니다.");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
       setDetailLoading(false);
     }
   }, []);
   useEffect(() => {
-    const timer = window.setTimeout(() => void load(), 0);
+    const timer = window.setTimeout(() => void load(true), 0);
     return () => window.clearTimeout(timer);
   }, [load]);
+  useEventSignal({ eventId: data?.event?.id, onRefresh: load });
   async function call(path: string, body: object, next?: string) {
     if (busy || !data) return;
     setBusy(true);
@@ -114,7 +120,7 @@ export function AdminDashboard() {
           설정 저장
         </button>
       </form>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-4">
         <button
           disabled={busy || e.status !== "OPEN"}
           onClick={() =>
@@ -127,6 +133,19 @@ export function AdminDashboard() {
           className="rounded-xl bg-amber-600 p-4 font-semibold text-white disabled:bg-slate-300"
         >
           응모 마감
+        </button>
+        <button
+          disabled={busy || e.status !== "CLOSED"}
+          onClick={() =>
+            void call(
+              "/api/admin/event",
+              { eventId: e.id, status: "OPEN", expectedStatus: "CLOSED" },
+              "OPEN",
+            )
+          }
+          className="rounded-xl bg-cyan-700 p-4 font-semibold text-white disabled:bg-slate-300"
+        >
+          응모 재개
         </button>
         <button
           disabled={busy || e.status !== "CLOSED"}
@@ -145,6 +164,62 @@ export function AdminDashboard() {
           결과 발표
         </button>
       </div>
+      <section className="rounded-2xl border border-red-200 bg-red-50 p-5">
+        <h2 className="text-lg font-semibold text-red-900">
+          Preview 리허설 초기화
+        </h2>
+        <p className="mt-1 text-sm text-red-800">
+          참석자 개인정보와 추첨·공개 결과를 삭제하고 행사·경품 설정은
+          유지합니다.
+        </p>
+        <label
+          className="mt-3 block text-sm font-semibold"
+          htmlFor="reset-title"
+        >
+          행사명 확인
+        </label>
+        <input
+          id="reset-title"
+          value={resetTitle}
+          onChange={(x) => setResetTitle(x.target.value)}
+          className="mt-1 min-h-11 w-full rounded-xl border px-3"
+        />
+        <label
+          className="mt-3 block text-sm font-semibold"
+          htmlFor="reset-confirmation"
+        >
+          확인 문구
+        </label>
+        <input
+          id="reset-confirmation"
+          value={resetConfirmation}
+          onChange={(x) => setResetConfirmation(x.target.value)}
+          placeholder="리허설 초기화"
+          className="mt-1 min-h-11 w-full rounded-xl border px-3"
+        />
+        <button
+          type="button"
+          disabled={
+            busy ||
+            resetTitle !== e.title ||
+            resetConfirmation !== "리허설 초기화"
+          }
+          onClick={() =>
+            void call(
+              "/api/admin/rehearsal-reset",
+              {
+                eventId: e.id,
+                eventTitle: resetTitle,
+                confirmation: resetConfirmation,
+              },
+              "SETUP",
+            )
+          }
+          className="mt-3 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white disabled:bg-slate-300"
+        >
+          리허설 데이터 초기화
+        </button>
+      </section>
       {error && (
         <p role="alert" className="text-red-700">
           {error}
@@ -158,7 +233,10 @@ export function AdminDashboard() {
           <ul className="divide-y">
             {participants.map((p) => (
               <li key={p.id} className="flex justify-between py-3 text-sm">
-                <span>{p.department || "소속 미입력"}</span>
+                <span>
+                  {p.name || "성함 미입력"} · {p.phone || "연락처 미입력"} ·{" "}
+                  {p.department || "소속 미입력"}
+                </span>
                 <span>{p.disqualified_at ? "제외됨" : "응모"}</span>
               </li>
             ))}
