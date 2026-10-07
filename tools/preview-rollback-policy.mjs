@@ -16,7 +16,7 @@ const PROTECTED_FILES = ["AGENTS.md"];
  */
 
 /**
- * Rejects any request that could restore from an unintended repository or commit.
+ * Rejects requests that restore from an unintended repository or commit.
  * @param {RollbackRequest} input
  * @returns {{ baselineSha: string, branchName: string }}
  */
@@ -59,7 +59,7 @@ export function validateRollbackRequest(input) {
 }
 
 /**
- * Git pathspecs that restore the repository tree while preserving operator-owned paths.
+ * Git pathspecs restore the tree while preserving operator-owned paths.
  * @returns {string[]}
  */
 export function buildRestorePathspec() {
@@ -94,7 +94,7 @@ export function validateStagedPaths(paths) {
       normalized.startsWith("/") ||
       normalized.split("/").includes("..") ||
       PROTECTED_FILES.includes(normalized) ||
-      PROTECTED_ROOTS.some((root) => normalized === root || normalized.startsWith(`${root}/`))
+      PROTECTED_ROOTS.includes(normalized.split("/")[0])
     ) {
       throw new Error(`보호 경로가 복구 변경에 포함되어 있습니다: ${path}`);
     }
