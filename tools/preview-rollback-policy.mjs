@@ -183,7 +183,10 @@ function restoreBaseline() {
     throw new Error("기준 SHA는 40자리 hexadecimal이어야 합니다.");
   }
 
-  const commit = spawnSync("git", ["cat-file", "-e", `${baselineSha}^{commit}`], {
+  const commit = spawnSync(
+    "git",
+    ["cat-file", "-e", `${baselineSha}^{commit}`],
+    {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -217,7 +220,10 @@ function main(command) {
   throw new Error("지원하지 않는 복구 검증 명령입니다.");
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === resolve(process.argv[1])
+) {
   try {
     main(process.argv[2]);
   } catch (error) {

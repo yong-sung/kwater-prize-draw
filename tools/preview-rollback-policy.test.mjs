@@ -220,7 +220,9 @@ describe("rollback policy CLI", () => {
       "baseline app\n",
     );
     expect(readFileSync(join(root, "docs/keep.md"), "utf8")).toBe("main docs\n");
-    expect(git(root, "diff", "--cached", "--name-only")).toBe("src/app/page.tsx");
+    expect(git(root, "diff", "--cached", "--name-only")).toBe(
+      "src/app/page.tsx",
+    );
   });
 
   it("fails before branch or PR work when no files are staged", () => {

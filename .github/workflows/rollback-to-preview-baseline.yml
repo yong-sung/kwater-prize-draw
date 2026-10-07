@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       confirmation:
-        description: '확인 문구: PREVIEW BASELINE 복구 PR 생성'
+        description: "확인 문구: PREVIEW BASELINE 복구 PR 생성"
         required: true
         type: string
       baseline_sha:
-        description: 'preview-baseline-2026-10-07 tag가 가리키는 전체 commit SHA'
+        description: preview-baseline-2026-10-07 tag가 가리키는 전체 commit SHA
         required: true
         type: string
 
