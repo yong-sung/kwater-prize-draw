@@ -219,7 +219,9 @@ describe("rollback policy CLI", () => {
     expect(readFileSync(join(root, "src/app/page.tsx"), "utf8")).toBe(
       "baseline app\n",
     );
-    expect(readFileSync(join(root, "docs/keep.md"), "utf8")).toBe("main docs\n");
+    expect(readFileSync(join(root, "docs/keep.md"), "utf8")).toBe(
+      "main docs\\n",
+    );
     expect(git(root, "diff", "--cached", "--name-only")).toBe(
       "src/app/page.tsx",
     );
