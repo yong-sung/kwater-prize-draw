@@ -28,7 +28,9 @@ describe("RevealStage", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "당첨자 발표" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "당첨자 발표" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("기계식 키보드 추첨 시작")).toBeInTheDocument();
     expect(screen.queryByText("공개된 당첨자")).not.toBeInTheDocument();
 
