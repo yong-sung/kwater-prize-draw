@@ -25,7 +25,7 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
   return (
     <div className="card max-w-[720px] mx-auto w-full p-5 bg-white shadow-sm rounded-[24px]">
       <h1 className="text-xl font-bold mb-6 text-center text-[#08B9D6]">
-        경품 응모
+        제4차 AI 인사이트 라운드 경품 응모
       </h1>
 
       {error && (
@@ -51,7 +51,7 @@ export default function EntryForm({ onSubmit, error }: EntryFormProps) {
 
         <div className="flex flex-col gap-1">
           <label htmlFor="phone" className="font-semibold text-gray-700">
-            연락처 (01012345678)
+            연락처 예시(01012345678)
           </label>
           <input
             id="phone"
