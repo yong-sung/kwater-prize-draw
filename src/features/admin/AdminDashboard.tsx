@@ -195,60 +195,60 @@ export function AdminDashboard() {
       </div>
       {data.rehearsalResetAllowed && (
         <section className="rounded-2xl border border-red-200 bg-red-50 p-5">
-        <h2 className="text-lg font-semibold text-red-900">
-          Preview 리허설 초기화
-        </h2>
-        <p className="mt-1 text-sm text-red-800">
-          참석자 개인정보와 추첨·공개 결과를 삭제하고 행사·경품 설정은
-          유지합니다.
-        </p>
-        <label
-          className="mt-3 block text-sm font-semibold"
-          htmlFor="reset-title"
-        >
-          행사명 확인
-        </label>
-        <input
-          id="reset-title"
-          value={resetTitle}
-          onChange={(x) => setResetTitle(x.target.value)}
-          className="mt-1 min-h-11 w-full rounded-xl border px-3"
-        />
-        <label
-          className="mt-3 block text-sm font-semibold"
-          htmlFor="reset-confirmation"
-        >
-          확인 문구
-        </label>
-        <input
-          id="reset-confirmation"
-          value={resetConfirmation}
-          onChange={(x) => setResetConfirmation(x.target.value)}
-          placeholder="리허설 초기화"
-          className="mt-1 min-h-11 w-full rounded-xl border px-3"
-        />
-        <button
-          type="button"
-          disabled={
-            busy ||
-            resetTitle !== e.title ||
-            resetConfirmation !== "리허설 초기화"
-          }
-          onClick={() =>
-            void call(
-              "/api/admin/rehearsal-reset",
-              {
-                eventId: e.id,
-                eventTitle: resetTitle,
-                confirmation: resetConfirmation,
-              },
-              "SETUP",
-            )
-          }
-          className="mt-3 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white disabled:bg-slate-300"
-        >
-          리허설 데이터 초기화
-        </button>
+          <h2 className="text-lg font-semibold text-red-900">
+            Preview 리허설 초기화
+          </h2>
+          <p className="mt-1 text-sm text-red-800">
+            참석자 개인정보와 추첨·공개 결과를 삭제하고 행사·경품 설정은
+            유지합니다.
+          </p>
+          <label
+            className="mt-3 block text-sm font-semibold"
+            htmlFor="reset-title"
+          >
+            행사명 확인
+          </label>
+          <input
+            id="reset-title"
+            value={resetTitle}
+            onChange={(x) => setResetTitle(x.target.value)}
+            className="mt-1 min-h-11 w-full rounded-xl border px-3"
+          />
+          <label
+            className="mt-3 block text-sm font-semibold"
+            htmlFor="reset-confirmation"
+          >
+            확인 문구
+          </label>
+          <input
+            id="reset-confirmation"
+            value={resetConfirmation}
+            onChange={(x) => setResetConfirmation(x.target.value)}
+            placeholder="리허설 초기화"
+            className="mt-1 min-h-11 w-full rounded-xl border px-3"
+          />
+          <button
+            type="button"
+            disabled={
+              busy ||
+              resetTitle !== e.title ||
+              resetConfirmation !== "리허설 초기화"
+            }
+            onClick={() =>
+              void call(
+                "/api/admin/rehearsal-reset",
+                {
+                  eventId: e.id,
+                  eventTitle: resetTitle,
+                  confirmation: resetConfirmation,
+                },
+                "SETUP",
+              )
+            }
+            className="mt-3 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white disabled:bg-slate-300"
+          >
+            리허설 데이터 초기화
+          </button>
         </section>
       )}
       {error && (
