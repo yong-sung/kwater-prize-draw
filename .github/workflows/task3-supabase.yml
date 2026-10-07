@@ -63,6 +63,11 @@ jobs:
         run: npm run typecheck
       - name: ESLint 검사
         run: npm run lint
+      - name: 임시 Prettier 출력 확인
+        run: |
+          npx prettier --write src/app/api/display/event/route.ts src/features/display/RevealStage.test.tsx
+          cat src/app/api/display/event/route.ts
+          cat src/features/display/RevealStage.test.tsx
       - name: Prettier 검사
         run: npm run format:check
       - name: Production build
@@ -78,7 +83,7 @@ jobs:
           fi
       - name: 실패 시 안전한 컨테이너 상태 출력
         if: failure()
-        run: docker ps -a --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
+        run: docker ps -a --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}'
       - name: Supabase 컨테이너 정리
         if: always()
         run: npm exec supabase -- stop --no-backup
