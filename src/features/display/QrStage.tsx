@@ -10,7 +10,9 @@ export default function QrStage({ title }: { title: string }) {
       aria-label="응모 QR"
       className="flex min-h-[100dvh] flex-col items-center justify-center gap-8 bg-slate-950 p-8 text-white"
     >
-      <p className="text-2xl font-semibold">{title}</p>
+      <h1 className="text-4xl font-bold text-center leading-tight sm:text-5xl">
+        {title}
+      </h1>
       <QRCodeSVG
         value={url}
         size={360}
