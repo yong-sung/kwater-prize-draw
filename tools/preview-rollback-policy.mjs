@@ -104,3 +104,96 @@ export function validateStagedPaths(paths) {
 
   return [...new Set(normalizedPaths)];
 }
+
+import { appendFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+function runGit(args) {
+  const result = spawnSync("git", args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || `git ${args[0]} failed.`);
+  }
+  return result.stdout.trim();
+}
+
+function writeGithubOutput(values) {
+  const outputPath = process.env.GITHUB_OUTPUT;
+  if (!outputPath) {
+    throw new Error("GITHUB_OUTPUT 경로가 없습니다.");
+  }
+  const lines = Object.entries(values).map(([key, value]) => `${key}=${value}`);
+  appendFileSync(outputPath, `${lines.join("\n")}\n`, "utf8");
+}
+
+function validateRequestFromEnvironment() {
+  const tagSha = runGit([
+    "rev-parse",
+    "--verify",
+    "refs/tags/preview-baseline-2026-10-07^{commit}",
+  ]);
+  const ancestry = spawnSync(
+    "git",
+    ["merge-base", "--is-ancestor", tagSha, "HEAD"],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+  );
+  if (ancestry.error) throw ancestry.error;
+  if (ancestry.status !== 0 && ancestry.status !== 1) {
+    throw new Error(ancestry.stderr.trim() || "기준 commit 조상을 확인할 수 없습니다.");
+  }
+
+  const validated = validateRollbackRequest({
+    repository: process.env.GITHUB_REPOSITORY,
+    ref: process.env.GITHUB_REF,
+    confirmation: process.env.ROLLBACK_CONFIRMATION,
+    requestedSha: process.env.ROLLBACK_BASELINE_SHA,
+    tagSha,
+    isAncestor: ancestry.status === 0,
+    runId: process.env.GITHUB_RUN_ID,
+  });
+  writeGithubOutput({
+    baseline_sha: validated.baselineSha,
+    branch_name: validated.branchName,
+  });
+}
+
+function validateStagedChanges() {
+  const result = spawnSync("git", ["diff", "--cached", "--name-only", "-z"], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || "staged 파일 목록을 확인할 수 없습니다.");
+  }
+
+  const paths = result.stdout.split("\0").filter(Boolean);
+  const validatedPaths = validateStagedPaths(paths);
+  writeGithubOutput({ staged_count: validatedPaths.length });
+}
+
+function main(command) {
+  if (command === "validate-request") {
+    validateRequestFromEnvironment();
+    return;
+  }
+  if (command === "validate-staged") {
+    validateStagedChanges();
+    return;
+  }
+  throw new Error("지원하지 않는 복구 검증 명령입니다.");
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  try {
+    main(process.argv[2]);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
+}
