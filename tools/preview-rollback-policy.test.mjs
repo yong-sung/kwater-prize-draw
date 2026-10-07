@@ -115,7 +115,7 @@ describe("restore path and staged file checks", () => {
 
     expect(readFileSync(join(root, "src/app/page.tsx"), "utf8")).toBe("baseline app\n");
     expect(readFileSync(join(root, "public/logo.svg"), "utf8")).toBe("baseline asset\n");
-    expect(readFileSync(join(root, "src/app/new-page.tsx"), "utf8")).toBe("new app file\n");
+    expect(existsSync(join(root, "src/app/new-page.tsx"))).toBe(false);
     for (const path of protectedPaths) {
       expect(readFileSync(join(root, path), "utf8")).toBe("main protected\n");
     }
