@@ -5,6 +5,11 @@ const mocks = vi.hoisted(() => ({
   from: vi.fn(),
   decryptPii: vi.fn(),
 }));
+const decryptedValues: Record<string, string> = {
+  "dummy-name-ciphertext": "홍길동",
+  "dummy-phone-ciphertext": "01012345678",
+  "dummy-department-ciphertext": "디지털협업",
+};
 vi.mock("@/lib/security/admin-session", () => ({
   requireAdmin: mocks.requireAdmin,
 }));
@@ -18,12 +23,7 @@ describe("GET /api/admin/participants", () => {
     vi.stubEnv("PII_ENCRYPTION_KEY", "dummy-key");
     mocks.requireAdmin.mockResolvedValue(undefined);
     mocks.decryptPii.mockImplementation(
-      (ciphertext: string) =>
-        (({
-          "dummy-name-ciphertext": "홍길동",
-          "dummy-phone-ciphertext": "01012345678",
-          "dummy-department-ciphertext": "디지털협업",
-        }) as Record<string, string>)[ciphertext] ?? "",
+      (ciphertext: string) => decryptedValues[ciphertext] ?? "",
     );
     mocks.from.mockReturnValue({
       select: vi.fn().mockReturnValue({
