@@ -13,7 +13,7 @@ describe("display event route 계약", () => {
 
   it("다음 추첨 경품명을 공개하지 않은 결과에서 결정한다", () => {
     expect(source).toContain('nextPrizeName');
-    expect(source).toContain('.is("revealed_at", "is", null)');
+    expect(source).toContain('.is("revealed_at", null)');
     expect(source).toContain("reveal_position");
   });
 
