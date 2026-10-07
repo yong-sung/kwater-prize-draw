@@ -42,7 +42,7 @@ tag가 없거나 SHA·코드 트리가 맞지 않으면 복구 workflow를 실�
 ## 생성된 PR 확인 및 병합
 
 1. Workflow가 출력한 복구 PR을 엽니다.
-2. 변경 경로를 확인합니다. `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`는 복구 대상에서 제외됩니다.
+2. 변경 경로를 확인합니다. `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`, `tools/preview-rollback-policy.mjs`는 복구 대상에서 제외됩니다.
 3. GitHub Actions 검사가 통과하고 Vercel Preview를 확인할 때까지 병합하지 않습니다.
 4. 후임 담당자가 diff와 Preview를 검토·승인한 뒤 PR을 직접 병합합니다. Workflow는 main에 직접 push하거나 자동 병합하지 않습니다.
 5. 잘못된 복구 PR을 병합했다면 해당 PR을 다시 revert하는 별도의 PR을 만듭니다.
