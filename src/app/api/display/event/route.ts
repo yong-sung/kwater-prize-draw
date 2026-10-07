@@ -82,8 +82,7 @@ export async function GET() {
         const rightOrder =
           REVEAL_PRIORITY.get(right.prize.code) ?? Number.MAX_SAFE_INTEGER;
         return (
-          leftOrder - rightOrder ||
-          left.revealPosition - right.revealPosition
+          leftOrder - rightOrder || left.revealPosition - right.revealPosition
         );
       });
     nextPrizeName = upcoming[0]?.prize.name ?? null;
