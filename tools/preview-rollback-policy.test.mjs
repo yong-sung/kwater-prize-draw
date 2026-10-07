@@ -217,7 +217,11 @@ describe("rollback policy CLI", () => {
     const baselineSha = git(root, "rev-parse", "HEAD");
     writeFixtureFile(root, "src/app/page.tsx", "main app\n");
     writeFixtureFile(root, "docs/keep.md", "main docs\n");
-    writeFixtureFile(root, "tools/preview-rollback-policy.mjs", "main rollback tool\n");
+    writeFixtureFile(
+      root,
+      "tools/preview-rollback-policy.mjs",
+      "main rollback tool\n",
+    );
     git(root, "add", ".");
     git(root, "commit", "-m", "main changes");
 

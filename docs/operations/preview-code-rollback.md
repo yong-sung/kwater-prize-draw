@@ -5,6 +5,7 @@
 ## GitHub Actions의 PR 생성 권한
 
 이 workflow는 기본 `GITHUB_TOKEN`으로 복구 branch를 push하고 PR을 엽니다. 저장소 **Settings → Actions → General → Workflow permissions**에서 **Allow GitHub Actions to create and approve pull requests**가 활성화되어 있어야 합니다. 저장소 설정은 이번 변경에서 바꾸지 않았습니다. workflow 자체는 `contents: write`와 `pull-requests: write`만 받고, PR 승인이나 병합은 실행하지 않습니다.
+
 ## 현재 준비 상태
 
 기준 Preview의 소스 SHA는 `de4aebb6d0503d4d453911bf0bd68a1dde11fd87`로 확인했습니다. 다만 이 SHA를 가리키는 Production 기준 tag는 아직 준비되지 않았습니다. PR #30을 별도 검토·병합하고 해당 앱 코드가 Production에 배포된 것을 확인한 뒤에만 아래 실행 절차를 사용할 수 있습니다.

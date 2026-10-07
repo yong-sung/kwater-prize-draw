@@ -128,7 +128,9 @@ function writeGithubOutput(values) {
   if (!outputPath) {
     throw new Error("GITHUB_OUTPUT 경로가 없습니다.");
   }
-  const lines = Object.entries(values).map(([key, value]) => `${key}=${value}`);
+  const lines = Object.entries(values).map(
+    ([key, value]) => `${key}=${value}`,
+  );
   appendFileSync(outputPath, `${lines.join("\n")}\n`, "utf8");
 }
 
