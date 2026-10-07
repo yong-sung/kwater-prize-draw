@@ -63,10 +63,6 @@ jobs:
         run: npm run typecheck
       - name: ESLint 검사
         run: npm run lint
-      - name: Temporary formatter diff diagnosis
-        run: |
-          npm exec -- prettier tools/preview-rollback-policy.mjs > /tmp/preview-rollback-policy.formatted.mjs
-          diff -u tools/preview-rollback-policy.mjs /tmp/preview-rollback-policy.formatted.mjs || true
       - name: Prettier 검사
         run: npm run format:check
       - name: Production build

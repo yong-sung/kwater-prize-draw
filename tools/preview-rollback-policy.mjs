@@ -128,9 +128,7 @@ function writeGithubOutput(values) {
   if (!outputPath) {
     throw new Error("GITHUB_OUTPUT 경로가 없습니다.");
   }
-  const lines = Object.entries(values).map(
-    ([key, value]) => `${key}=${value}`,
-  );
+  const lines = Object.entries(values).map(([key, value]) => `${key}=${value}`);
   appendFileSync(outputPath, `${lines.join("\n")}\n`, "utf8");
 }
 
@@ -147,7 +145,9 @@ function validateRequestFromEnvironment() {
   );
   if (ancestry.error) throw ancestry.error;
   if (ancestry.status !== 0 && ancestry.status !== 1) {
-    throw new Error(ancestry.stderr.trim() || "기준 commit 조상을 확인할 수 없습니다.");
+    throw new Error(
+      ancestry.stderr.trim() || "기준 commit 조상을 확인할 수 없습니다.",
+    );
   }
 
   const validated = validateRollbackRequest({
@@ -172,7 +172,9 @@ function validateStagedChanges() {
   });
   if (result.error) throw result.error;
   if (result.status !== 0) {
-    throw new Error(result.stderr.trim() || "staged 파일 목록을 확인할 수 없습니다.");
+    throw new Error(
+      result.stderr.trim() || "staged 파일 목록을 확인할 수 없습니다.",
+    );
   }
 
   const paths = result.stdout.split("\0").filter(Boolean);
