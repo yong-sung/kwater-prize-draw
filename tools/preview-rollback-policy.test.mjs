@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import {
   existsSync,
   mkdtempSync,
@@ -9,6 +9,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   buildRestorePathspec,
@@ -27,6 +28,7 @@ const validRequest = {
 };
 
 const temporaryDirectories = [];
+const policyScriptPath = fileURLToPath(new URL("./preview-rollback-policy.mjs", import.meta.url));
 
 function writeFixtureFile(root, path, contents) {
   const fullPath = join(root, path);
@@ -40,6 +42,14 @@ function git(root, ...args) {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
   }).trim();
+}
+
+function runPolicyCli(root, command, env = {}) {
+  return spawnSync(process.execPath, [policyScriptPath, command], {
+    cwd: root,
+    encoding: "utf8",
+    env: { ...process.env, ...env },
+  });
 }
 
 afterEach(() => {
@@ -145,5 +155,60 @@ describe("restore path and staged file checks", () => {
       expect(readFileSync(join(root, path), "utf8")).toBe("main protected\n");
     }
     expect(git(root, "rev-parse", "preview-baseline")).toBe(baselineSha);
+  });
+});
+describe("rollback policy CLI", () => {
+  it("writes a verified baseline SHA and rollback branch to GITHUB_OUTPUT", () => {
+    const root = mkdtempSync(join(tmpdir(), "preview-rollback-cli-"));
+    temporaryDirectories.push(root);
+    git(root, "init");
+    git(root, "checkout", "-b", "main");
+    git(root, "config", "user.name", "Rollback Policy Test");
+    git(root, "config", "user.email", "rollback-test@example.invalid");
+    writeFixtureFile(root, "src/app/page.tsx", "baseline app\\n");
+    git(root, "add", ".");
+    git(root, "commit", "-m", "baseline");
+    git(root, "tag", "preview-baseline-2026-10-07");
+    const baselineSha = git(root, "rev-parse", "preview-baseline-2026-10-07");
+    writeFixtureFile(root, "src/app/page.tsx", "main app\\n");
+    git(root, "add", ".");
+    git(root, "commit", "-m", "main changes");
+    const outputPath = join(root, "workflow-output.txt");
+
+    const result = runPolicyCli(root, "validate-request", {
+      GITHUB_REPOSITORY: "yong-sung/kwater-prize-draw",
+      GITHUB_REF: "refs/heads/main",
+      ROLLBACK_CONFIRMATION: "PREVIEW BASELINE 복구 PR 생성",
+      ROLLBACK_BASELINE_SHA: baselineSha,
+      GITHUB_RUN_ID: "456",
+      GITHUB_OUTPUT: outputPath,
+    });
+
+    expect(result.status).toBe(0);
+    expect(existsSync(outputPath)).toBe(true);
+    expect(readFileSync(outputPath, "utf8")).toBe(
+      `baseline_sha=${baselineSha}\\nbranch_name=rollback/preview-baseline-456\\n`,
+    );
+  });
+
+  it("fails before branch or PR work when no files are staged", () => {
+    const root = mkdtempSync(join(tmpdir(), "preview-rollback-cli-"));
+    temporaryDirectories.push(root);
+    git(root, "init");
+    git(root, "checkout", "-b", "main");
+    git(root, "config", "user.name", "Rollback Policy Test");
+    git(root, "config", "user.email", "rollback-test@example.invalid");
+    writeFixtureFile(root, "src/app/page.tsx", "main app\\n");
+    git(root, "add", ".");
+    git(root, "commit", "-m", "main");
+    const outputPath = join(root, "workflow-output.txt");
+
+    const result = runPolicyCli(root, "validate-staged", {
+      GITHUB_OUTPUT: outputPath,
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("복원할 코드 변경이 없습니다.");
+    expect(existsSync(outputPath)).toBe(false);
   });
 });
