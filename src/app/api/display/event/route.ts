@@ -62,9 +62,7 @@ export async function GET() {
   if (event.status === "DRAWN" || event.status === "REVEALING") {
     const { data: upcomingRows, error: upcomingError } = await db
       .from("draw_results")
-      .select(
-        "reveal_position,prizes!draw_results_prize_id_fkey(code,name)",
-      )
+      .select("reveal_position,prizes!draw_results_prize_id_fkey(code,name)")
       .eq("event_id", event.id)
       .is("revealed_at", null)
       .not("participant_id", "is", null)
@@ -76,9 +74,7 @@ export async function GET() {
     const upcoming = ((upcomingRows ?? []) as UpcomingRow[])
       .flatMap((row) => {
         const prize = firstRelation(row.prizes);
-        return prize
-          ? [{ revealPosition: row.reveal_position, prize }]
-          : [];
+        return prize ? [{ revealPosition: row.reveal_position, prize }] : [];
       })
       .sort((left, right) => {
         const leftOrder =
