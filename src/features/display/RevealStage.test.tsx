@@ -31,7 +31,9 @@ describe("RevealStage", () => {
     expect(
       screen.getByRole("heading", { name: "당첨자 발표" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("기계식 키보드 추첨 시작")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "기계식 키보드 추첨 시작" }),
+    ).toBeInTheDocument();
     expect(screen.queryByText("공개된 당첨자")).not.toBeInTheDocument();
 
     const keyboard = screen
@@ -43,6 +45,22 @@ describe("RevealStage", () => {
     expect(within(keyboard!).getByLabelText("1번")).toBeInTheDocument();
     expect(within(keyboard!).getByLabelText("2번")).toBeInTheDocument();
     expect(within(tumbler!).getByLabelText("1번")).toBeInTheDocument();
+  });
+
+  it("다음 경품명을 추첨 시작 버튼에 표시한다", () => {
+    render(
+      <RevealStage
+        groups={[]}
+        status="REVEALING"
+        nextPrizeName="스탠리 텀블러"
+        onReveal={() => undefined}
+        busy={false}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "스탠리 텀블러 추첨 시작" }),
+    ).toBeEnabled();
   });
 
   it("추첨 진행 중에는 진행 문구를 표시한다", () => {
