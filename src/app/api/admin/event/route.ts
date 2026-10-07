@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/security/admin-session";
 import { createServerClient } from "@/lib/supabase/server";
+import { canResetRehearsal } from "@/lib/rehearsal/reset-guard";
 import { assertTransition } from "@/lib/domain/state-machine";
 export const runtime = "nodejs";
 export async function GET() {
@@ -17,7 +18,12 @@ export async function GET() {
     .maybeSingle();
   if (error) return NextResponse.json({ code: "LOAD_FAILED" }, { status: 500 });
   return NextResponse.json(
-    { event: data, participants: 0, prizes: 0 },
+    {
+      event: data,
+      participants: 0,
+      prizes: 0,
+      rehearsalResetAllowed: canResetRehearsal(process.env),
+    },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

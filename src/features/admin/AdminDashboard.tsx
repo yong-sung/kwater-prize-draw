@@ -20,7 +20,27 @@ type Data = {
   event: { id: string; title: string; status: string };
   participants?: number;
   prizes?: number;
+  rehearsalResetAllowed?: boolean;
 };
+function rehearsalResetErrorMessage(code: unknown) {
+  switch (code) {
+    case "REHEARSAL_RESET_DISABLED":
+      return "리허설 초기화는 허용된 Preview 환경에서만 사용할 수 있습니다. Preview 주소인지 확인해 주세요.";
+    case "UNAUTHORIZED":
+      return "관리자 로그인이 만료됐습니다. 관리자 페이지에 다시 로그인해 주세요.";
+    case "INVALID_CONFIRMATION":
+      return "행사명과 확인 문구를 확인한 뒤 다시 시도해 주세요.";
+    case "EVENT_NOT_FOUND":
+      return "대상 행사를 찾을 수 없습니다. 관리자 화면을 새로고침해 주세요.";
+    case "EVENT_TITLE_CHANGED":
+      return "행사명이 변경됐습니다. 화면을 새로고침한 뒤 다시 시도해 주세요.";
+    case "REHEARSAL_RESET_FAILED":
+      return "데이터베이스에서 초기화 요청을 처리하지 못했습니다. Preview DB 권한과 함수 상태를 확인해 주세요.";
+    default:
+      return "요청을 처리하지 못했습니다. 상태와 권한을 확인하세요.";
+  }
+}
+
 export function AdminDashboard() {
   const [data, setData] = useState<Data | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -72,7 +92,16 @@ export function AdminDashboard() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!r.ok) throw Error();
+      if (!r.ok) {
+        if (path === "/api/admin/rehearsal-reset") {
+          const result = (await r.json().catch(() => null)) as {
+            code?: unknown;
+          } | null;
+          setError(rehearsalResetErrorMessage(result?.code));
+          return;
+        }
+        throw Error();
+      }
       if (next) setData({ ...data, event: { ...data.event, status: next } });
       await load();
     } catch {
@@ -164,62 +193,64 @@ export function AdminDashboard() {
           결과 발표
         </button>
       </div>
-      <section className="rounded-2xl border border-red-200 bg-red-50 p-5">
-        <h2 className="text-lg font-semibold text-red-900">
-          Preview 리허설 초기화
-        </h2>
-        <p className="mt-1 text-sm text-red-800">
-          참석자 개인정보와 추첨·공개 결과를 삭제하고 행사·경품 설정은
-          유지합니다.
-        </p>
-        <label
-          className="mt-3 block text-sm font-semibold"
-          htmlFor="reset-title"
-        >
-          행사명 확인
-        </label>
-        <input
-          id="reset-title"
-          value={resetTitle}
-          onChange={(x) => setResetTitle(x.target.value)}
-          className="mt-1 min-h-11 w-full rounded-xl border px-3"
-        />
-        <label
-          className="mt-3 block text-sm font-semibold"
-          htmlFor="reset-confirmation"
-        >
-          확인 문구
-        </label>
-        <input
-          id="reset-confirmation"
-          value={resetConfirmation}
-          onChange={(x) => setResetConfirmation(x.target.value)}
-          placeholder="리허설 초기화"
-          className="mt-1 min-h-11 w-full rounded-xl border px-3"
-        />
-        <button
-          type="button"
-          disabled={
-            busy ||
-            resetTitle !== e.title ||
-            resetConfirmation !== "리허설 초기화"
-          }
-          onClick={() =>
-            void call(
-              "/api/admin/rehearsal-reset",
-              {
-                eventId: e.id,
-                eventTitle: resetTitle,
-                confirmation: resetConfirmation,
-              },
-              "SETUP",
-            )
-          }
-          className="mt-3 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white disabled:bg-slate-300"
-        >
-          리허설 데이터 초기화
-        </button>
-      </section>
+      {data.rehearsalResetAllowed && (
+        <section className="rounded-2xl border border-red-200 bg-red-50 p-5">
+          <h2 className="text-lg font-semibold text-red-900">
+            Preview 리허설 초기화
+          </h2>
+          <p className="mt-1 text-sm text-red-800">
+            참석자 개인정보와 추첨·공개 결과를 삭제하고 행사·경품 설정은
+            유지합니다.
+          </p>
+          <label
+            className="mt-3 block text-sm font-semibold"
+            htmlFor="reset-title"
+          >
+            행사명 확인
+          </label>
+          <input
+            id="reset-title"
+            value={resetTitle}
+            onChange={(x) => setResetTitle(x.target.value)}
+            className="mt-1 min-h-11 w-full rounded-xl border px-3"
+          />
+          <label
+            className="mt-3 block text-sm font-semibold"
+            htmlFor="reset-confirmation"
+          >
+            확인 문구
+          </label>
+          <input
+            id="reset-confirmation"
+            value={resetConfirmation}
+            onChange={(x) => setResetConfirmation(x.target.value)}
+            placeholder="리허설 초기화"
+            className="mt-1 min-h-11 w-full rounded-xl border px-3"
+          />
+          <button
+            type="button"
+            disabled={
+              busy ||
+              resetTitle !== e.title ||
+              resetConfirmation !== "리허설 초기화"
+            }
+            onClick={() =>
+              void call(
+                "/api/admin/rehearsal-reset",
+                {
+                  eventId: e.id,
+                  eventTitle: resetTitle,
+                  confirmation: resetConfirmation,
+                },
+                "SETUP",
+              )
+            }
+            className="mt-3 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white disabled:bg-slate-300"
+          >
+            리허설 데이터 초기화
+          </button>
+        </section>
+      )}
       {error && (
         <p role="alert" className="text-red-700">
           {error}
