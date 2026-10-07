@@ -19,12 +19,6 @@ export default function RevealStage({
   onReveal: () => void;
   busy: boolean;
 }) {
-  const showNextPrize =
-    Boolean(nextPrizeName) &&
-    !busy &&
-    status !== "REVEALED" &&
-    status !== "PUBLISHED";
-
   return (
     <section
       aria-label="당첨자 공개"
@@ -32,9 +26,6 @@ export default function RevealStage({
     >
       <header className="mx-auto w-full max-w-6xl py-6 text-center">
         <h1 className="text-4xl font-bold">당첨자 발표</h1>
-        {showNextPrize ? (
-          <p className="mt-3 text-xl">{nextPrizeName} 추첨 시작</p>
-        ) : null}
       </header>
       <div className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 gap-6 py-6 md:grid-cols-3">
         {groups.map((group) => (
@@ -73,7 +64,7 @@ export default function RevealStage({
           disabled={busy}
           className="mx-auto rounded-xl bg-cyan-400 px-8 py-4 text-lg font-bold text-slate-950 disabled:opacity-40"
         >
-          {busy ? "추첨 중...." : "Enter로 다음 당첨자 공개"}
+          {busy ? "추첨 중...." : nextPrizeName ? `${nextPrizeName} 추첨 시작` : "추첨 시작"}
         </button>
       )}
     </section>
