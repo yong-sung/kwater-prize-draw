@@ -15,7 +15,7 @@
 - 복구 대상은 Git으로 관리되는 앱 코드와 정적 파일이다.
 - Supabase 데이터·migration·설정, Vercel 환경변수·프로젝트 설정·도메인, 관리자 기능의 동작은 복구 작업에서 변경하지 않는다.
 - 복구 과정에서 응모나 리허설 초기화 API를 호출하지 않는다.
-- `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`는 복구 변경에서 제외한다.
+- `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`, `tools/preview-rollback-policy.mjs`는 복구 변경에서 제외한다.
 - 기본 브랜치에 직접 push하거나 복구 PR을 자동 병합하지 않는다.
 - Workflow는 GitHub의 기본 `GITHUB_TOKEN`만 `contents: write`, `pull-requests: write`로 사용하고 Supabase·Vercel Secret을 읽지 않는다.
 - 전체 검증은 `test:run`, `typecheck`, `lint`, `format:check`, `build`를 통과해야 한다.
@@ -51,14 +51,14 @@
 
 **Interfaces:**
 - Produces: `validateRollbackRequest(input: { repository: string, ref: string, confirmation: string, requestedSha: string, tagSha: string, isAncestor: boolean, runId: string }): { baselineSha: string, branchName: string }`
-- Produces: `buildRestorePathspec(): string[]` — `.`와 여섯 보호 경로의 Git pathspec exclude 항목을 반환한다.
+- Produces: `buildRestorePathspec(): string[]` — `.`와 일곱 보호 경로의 Git pathspec exclude 항목을 반환한다.
 - Produces: `validateStagedPaths(paths: string[]): string[]` — 비어 있지 않은 허용 변경 파일 목록만 반환하며 빈 목록이나 보호 경로가 있으면 오류를 던진다.
 
 - [ ] **Step 1: 실패 테스트를 먼저 작성한다**
 
   올바른 저장소 `yong-sung/kwater-prize-draw`, ref `refs/heads/main`, 확인 문구 `PREVIEW BASELINE 복구 PR 생성`, 같은 40자리 SHA, 조상 여부 true 입력은 통과해야 한다. 저장소·ref·확인 문구 오류, SHA 형식 오류·tag 불일치, 조상 여부 false는 각각 거부되어야 한다. 변경 목록 검사는 빈 목록과 보호 경로를 거부하고 일반 앱 파일을 허용해야 한다.
 
-  임시 Git 저장소 통합 테스트는 기준 commit에 `src/app/page.tsx`를 만들고 후속 main commit에서 앱 파일과 보호 파일을 바꾼 뒤, helper의 pathspec으로 복원한다. 앱 파일은 기준 commit 내용이 되고 `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`는 후속 main 내용이 남아야 한다.
+  임시 Git 저장소 통합 테스트는 기준 commit에 `src/app/page.tsx`를 만들고 후속 main commit에서 앱 파일과 보호 파일을 바꾼 뒤, helper의 pathspec으로 복원한다. 앱 파일은 기준 commit 내용이 되고 `supabase/**`, `.github/**`, `docs/**`, `context/**`, `study/**`, `AGENTS.md`, `tools/preview-rollback-policy.mjs`는 후속 main 내용이 남아야 한다.
 
 - [ ] **Step 2: 테스트가 실패하는지 확인한다**
 
@@ -67,7 +67,7 @@
 
 - [ ] **Step 3: 정책 helper를 구현한다**
 
-  `validateRollbackRequest`는 위 저장소·ref·확인 문구를 상수와 비교하고, 두 SHA가 40자리 hexadecimal이며 서로 같고 기준 commit이 main 조상일 때만 통과시킨다. 반환 branch 이름은 `rollback/preview-baseline-<runId>`로 제한한다. `buildRestorePathspec`는 `.` 뒤에 `:(exclude)supabase/**`, `:(exclude).github/**`, `:(exclude)docs/**`, `:(exclude)context/**`, `:(exclude)study/**`, `:(exclude)AGENTS.md`를 반환한다. `validateStagedPaths`는 빈 목록 및 보호 경로 변경을 거부한다.
+  `validateRollbackRequest`는 위 저장소·ref·확인 문구를 상수와 비교하고, 두 SHA가 40자리 hexadecimal이며 서로 같고 기준 commit이 main 조상일 때만 통과시킨다. 반환 branch 이름은 `rollback/preview-baseline-<runId>`로 제한한다. `buildRestorePathspec`는 `.` 뒤에 `:(exclude)supabase/**`, `:(exclude).github/**`, `:(exclude)docs/**`, `:(exclude)context/**`, `:(exclude)study/**`, `:(exclude)AGENTS.md`, `:(exclude)tools/preview-rollback-policy.mjs`를 반환한다. `validateStagedPaths`는 빈 목록 및 보호 경로 변경을 거부한다.
 
 - [ ] **Step 4: 테스트를 다시 실행해 통과를 확인한다**
 
