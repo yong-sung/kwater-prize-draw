@@ -2,7 +2,7 @@ const EXPECTED_REPOSITORY = "yong-sung/kwater-prize-draw";
 const EXPECTED_REF = "refs/heads/main";
 const EXPECTED_CONFIRMATION = "PREVIEW BASELINE 복구 PR 생성";
 const PROTECTED_ROOTS = ["supabase", ".github", "docs", "context", "study"];
-const PROTECTED_FILES = ["AGENTS.md"];
+const PROTECTED_FILES = ["AGENTS.md", "tools/preview-rollback-policy.mjs"];
 
 /**
  * @typedef {object} RollbackRequest
@@ -71,6 +71,7 @@ export function buildRestorePathspec() {
     ":(exclude)context/**",
     ":(exclude)study/**",
     ":(exclude)AGENTS.md",
+    ":(exclude)tools/preview-rollback-policy.mjs",
   ];
 }
 
