@@ -19,6 +19,10 @@ export default function RevealStage({
   onReveal: () => void;
   busy: boolean;
 }) {
+  const startLabel = nextPrizeName
+    ? `${nextPrizeName} 추첨 시작`
+    : "추첨 시작";
+
   return (
     <section
       aria-label="당첨자 공개"
@@ -64,7 +68,7 @@ export default function RevealStage({
           disabled={busy}
           className="mx-auto rounded-xl bg-cyan-400 px-8 py-4 text-lg font-bold text-slate-950 disabled:opacity-40"
         >
-          {busy ? "추첨 중...." : nextPrizeName ? `${nextPrizeName} 추첨 시작` : "추첨 시작"}
+          {busy ? "추첨 중...." : startLabel}
         </button>
       )}
     </section>
