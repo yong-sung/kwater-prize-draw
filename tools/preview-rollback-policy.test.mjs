@@ -197,6 +197,35 @@ describe("rollback policy CLI", () => {
     );
   });
 
+  it("restores through the CLI while preserving protected paths", () => {
+    const root = mkdtempSync(join(tmpdir(), "preview-rollback-cli-"));
+    temporaryDirectories.push(root);
+    git(root, "init");
+    git(root, "checkout", "-b", "main");
+    git(root, "config", "user.name", "Rollback Policy Test");
+    git(root, "config", "user.email", "rollback-test@example.invalid");
+    writeFixtureFile(root, "src/app/page.tsx", "baseline app\\n");
+    writeFixtureFile(root, "docs/keep.md", "baseline docs\\n");
+    git(root, "add", ".");
+    git(root, "commit", "-m", "baseline");
+    const baselineSha = git(root, "rev-parse", "HEAD");
+    writeFixtureFile(root, "src/app/page.tsx", "main app\\n");
+    writeFixtureFile(root, "docs/keep.md", "main docs\\n");
+    git(root, "add", ".");
+    git(root, "commit", "-m", "main changes");
+
+    const result = runPolicyCli(root, "restore", {
+      ROLLBACK_BASELINE_SHA: baselineSha,
+    });
+
+    expect(result.status).toBe(0);
+    expect(readFileSync(join(root, "src/app/page.tsx"), "utf8")).toBe(
+      "baseline app\\n",
+    );
+    expect(readFileSync(join(root, "docs/keep.md"), "utf8")).toBe("main docs\\n");
+    expect(git(root, "diff", "--cached", "--name-only")).toBe("src/app/page.tsx");
+  });
+
   it("fails before branch or PR work when no files are staged", () => {
     const root = mkdtempSync(join(tmpdir(), "preview-rollback-cli-"));
     temporaryDirectories.push(root);
