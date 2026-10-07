@@ -89,6 +89,7 @@ describe("restore path and staged file checks", () => {
       ":(exclude)context/**",
       ":(exclude)study/**",
       ":(exclude)AGENTS.md",
+      ":(exclude)tools/preview-rollback-policy.mjs",
     ]);
   });
 
@@ -96,6 +97,9 @@ describe("restore path and staged file checks", () => {
     expect(() => validateStagedPaths([])).toThrow();
     expect(() =>
       validateStagedPaths(["supabase/migrations/changed.sql"]),
+    ).toThrow();
+    expect(() =>
+      validateStagedPaths(["tools/preview-rollback-policy.mjs"]),
     ).toThrow();
     const allowedPaths = validateStagedPaths(["src/app/page.tsx"]);
     expect(allowedPaths).toEqual(["src/app/page.tsx"]);
@@ -117,6 +121,7 @@ describe("restore path and staged file checks", () => {
       "study/keep.md",
       "AGENTS.md",
     ];
+    const runtimeToolPath = "tools/preview-rollback-policy.mjs";
     writeFixtureFile(root, "src/app/page.tsx", "baseline app\n");
     writeFixtureFile(root, "public/logo.svg", "baseline asset\n");
     for (const path of protectedPaths) {
@@ -133,6 +138,7 @@ describe("restore path and staged file checks", () => {
     for (const path of protectedPaths) {
       writeFixtureFile(root, path, "main protected\n");
     }
+    writeFixtureFile(root, runtimeToolPath, "main rollback tool\n");
     git(root, "add", ".");
     git(root, "commit", "-m", "main changes");
 
@@ -153,6 +159,9 @@ describe("restore path and staged file checks", () => {
     for (const path of protectedPaths) {
       expect(readFileSync(join(root, path), "utf8")).toBe("main protected\n");
     }
+    expect(readFileSync(join(root, runtimeToolPath), "utf8")).toBe(
+      "main rollback tool\n",
+    );
     expect(git(root, "rev-parse", "preview-baseline")).toBe(baselineSha);
   });
 });
@@ -208,6 +217,7 @@ describe("rollback policy CLI", () => {
     const baselineSha = git(root, "rev-parse", "HEAD");
     writeFixtureFile(root, "src/app/page.tsx", "main app\n");
     writeFixtureFile(root, "docs/keep.md", "main docs\n");
+    writeFixtureFile(root, "tools/preview-rollback-policy.mjs", "main rollback tool\n");
     git(root, "add", ".");
     git(root, "commit", "-m", "main changes");
 
@@ -222,6 +232,9 @@ describe("rollback policy CLI", () => {
     expect(readFileSync(join(root, "docs/keep.md"), "utf8")).toBe(
       "main docs\n",
     );
+    expect(
+      readFileSync(join(root, "tools/preview-rollback-policy.mjs"), "utf8"),
+    ).toBe("main rollback tool\n");
     expect(git(root, "diff", "--cached", "--name-only")).toBe(
       "src/app/page.tsx",
     );
