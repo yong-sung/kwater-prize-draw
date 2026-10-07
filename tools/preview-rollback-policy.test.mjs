@@ -1,5 +1,12 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -42,7 +49,7 @@ afterEach(() => {
 });
 
 describe("validateRollbackRequest", () => {
-  it("accepts only the confirmed repository, main ref, matching baseline SHA, and ancestor", () => {
+  it("accepts a valid baseline rollback request", () => {
     expect(validateRollbackRequest(validRequest)).toEqual({
       baselineSha: validRequest.tagSha,
       branchName: "rollback/preview-baseline-123456",
@@ -57,12 +64,14 @@ describe("validateRollbackRequest", () => {
     ["a tag and requested SHA mismatch", { requestedSha: "a".repeat(40) }],
     ["a baseline outside main history", { isAncestor: false }],
   ])("rejects %s", (_condition, overrides) => {
-    expect(() => validateRollbackRequest({ ...validRequest, ...overrides })).toThrow();
+    expect(() =>
+      validateRollbackRequest({ ...validRequest, ...overrides }),
+    ).toThrow();
   });
 });
 
 describe("restore path and staged file checks", () => {
-  it("restores the tree while excluding Supabase, Actions, docs, context, study, and AGENTS.md", () => {
+  it("excludes all protected paths", () => {
     expect(buildRestorePathspec()).toEqual([
       ".",
       ":(exclude)supabase/**",
@@ -76,11 +85,14 @@ describe("restore path and staged file checks", () => {
 
   it("rejects an empty change set and any staged protected path", () => {
     expect(() => validateStagedPaths([])).toThrow();
-    expect(() => validateStagedPaths(["supabase/migrations/changed.sql"])).toThrow();
-    expect(validateStagedPaths(["src/app/page.tsx"])).toEqual(["src/app/page.tsx"]);
+    expect(() =>
+      validateStagedPaths(["supabase/migrations/changed.sql"]),
+    ).toThrow();
+    const allowedPaths = validateStagedPaths(["src/app/page.tsx"]);
+    expect(allowedPaths).toEqual(["src/app/page.tsx"]);
   });
 
-  it("restores app files to the baseline and leaves every protected file at its main version", () => {
+  it("restores app files and preserves protected paths", () => {
     const root = mkdtempSync(join(tmpdir(), "preview-code-rollback-"));
     temporaryDirectories.push(root);
     git(root, "init");
@@ -111,7 +123,14 @@ describe("restore path and staged file checks", () => {
     git(root, "add", ".");
     git(root, "commit", "-m", "main changes");
 
-    git(root, "restore", "--source=preview-baseline", "--staged", "--worktree", ...buildRestorePathspec());
+    git(
+      root,
+      "restore",
+      "--source=preview-baseline",
+      "--staged",
+      "--worktree",
+      ...buildRestorePathspec(),
+    );
 
     expect(readFileSync(join(root, "src/app/page.tsx"), "utf8")).toBe("baseline app\n");
     expect(readFileSync(join(root, "public/logo.svg"), "utf8")).toBe("baseline asset\n");
