@@ -46,7 +46,7 @@ describe("참석자 결과 자동 반영", () => {
 
     render(<ParticipantApp />);
     expect(
-      await screen.findByText(/응모가 완료되었습니다/),
+      await screen.findByRole("heading", { name: "응모 완료되었습니다!" }),
     ).toBeInTheDocument();
 
     published = true;

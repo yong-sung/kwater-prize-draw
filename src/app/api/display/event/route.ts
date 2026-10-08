@@ -16,12 +16,23 @@ type RevealedRow = {
   }>;
 };
 
+type UpcomingRow = {
+  reveal_position: number;
+  prizes: Relation<{ code: string; name: string }>;
+};
+
 type DisplayWinner = { name: string; department: string };
 type DisplayGroup = {
   prizeCode: string;
   prizeName: string;
   winners: DisplayWinner[];
 };
+
+const REVEAL_PRIORITY = new Map([
+  ["KEYBOARD", 1],
+  ["TUMBLER", 2],
+  ["SCANNER", 3],
+]);
 
 function firstRelation<T>(value: Relation<T>): T | null {
   return Array.isArray(value) ? (value[0] ?? null) : value;
@@ -46,6 +57,37 @@ export async function GET() {
     return NextResponse.json({ code: "EVENT_NOT_FOUND" }, { status: 404 });
 
   const groups: DisplayGroup[] = [];
+  let nextPrizeName: string | null = null;
+
+  if (event.status === "DRAWN" || event.status === "REVEALING") {
+    const { data: upcomingRows, error: upcomingError } = await db
+      .from("draw_results")
+      .select("reveal_position,prizes!draw_results_prize_id_fkey(code,name)")
+      .eq("event_id", event.id)
+      .is("revealed_at", null)
+      .not("participant_id", "is", null)
+      .is("unawarded_at", null)
+      .order("reveal_position");
+    if (upcomingError)
+      return NextResponse.json({ code: "LOAD_FAILED" }, { status: 500 });
+
+    const upcoming = ((upcomingRows ?? []) as UpcomingRow[])
+      .flatMap((row) => {
+        const prize = firstRelation(row.prizes);
+        return prize ? [{ revealPosition: row.reveal_position, prize }] : [];
+      })
+      .sort((left, right) => {
+        const leftOrder =
+          REVEAL_PRIORITY.get(left.prize.code) ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder =
+          REVEAL_PRIORITY.get(right.prize.code) ?? Number.MAX_SAFE_INTEGER;
+        return (
+          leftOrder - rightOrder || left.revealPosition - right.revealPosition
+        );
+      });
+    nextPrizeName = upcoming[0]?.prize.name ?? null;
+  }
+
   if (["REVEALING", "REVEALED", "PUBLISHED"].includes(event.status)) {
     const { data: rows, error: loadError } = await db
       .from("draw_results")
@@ -94,6 +136,7 @@ export async function GET() {
       status: event.status,
       participantCount: event.participants?.[0]?.count ?? 0,
       groups,
+      nextPrizeName,
     },
     { headers: { "Cache-Control": "no-store" } },
   );

@@ -12,6 +12,7 @@ type EventData = {
   id: string;
   title: string;
   status: string;
+  nextPrizeName?: string | null;
   groups?: RevealGroup[];
 };
 export default function DisplayApp() {
@@ -97,6 +98,7 @@ export default function DisplayApp() {
       <RevealStage
         groups={groups}
         status={status}
+        nextPrizeName={event.nextPrizeName}
         onReveal={reveal}
         busy={busy}
       />

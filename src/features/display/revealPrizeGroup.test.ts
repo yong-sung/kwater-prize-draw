@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { revealPrizeGroup } from "./revealPrizeGroup";
 
 describe("경품 그룹 순차 공개", () => {
-  it("첫 당첨자를 공개한 뒤 같은 경품을 0.5초 간격으로 요청하고 그룹 경계에서 멈춘다", async () => {
+  it("첫 당첨자를 공개한 뒤 같은 경품을 0.2초 간격으로 요청하고 그룹 경계에서 멈춘다", async () => {
     const reveal = vi
       .fn()
       .mockResolvedValueOnce({
@@ -29,7 +29,7 @@ describe("경품 그룹 순차 공개", () => {
     expect(reveal).toHaveBeenNthCalledWith(2, "KEYBOARD");
     expect(reveal).toHaveBeenNthCalledWith(3, "KEYBOARD");
     expect(wait).toHaveBeenCalledTimes(2);
-    expect(wait).toHaveBeenNthCalledWith(1, 500);
+    expect(wait).toHaveBeenNthCalledWith(1, 200);
     expect(refresh).toHaveBeenCalledTimes(2);
   });
 

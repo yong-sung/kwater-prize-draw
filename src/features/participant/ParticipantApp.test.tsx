@@ -93,7 +93,20 @@ describe("참석자 모바일 화면", () => {
     );
 
     expect(
-      await screen.findByText(/응모가 완료되었습니다/i),
+      await screen.findByRole("heading", {
+        name: "응모 완료되었습니다!",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("해당 페이지를 종료하지 마세요."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("추첨은 행사 종료 직후 진행됩니다."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "해당 페이지와 강연장 화면에서 추첨 결과를 확인하실 수 있습니다.",
+      ),
     ).toBeInTheDocument();
   });
 
