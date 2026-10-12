@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0.8" y2="1"><stop stop-color="#dcffff" stop-opacity=".7"/><stop offset=".25" stop-color="#9ceaff" stop-opacity=".25"/><stop offset="1" stop-color="#28acff" stop-opacity="0"/></linearGradient>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".055"/></feComponentTransfer><feBlend in="SourceGraphic" mode="soft-light"/></filter>
+    <radialGradient id="glow"><stop stop-color="#fff"/><stop offset=".3" stop-color="#b6ffff" stop-opacity=".8"/><stop offset="1" stop-color="#8bffff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#e1ffff" stop-opacity=".38"/>
+      <stop offset=".45" stop-color="#8beaff" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#52bcff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="crest" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#e4ffff" stop-opacity="0"/>
+      <stop offset=".35" stop-color="#e4ffff" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#b4f5ff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#water)" stroke="#b8f4ff" stroke-opacity=".25" stroke-width="2">
+    <path d="M-120-80C180-50-30 120 200 200S530 150 720 280S920 430 1150 370C780 580 330 360-120 640Z"/>
+    <path d="M-100 350C160 300 260 130 480 260S790 490 1080 410S1320 350 1450 420C1010 650 590 530 260 720S40 880-100 940Z"/>
+    <path d="M2020 60C1730 60 1850 240 1570 270S1330 500 1080 480C1310 600 1570 430 1780 560S1920 710 2020 730Z"/>
+    <path d="M-80 890C180 730 370 1020 660 950S970 980 1150 1090C780 1020 470 1210-80 1170Z"/>
+    <path d="M2020 800C1740 730 1780 1010 1500 990S1260 1060 1110 1140C1460 1140 1800 1200 2020 1170Z"/>
+  </g>
+  <g fill="url(#ribbon)">
+    <path d="M-90 100C190 0 170 270 450 190S710 50 950-80L640-80C430 140 270 20 130-70H-90Z"/>
+    <path d="M1980 180C1770 290 1710 70 1500 160S1240 280 1120 160C1290 380 1530 190 1670 320S1860 380 1980 270Z"/>
+    <path d="M-60 760C200 590 310 840 570 740S820 700 970 790C750 670 610 930 380 850S100 780-60 940Z"/>
+    <path d="M1980 850C1700 960 1610 790 1410 900S1160 1060 930 1010C1190 1150 1370 990 1530 1010S1820 1080 1980 980Z"/>
+  </g>
+  <g fill="none" stroke="url(#crest)" stroke-width="2" stroke-linecap="round">
+    <path d="M-50 160C180 30 250 300 510 220S780 70 940 30"/>
+    <path d="M1130 180C1320 360 1510 140 1690 280S1880 340 1980 220"/>
+    <path d="M-80 805C160 650 310 910 570 795S820 760 980 830"/>
+    <path d="M1000 1040C1210 1140 1390 920 1560 960S1820 1040 1980 910"/>
+  </g>
+  <rect width="1920" height="1080" fill="transparent" filter="url(#grain)"/>
+  <g fill="url(#glow)">
+    <circle cx="440" cy="78" r="10"/><circle cx="550" cy="51" r="12"/><circle cx="790" cy="54" r="7"/><circle cx="1284" cy="42" r="6"/><circle cx="1560" cy="80" r="8"/><circle cx="18" cy="460" r="7"/><circle cx="1883" cy="460" r="8"/><circle cx="300" cy="1030" r="10"/>
+    <circle cx="110" cy="320" r="8"/><circle cx="1740" cy="210" r="9"/><circle cx="680" cy="1040" r="7"/><circle cx="1460" cy="1015" r="11"/>
+  </g>
+</svg>

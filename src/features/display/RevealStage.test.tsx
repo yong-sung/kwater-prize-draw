@@ -29,8 +29,14 @@ describe("RevealStage", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "당첨자 발표" }),
+      screen.getByRole("heading", { name: "경품 당첨자 발표" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "경품 당첨자 발표" }),
+    ).toHaveAttribute("src", "/images/display/prize-draw-title.png");
+    expect(
+      screen.getByRole("img", { name: "당첨을 축하합니다!" }),
+    ).toHaveAttribute("src", "/images/display/congratulations.png");
     expect(
       screen.getByRole("button", { name: "기계식 키보드 추첨 시작" }),
     ).toBeInTheDocument();
@@ -45,6 +51,12 @@ describe("RevealStage", () => {
     expect(within(keyboard!).getByLabelText("1번")).toBeInTheDocument();
     expect(within(keyboard!).getByLabelText("2번")).toBeInTheDocument();
     expect(within(tumbler!).getByLabelText("1번")).toBeInTheDocument();
+    expect(within(keyboard!).getByText("2명")).toBeInTheDocument();
+    expect(within(tumbler!).getByText("1명")).toBeInTheDocument();
+    expect(
+      within(keyboard!).getByRole("img", { name: "기계식 키보드" }),
+    ).toBeInTheDocument();
+    expect(within(keyboard!).getByText("본부")).toBeInTheDocument();
   });
 
   it("다음 경품명을 추첨 시작 버튼에 표시한다", () => {
@@ -61,6 +73,8 @@ describe("RevealStage", () => {
     expect(
       screen.getByRole("button", { name: "스탠리 텀블러 추첨 시작" }),
     ).toBeEnabled();
+    expect(screen.getAllByText("공개 대기 중")).toHaveLength(3);
+    expect(screen.queryByText("15명")).not.toBeInTheDocument();
   });
 
   it("추첨 진행 중에는 진행 문구를 표시한다", () => {
