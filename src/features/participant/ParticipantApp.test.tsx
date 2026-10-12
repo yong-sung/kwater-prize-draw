@@ -100,13 +100,17 @@ describe("참석자 모바일 화면", () => {
     expect(
       screen.getByText("해당 페이지를 종료하지 마세요."),
     ).toBeInTheDocument();
+    expect(screen.getByText("추첨이 잠시 후 진행됩니다.")).toBeInTheDocument();
+    const notice = screen
+      .getByText("해당 페이지를 종료하지 마세요.")
+      .closest("aside");
+    expect(notice?.querySelectorAll("p")).toHaveLength(3);
+    expect(notice?.querySelector("p:last-child br")).toBeInTheDocument();
     expect(
-      screen.getByText("추첨은 행사 종료 직후 진행됩니다."),
+      screen.getByText("해당 페이지와 강연장 화면에서"),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "해당 페이지와 강연장 화면에서 추첨 결과를 확인하실 수 있습니다.",
-      ),
+      screen.getByText("추첨 결과를 확인하실 수 있습니다."),
     ).toBeInTheDocument();
   });
 
@@ -155,7 +159,7 @@ describe("참석자 모바일 화면", () => {
     render(<ParticipantApp />);
 
     expect(
-      await screen.findByText(/응모가 마감되었습니다/i),
+      await screen.findByRole("heading", { name: "응모 마감되었습니다!" }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /경품 응모/i }),

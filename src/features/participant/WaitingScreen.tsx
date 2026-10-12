@@ -16,6 +16,9 @@ export default function WaitingScreen() {
         <div className={styles.content}>
           <div className={styles.ribbon}>
             <svg viewBox="0 0 300 90" aria-hidden="true">
+              <defs>
+                <path id="complete-ribbon-arc" d="M38 49 Q150 19 262 49" />
+              </defs>
               <path
                 d="M30 35 3 49 21 60 15 83 64 69 236 69 285 83 279 60 297 49 270 35Z"
                 fill="#d9f3ff"
@@ -26,8 +29,17 @@ export default function WaitingScreen() {
                 stroke="#fff"
                 strokeWidth="2"
               />
+              <text className={styles.ribbonText}>
+                <textPath
+                  href="#complete-ribbon-arc"
+                  startOffset="50%"
+                  textAnchor="middle"
+                >
+                  AI INSIGHT ROUND
+                </textPath>
+              </text>
             </svg>
-            <p>AI INSIGHT ROUND</p>
+            <p className="sr-only">AI INSIGHT ROUND</p>
           </div>
           <div className={styles.ticket}>
             <Image
@@ -83,10 +95,34 @@ export default function WaitingScreen() {
             </div>
           </div>
           <aside className={styles.notice}>
-            <p className={styles.noticeTitle}>해당 페이지를 종료하지 마세요.</p>
-            <p>추첨은 행사 종료 직후 진행됩니다.</p>
+            <p className={styles.noticeTitle}>
+              <svg
+                className={styles.noticeIcon}
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M10.3 4.2a2 2 0 0 1 3.4 0l8 13.8a2 2 0 0 1-1.7 3H4a2 2 0 0 1-1.7-3Z"
+                  fill="#ffe5a3"
+                  stroke="#b47c18"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M12 9v5"
+                  stroke="#78521a"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <circle cx="12" cy="17" r="1" fill="#78521a" />
+              </svg>
+              해당 페이지를 종료하지 마세요.
+            </p>
+            <p className={styles.noticeTiming}>추첨이 잠시 후 진행됩니다.</p>
             <p>
-              해당 페이지와 강연장 화면에서 추첨 결과를 확인하실 수 있습니다.
+              <span>해당 페이지와 강연장 화면에서</span>
+              <br />
+              <span>추첨 결과를 확인하실 수 있습니다.</span>
             </p>
           </aside>
         </div>
