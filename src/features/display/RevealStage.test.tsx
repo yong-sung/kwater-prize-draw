@@ -1,8 +1,25 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import RevealStage from "./RevealStage";
 
 describe("RevealStage", () => {
+  it("캡슐 머신의 레버를 클릭하면 공개 요청을 한 번 전달한다", async () => {
+    const onReveal = vi.fn();
+    render(
+      <RevealStage
+        groups={[]}
+        status="DRAWN"
+        onReveal={onReveal}
+        busy={false}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "레버 돌리기" }));
+    expect(onReveal).toHaveBeenCalledTimes(1);
+    expect(screen.getByLabelText("레버 추첨 장식")).toHaveStyle({
+      backgroundImage: 'url("/images/reveal/announcement-scene.png")',
+    });
+  });
   it("추첨 시작 전 현재 경품명과 추첨 시작을 안내하고 경품마다 번호를 다시 매긴다", () => {
     render(
       <RevealStage
@@ -61,6 +78,21 @@ describe("RevealStage", () => {
     expect(
       screen.getByRole("button", { name: "스탠리 텀블러 추첨 시작" }),
     ).toBeEnabled();
+  });
+
+  it("대기 화면은 추첨 준비 상태 메시지와 장식 요소를 표시한다", () => {
+    render(
+      <RevealStage
+        groups={[]}
+        status="DRAWN"
+        nextPrizeName="기계식 키보드"
+        onReveal={() => undefined}
+        busy={false}
+      />,
+    );
+
+    expect(screen.getByText("추첨 대기 중")).toBeInTheDocument();
+    expect(screen.getByLabelText("레버 추첨 장식")).toBeInTheDocument();
   });
 
   it("추첨 진행 중에는 진행 문구를 표시한다", () => {

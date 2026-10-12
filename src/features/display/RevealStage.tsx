@@ -1,5 +1,7 @@
 "use client";
 
+import styles from "./RevealStage.module.css";
+
 export type RevealGroup = {
   prizeCode: string;
   prizeName: string;
@@ -21,6 +23,34 @@ export default function RevealStage({
 }) {
   const startLabel = nextPrizeName ? `${nextPrizeName} 추첨 시작` : "추첨 시작";
 
+  if (status === "DRAWN" && groups.length === 0 && !busy) {
+    return (
+      <section aria-label="당첨자 공개" className={styles.stage}>
+        <div className={styles.sceneArea}>
+          <div
+            className={styles.scene}
+            aria-label="레버 추첨 장식"
+            style={{
+              backgroundImage: 'url("/images/reveal/announcement-scene.png")',
+            }}
+          >
+            <h1 className="sr-only">당첨자 발표</h1>
+            <p role="status" className="sr-only">
+              추첨 대기 중
+            </p>
+            <button
+              type="button"
+              onClick={onReveal}
+              aria-label={nextPrizeName ? startLabel : "레버 돌리기"}
+              className={styles.lever}
+            >
+              <span className="sr-only">레버 돌리기</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
   return (
     <section
       aria-label="당첨자 공개"
