@@ -1,18 +1,33 @@
 /* Only this view cancels the home page's 16px padding. */
 .viewport {
   margin: -16px;
-  min-height: 100svh;
+  min-height: 100dvh;
   background: #eef7fc;
 }
 
 .scene {
+  --preview-gutter: 0px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --available-height: calc(
+    100dvh - var(--preview-gutter) - var(--safe-top) - var(--safe-bottom)
+  );
+  --top-gap: clamp(8px, 2.5dvh, 24px);
+  /* Ribbon + original ticket ratio; leave room for the existing result notice. */
+  --ticket-width: max(
+    min(260px, 95cqw),
+    min(
+      95cqw,
+      calc((var(--available-height) - var(--top-gap) - 6.5rem - 8px) / 1.82)
+    )
+  );
   position: relative;
   isolation: isolate;
   width: 100%;
   max-width: 430px;
-  min-height: 100svh;
+  min-height: calc(100dvh - var(--preview-gutter));
   margin-inline: auto;
-  overflow: hidden;
+  overflow-x: clip;
   background: #afe1fc;
   container-type: inline-size;
   font-family: Arial, "Malgun Gothic", sans-serif;
@@ -26,16 +41,19 @@
 }
 
 .content {
-  padding-top: calc(52px + env(safe-area-inset-top));
-  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - var(--preview-gutter));
+  padding-top: calc(var(--top-gap) + var(--safe-top));
+  padding-bottom: calc(8px + var(--safe-bottom));
   text-align: center;
 }
 
 .ribbon {
   position: relative;
   z-index: 2;
-  width: 61%;
-  margin: 0 auto 3px;
+  width: calc(var(--ticket-width) * 0.58);
+  margin: 0 auto 4px;
   filter: drop-shadow(0 5px 5px #318ecb26);
 }
 
@@ -45,34 +63,43 @@
   height: auto;
 }
 
-.ribbon p {
-  position: absolute;
-  inset: 24% 0 auto;
-  margin: 0;
-  color: #0879e8;
-  font-size: clamp(14px, 4cqw, 18px);
+.ribbonText {
+  fill: var(--ribbon-ink, #0879e8);
+  font-size: 19px;
   font-weight: 800;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.4px;
 }
 
 .ticket {
   position: relative;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  width: var(--ticket-width);
+  min-height: calc(var(--ticket-width) * 1536 / 1024);
   margin-inline: auto;
+  container-type: inline-size;
+  flex-shrink: 0;
 }
 
 .frame {
+  position: absolute;
+  top: 0;
   display: block;
-  width: 100%;
+  left: -2.5%;
+  width: 105%;
+  max-width: none;
   height: auto;
+  /* Fade only the buried end into the single cloud layer, without stretching it. */
+  mask-image: linear-gradient(to bottom, #000 73%, transparent 83%);
   pointer-events: none;
 }
 
 .message {
-  position: absolute;
+  position: relative;
   z-index: 1;
-  top: 10%;
-  inset-inline: 14%;
+  width: 72%;
+  margin-inline: auto;
+  padding-top: 18cqw;
   color: #4e7095;
 }
 
@@ -80,16 +107,16 @@
   display: block;
   width: 7.5cqw;
   height: 7.5cqw;
-  margin: 0 auto 3cqw;
+  margin: 0 auto 2.5cqw;
   filter: drop-shadow(0 2px 1px #fff);
 }
 
 .title {
   margin: 0;
   color: #0878df;
-  font-size: 7.8cqw;
+  font-size: clamp(1.5rem, 7.8cqw, 2.125rem);
   font-weight: 900;
-  line-height: 1.32;
+  line-height: 1.28;
   letter-spacing: -0.065em;
   text-shadow: 0 2px 0 #d2ebff;
   -webkit-text-stroke: 0.65px currentColor;
@@ -101,61 +128,83 @@
 }
 
 .title span:first-child {
-  font-size: 10cqw;
+  font-size: clamp(1.875rem, 10cqw, 2.625rem);
 }
 
 .description {
-  margin: 3.8cqw 0 0;
-  font-size: 3.45cqw;
+  margin: 3.2cqw 0 0;
+  font-size: clamp(0.6875rem, 3.45cqw, 0.875rem);
   font-weight: 600;
-  line-height: 1.65;
+  line-height: 1.55;
   letter-spacing: -0.055em;
 }
 
 /* Clouds are anchored to the character, never to the viewport. */
 .characterStage {
-  position: absolute;
-  inset: 33% 0 0;
+  position: relative;
+  flex: 1;
+  min-height: 82cqw;
 }
 
 .character {
   position: absolute;
-  top: 0;
-  left: 7%;
-  width: 86%;
+  z-index: 2;
+  top: calc(3% - 13cqw);
+  left: 10%;
+  width: 80%;
   height: auto;
 }
 
 .clouds {
   position: absolute;
-  z-index: 2;
-  bottom: -1%;
-  left: -5%;
-  width: 110%;
+  z-index: 3;
+  bottom: -22%;
+  left: -10%;
+  width: 120%;
   max-width: none;
   height: auto;
   pointer-events: none;
+  mask-image: linear-gradient(to bottom, #000 94%, transparent 100%);
 }
 
 .notice {
   position: relative;
   z-index: 3;
-  margin: -2cqw 7% 0;
-  padding: 12px 14px;
+  margin: auto 7% 0;
+  padding: 13px 12px;
   border: 1px solid #ffffffb3;
   border-radius: 16px;
   background: #f3fbffe6;
   color: #476985;
-  font-size: 12px;
-  line-height: 1.65;
+  font-size: clamp(0.625rem, 3.1cqw, 0.75rem);
+  line-height: 1.5;
 }
 
 .notice p {
   margin: 0;
 }
 
+.notice p + p {
+  margin-top: 5px;
+}
+
 .noticeTitle {
-  font-weight: 700;
+  color: #264767;
+  font-size: 1.125em;
+  font-weight: 800;
+}
+
+.noticeTiming {
+  font-size: 1.04em;
+  font-weight: 600;
+}
+
+.noticeIcon {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 0.4em;
+  vertical-align: -0.15em;
 }
 
 @media (min-width: 600px) {
@@ -164,8 +213,15 @@
   }
 
   .scene {
-    min-height: 0;
+    --preview-gutter: 48px;
     border-radius: 28px;
     box-shadow: 0 12px 48px #5596bc1f;
+  }
+}
+
+/* Keep text readable in unusually short viewports and at enlarged text sizes. */
+@media (max-height: 520px) {
+  .scene {
+    --top-gap: 8px;
   }
 }
