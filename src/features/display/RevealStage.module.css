@@ -306,7 +306,7 @@
 }
 @media (min-width: 901px) and (min-aspect-ratio: 4/3) {
   .stage {
-    padding: 4vh 2.8vw 5vh;
+    padding: 4vh 2.8vw 3vh;
   }
   .header {
     height: 26vh;
@@ -317,7 +317,10 @@
     padding: 0 0 1vh;
   }
   .heading h1 {
-    width: min(52vw, 110vh);
+    width: min(52vw, 76vh);
+  }
+  .heading .congratulations {
+    width: min(28vw, 48vh);
   }
   .heading p {
     font-size: 3.8vh;
@@ -339,7 +342,7 @@
     border-radius: 3.5vh;
   }
   .product {
-    height: 21vh;
+    height: 20vh;
   }
   .cardTitle {
     min-height: 8.4vh;
