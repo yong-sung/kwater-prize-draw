@@ -440,3 +440,59 @@
     min-height: 180px;
   }
 }
+
+.preDrawStage {
+  min-height: 100dvh;
+  background: #a8ddfa;
+  color: #172c48;
+}
+
+.sceneArea {
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #e5f8ff, #95d2f7);
+}
+
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.lever {
+  position: absolute;
+  left: 42.25%;
+  top: 73.3%;
+  width: 15.5%;
+  height: 9.6%;
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  transition:
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.lever:hover:not(:disabled) {
+  background: rgb(255 240 132 / 15%);
+  box-shadow: 0 0 28px rgb(255 216 62 / 65%);
+}
+
+.lever:focus-visible {
+  outline: 4px solid #172c48;
+  outline-offset: 5px;
+}
+
+.lever:disabled {
+  cursor: wait;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lever {
+    transition: none;
+  }
+}

@@ -94,16 +94,30 @@ describe("참석자 모바일 화면", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "응모가 완료되었습니다! 해당 페이지를 종료하지 마세요.",
+        name: "응모가 완료되었어요!",
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("추첨은 행사 종료 직후 진행됩니다."),
+      screen.getByText("곧 당첨자를 추첨할 예정이에요.").closest("p"),
+    ).toHaveTextContent("곧 당첨자를 추첨할 예정이에요. 조금만 기다려주세요!");
+    expect(screen.getByAltText("별 지팡이를 든 방울이")).toHaveAttribute(
+      "src",
+      "/assets/banguli-success.png",
+    );
+    expect(
+      screen.getByText("해당 페이지를 종료하지 마세요."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("추첨이 잠시 후 진행됩니다.")).toBeInTheDocument();
+    const notice = screen
+      .getByText("해당 페이지를 종료하지 마세요.")
+      .closest("aside");
+    expect(notice?.querySelectorAll("p")).toHaveLength(3);
+    expect(notice?.querySelector("p:last-child br")).toBeInTheDocument();
+    expect(
+      screen.getByText("해당 페이지와 강연장 화면에서"),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "해당 페이지와 강연장 화면에서 추첨 결과를 확인하실 수 있습니다.",
-      ),
+      screen.getByText("추첨 결과를 확인하실 수 있습니다."),
     ).toBeInTheDocument();
   });
 
@@ -126,7 +140,9 @@ describe("참석자 모바일 화면", () => {
 
     expect(await screen.findByAltText("행복해하는 방울이")).toBeInTheDocument();
     expect(screen.getByText(/스마트 텀블러/)).toBeInTheDocument();
-    expect(screen.getByText(/당첨/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "당첨되었습니다!" }),
+    ).toBeInTheDocument();
   });
 
   it("NOT_WINNER이면 슬퍼하는 방울이와 꽝 문구를 표시한다", async () => {
@@ -141,7 +157,9 @@ describe("참석자 모바일 화면", () => {
     render(<ParticipantApp />);
 
     expect(await screen.findByAltText("슬퍼하는 방울이")).toBeInTheDocument();
-    expect(screen.getByText(/아쉽지만/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "아쉬워요!" }),
+    ).toBeInTheDocument();
   });
 
   it("미응모 상태에서 CLOSED이면 마감 화면을 표시한다", async () => {
@@ -152,7 +170,7 @@ describe("참석자 모바일 화면", () => {
     render(<ParticipantApp />);
 
     expect(
-      await screen.findByText(/응모가 마감되었습니다/i),
+      await screen.findByRole("heading", { name: "응모가 마감되었어요!" }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /경품 응모/i }),
