@@ -153,13 +153,15 @@ export default function RevealStage({
         {cards.map(({ code, name, image, group }) => (
           <article key={code} className={styles.card}>
             <div className={`${styles.product} ${styles[code.toLowerCase()]}`}>
-              <Image
-                src={image}
-                alt={group?.prizeName ?? name}
-                width={600}
-                height={400}
-                unoptimized
-              />
+              <div className={styles.productArtwork}>
+                <Image
+                  src={image}
+                  alt={group?.prizeName ?? name}
+                  width={600}
+                  height={400}
+                  unoptimized
+                />
+              </div>
             </div>
             <div className={styles.cardTitle}>
               <h2>{group?.prizeName ?? name}</h2>
