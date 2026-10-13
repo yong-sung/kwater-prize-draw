@@ -8,7 +8,6 @@
   min-height: 100svh;
   display: grid;
   place-items: center;
-  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
   background: #eef7fc;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -20,31 +19,25 @@
 
 .scene {
   --event-title-size: 7.32cqw;
+  --ribbon-top: max(7.907cqw, calc(var(--safe-top) + 2px));
   position: relative;
   isolation: isolate;
   container-type: size;
-  width: min(
-    100%,
-    430px,
-    calc(
-      (100svh - var(--safe-top) - var(--safe-bottom) - var(--preview-gutter)) *
-        430 / 830
-    )
-  );
-  aspect-ratio: 430 / 830;
+  width: 100%;
+  height: calc(100svh - var(--preview-gutter));
   margin-inline: auto;
   overflow: clip;
   background: #61c4f8;
   font-family: Arial, "Malgun Gothic", sans-serif;
 }
 
-/* 430×830 기준 장면 안에서 원본 배경과 모든 요소를 함께 비례 조정합니다. */
+/* 원본 비율로 화면을 채우고 상품·캐릭터는 같은 배경 좌표를 사용합니다. */
 .artwork {
   position: absolute;
   z-index: 0;
   bottom: 0;
   left: 50%;
-  width: calc(100cqh * 942 / 1670);
+  width: max(100cqw, calc(100cqh * 942 / 1670));
   aspect-ratio: 942 / 1670;
   transform: translateX(-50%);
 }
@@ -58,7 +51,7 @@
 .ribbon {
   position: absolute;
   z-index: 3;
-  top: 7.907cqw;
+  top: var(--ribbon-top);
   left: 50%;
   width: 58cqw;
   translate: -50% 0;
@@ -87,7 +80,10 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding-top: 41.395cqw;
+  padding-top: max(
+    min(41.395cqw, 21.445cqh),
+    calc(var(--ribbon-top) + 19.4cqw)
+  );
   padding-bottom: 0.93cqw;
   text-align: center;
 }
@@ -149,7 +145,7 @@
 }
 
 .notice {
-  margin-bottom: 4.186cqw;
+  margin-bottom: max(4.186cqw, var(--safe-bottom));
   padding: 2.093cqw 2.791cqw;
   color: #315477;
   font-size: 3.14cqw;
@@ -175,11 +171,11 @@
 @media (min-width: 600px) {
   .viewport {
     --preview-gutter: 48px;
-    padding-top: calc(var(--safe-top) + 24px);
-    padding-bottom: calc(var(--safe-bottom) + 24px);
+    padding-block: 24px;
   }
 
   .scene {
+    width: min(430px, calc((100svh - var(--preview-gutter)) * 430 / 830));
     border-radius: 28px;
     box-shadow: 0 12px 48px #5596bc1f;
   }
@@ -188,6 +184,6 @@
 /* 극단적으로 낮은 화면은 가독성을 유지하고 스크롤을 허용합니다. */
 @media (max-height: 420px) {
   .scene {
-    width: min(100%, 280px);
+    min-height: 560px;
   }
 }

@@ -93,3 +93,12 @@
 .confirm {
   display: none;
 }
+
+/* 짧고 넓은 화면에서만 상품을 캡슐 안쪽으로 정리합니다. */
+@container (min-aspect-ratio: 3/5) {
+  .prize {
+    top: 59%;
+    left: 36%;
+    width: 30%;
+  }
+}
