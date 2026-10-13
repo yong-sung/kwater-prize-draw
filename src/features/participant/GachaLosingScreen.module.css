@@ -5,7 +5,7 @@
 }
 
 .message {
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 .title {
@@ -13,6 +13,6 @@
 }
 
 .description {
-  margin-top: 12px;
-  font-size: clamp(0.71875rem, calc(3cqw + 1.5px), 0.90625rem);
+  margin-top: 2.791cqw;
+  font-size: 3.35cqw;
 }

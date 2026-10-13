@@ -55,6 +55,8 @@ describe("참석자 결과 자동 반영", () => {
     });
 
     expect(await screen.findByText(/기계식 키보드/)).toBeInTheDocument();
-    expect(screen.getByAltText("기계식 키보드 경품 사진")).toBeInTheDocument();
+    expect(
+      screen.getByAltText("방울이 기계식 키보드 경품 사진"),
+    ).toBeInTheDocument();
   });
 });

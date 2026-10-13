@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import ResultScreen from "./ResultScreen";
+import { PRIZE_DISPLAY_NAMES } from "./prize-display";
 
 describe("개인 결과 화면", () => {
   it.each([
@@ -14,7 +15,9 @@ describe("개인 결과 화면", () => {
         <ResultScreen isWinner prizeCode={prizeCode} prizeName="테스트 경품" />,
       );
 
-      expect(screen.getByAltText("테스트 경품 경품 사진")).toHaveAttribute(
+      expect(
+        screen.getByAltText(PRIZE_DISPLAY_NAMES[prizeCode] + " 경품 사진"),
+      ).toHaveAttribute(
         "src",
         expect.stringContaining(encodeURIComponent(src)),
       );
@@ -26,7 +29,9 @@ describe("개인 결과 화면", () => {
       expect(
         screen.getByRole("heading", { name: "당첨되었습니다!" }),
       ).toBeInTheDocument();
-      expect(screen.getByText("테스트 경품")).toBeInTheDocument();
+      expect(
+        screen.getByText(PRIZE_DISPLAY_NAMES[prizeCode]),
+      ).toBeInTheDocument();
       expect(screen.getByText("당첨을 축하합니다.")).toBeInTheDocument();
       expect(screen.getByText("해당 화면을 보여주시면")).toBeInTheDocument();
       expect(screen.getByText("상품으로 교환해 드립니다")).toBeInTheDocument();

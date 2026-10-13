@@ -1,38 +1,37 @@
 .viewport {
-  margin: -1rem;
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: #eef7fc;
-}
-
-:global(main):has(> .viewport > .scene) {
-  min-height: 100dvh;
-}
-
-.scene {
-  --readability-height: calc(50rem - 380px);
-  --event-title-size: calc(clamp(1.265875rem, 6.6215cqw, 1.850125rem) + 3px);
-  --preview-gutter: 0px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
+  --preview-gutter: 0px;
+  margin: -1rem;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  background: #eef7fc;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+:global(main):has(> .viewport > .scene) {
+  min-height: 100svh;
+}
+
+.scene {
+  --event-title-size: 7.32cqw;
+  --ribbon-top: max(7.907cqw, calc(var(--safe-top) + 2px));
   position: relative;
   isolation: isolate;
   container-type: size;
   width: 100%;
-  max-width: 430px;
-  height: calc(100vh - var(--preview-gutter));
-  height: calc(100dvh - var(--preview-gutter));
-  /* 글자 확대 시 하단 안내와 상품명에 필요한 세로 공간도 함께 확보합니다. */
-  min-height: max(26.25rem, var(--readability-height));
+  height: calc(100svh - var(--preview-gutter));
   margin-inline: auto;
   overflow: clip;
   background: #61c4f8;
   font-family: Arial, "Malgun Gothic", sans-serif;
 }
 
-/* The background and mascot share the original artwork's coordinate system. */
+/* 원본 비율로 화면을 채우고 상품·캐릭터는 같은 배경 좌표를 사용합니다. */
 .artwork {
   position: absolute;
   z-index: 0;
@@ -50,29 +49,12 @@
 }
 
 .ribbon {
-  --text-top: calc(
-    max(calc(var(--safe-top) + 16px), clamp(40px, 10cqh, 100px)) + 30px
-  );
-  --ribbon-height: min(17.4cqw, calc(var(--text-top) - var(--safe-top) - 16px));
   position: absolute;
   z-index: 3;
-  top: calc(var(--safe-top) + 4px);
+  top: var(--ribbon-top);
   left: 50%;
-  width: min(
-    58cqw,
-    calc(
-      (
-          max(calc(var(--safe-top) + 16px), clamp(40px, 10cqh, 100px)) + 30px -
-            var(--safe-top) - 16px
-        ) *
-        300 / 90
-    )
-  );
-  translate: -50%
-    min(
-      30px,
-      calc(var(--text-top) - var(--safe-top) - 4px - var(--ribbon-height) + 7px)
-    );
+  width: 58cqw;
+  translate: -50% 0;
   pointer-events: none;
 }
 
@@ -98,18 +80,21 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding-top: max(calc(var(--safe-top) + 16px), clamp(40px, 10cqh, 100px));
-  padding-bottom: calc(var(--safe-bottom) + 4px);
+  padding-top: max(
+    min(41.395cqw, 21.445cqh),
+    calc(var(--ribbon-top) + 19.4cqw)
+  );
+  padding-bottom: 0.93cqw;
   text-align: center;
 }
 
 .message {
   position: relative;
   isolation: isolate;
-  width: min(90%, calc(100% - var(--safe-left) - var(--safe-right) - 24px));
+  width: 90%;
   margin-inline: auto;
   color: #003aa8;
-  translate: 0 30px;
+  translate: 0 0;
 }
 
 .message::before {
@@ -119,7 +104,7 @@
   top: 50%;
   left: 50%;
   width: calc((100% + 12cqw) * 1.888);
-  height: calc((100% + 48px) * 1.652);
+  height: calc((100% + 11.163cqw) * 1.652);
   translate: -50% -50%;
   background: radial-gradient(
     ellipse closest-side at center,
@@ -131,17 +116,8 @@
   pointer-events: none;
 }
 
-.scene:has(> .ribbon) .message {
-  translate: 0 75px;
-}
-
 .scene:has(> .ribbon) .message::before {
-  top: calc(50% - 15px);
-}
-
-.scene[aria-labelledby="entry-complete-title"] .message,
-.scene[aria-labelledby="entry-closed-title"] .message {
-  translate: 0 95px;
+  top: calc(50% - 3.488cqw);
 }
 
 .title {
@@ -160,8 +136,8 @@
 
 .description {
   color: #123b70;
-  margin: clamp(12px, 2cqh, 20px) 0 0;
-  font-size: clamp(0.625rem, 3cqw, 0.8125rem);
+  margin: 3.86cqw 0 0;
+  font-size: 3cqw;
   font-weight: 500;
   line-height: 1.65;
   letter-spacing: -0.035em;
@@ -169,10 +145,10 @@
 }
 
 .notice {
-  margin-bottom: clamp(0px, calc(23cqh - 118px - var(--safe-bottom)), 18px);
-  padding: 9px 12px;
+  margin-bottom: max(4.186cqw, var(--safe-bottom));
+  padding: 2.093cqw 2.791cqw;
   color: #315477;
-  font-size: clamp(0.6875rem, calc(3.1cqw + 1.5px), 0.84375rem);
+  font-size: 3.14cqw;
   font-weight: 500;
   line-height: 1.55;
 }
@@ -182,47 +158,32 @@
   font-weight: 500;
 }
 
+.notice > p + p {
+  margin-top: 1.163cqw;
+}
+
 .notice > p:first-child {
   color: #123b70;
   font-size: 1.08em;
   font-weight: 700;
 }
 
-.scene:has(.notice) {
-  --readability-height: calc(80rem - 860px);
-}
-
-@media (max-height: 620px) {
-  .notice {
-    padding-block: 5px;
-    font-size: calc(clamp(0.6875rem, calc(3.1cqw + 1.5px), 0.84375rem) - 0.5px);
-  }
-}
-
-@media (max-height: 520px) {
-  .scene {
-    min-height: max(
-      35rem,
-      var(--readability-height),
-      calc(160cqw + var(--safe-top) + var(--safe-bottom))
-    );
-  }
-}
-
-@container (min-width: 380px) and (max-height: 620px) {
-  .scene[aria-labelledby="winner-title"] .ribbon {
-    margin-top: -12px;
-  }
-}
-
 @media (min-width: 600px) {
   .viewport {
+    --preview-gutter: 48px;
     padding-block: 24px;
   }
 
   .scene {
-    --preview-gutter: 48px;
+    width: min(430px, calc((100svh - var(--preview-gutter)) * 430 / 830));
     border-radius: 28px;
     box-shadow: 0 12px 48px #5596bc1f;
+  }
+}
+
+/* 극단적으로 낮은 화면은 가독성을 유지하고 스크롤을 허용합니다. */
+@media (max-height: 420px) {
+  .scene {
+    min-height: 560px;
   }
 }

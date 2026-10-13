@@ -1,5 +1,5 @@
 .character {
-  right: calc(max(2%, (100% - 100cqw) / 2 + 2cqw) - 10px);
+  right: calc(max(2%, (100% - 100cqw) / 2 + 2cqw) - 2.326cqw);
   bottom: 23%;
   width: min(40%, 45cqw);
 }
@@ -7,9 +7,10 @@
 .prize {
   position: absolute;
   z-index: 1;
-  top: 45%;
-  left: 28%;
-  width: 46%;
+  bottom: max(24%, calc(32.44% - var(--winner-crowding) * 0.65));
+  left: 51%;
+  width: clamp(34%, calc(46% - var(--winner-crowding) * 0.67), 46%);
+  translate: -50% 0;
   text-align: center;
 }
 
@@ -45,8 +46,12 @@
   height: 120%;
 }
 
-.message {
-  margin-top: 20px;
+.scene .message {
+  position: absolute;
+  top: var(--winner-text-top);
+  left: 50%;
+  translate: -50% 0;
+  margin: 0;
 }
 
 .title {
@@ -54,9 +59,9 @@
 }
 
 .description {
-  margin: calc(clamp(4px, 1cqh, 10px) + 3px) 0 0;
+  margin: 2.628cqw 0 0;
   color: #123b70;
-  font-size: clamp(0.625rem, 3cqw, 0.8125rem);
+  font-size: 3cqw;
   font-weight: 500;
   line-height: 1.5;
   letter-spacing: -0.035em;
@@ -70,18 +75,18 @@
 .prizeName {
   position: absolute;
   z-index: 2;
-  top: calc(81.3% + 30px);
+  top: calc(81.3% + 6.977cqw);
   left: 51%;
   translate: -50% 0;
   width: max-content;
-  max-width: calc(90cqw - var(--safe-left) - var(--safe-right));
+  max-width: 90cqw;
   margin: 0;
-  padding: 6px 12px;
+  padding: 1.395cqw 2.791cqw;
   border-radius: 999px;
   background: #ffffffd9;
   text-align: center;
   color: #123b70;
-  font-size: clamp(0.6875rem, 3.1cqw, 0.875rem);
+  font-size: 3.1cqw;
   font-weight: 900;
   -webkit-text-stroke: 0.2px currentColor;
   line-height: 1.4;
@@ -94,22 +99,18 @@
   display: none;
 }
 
-@media (max-height: 620px) {
-  .message {
-    margin-top: clamp(-30px, calc(150cqh - 900px), 20px);
-  }
-}
-
-@container (min-width: 380px) and (max-height: 620px) {
-  .message:has(.description span:nth-child(3)) {
-    margin-top: clamp(-38px, calc(150cqh - 912px), 20px);
-  }
-
-  .prize {
-    top: 52%;
-  }
-
-  .prize:has([data-prize-code="TUMBLER"]) {
-    top: 55.3%;
-  }
+.scene {
+  --winner-art-height: max(100cqh, calc(100cqw * 1670 / 942));
+  --winner-text-top: max(
+    calc(var(--ribbon-top) + 19.4cqw),
+    min(41.395cqw, calc(100cqh - var(--winner-art-height) * 0.78555))
+  );
+  /* 제목·설명 높이와 간격을 포함해 상품에 필요한 공간만 계산합니다. */
+  --winner-crowding: max(
+    0px,
+    calc(
+      var(--winner-text-top) + 26.912cqw + var(--winner-art-height) * 0.55 -
+        100cqh
+    )
+  );
 }
