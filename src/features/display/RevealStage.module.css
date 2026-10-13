@@ -157,9 +157,8 @@
   font-size: clamp(12px, 1.2vw, 22px);
 }
 .keyboard img {
-  width: 80%;
-  height: 78%;
-  margin-bottom: 5%;
+  width: 96%;
+  height: 100%;
 }
 .scanner img {
   width: 100%;

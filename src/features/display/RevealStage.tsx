@@ -23,7 +23,7 @@ const PRIZES = [
   {
     code: "KEYBOARD",
     name: "기계식 키보드",
-    image: "/images/display/keyboard-placeholder.svg",
+    image: "/images/prizes/keyboard-bangwool.png",
   },
 ];
 
@@ -160,11 +160,6 @@ export default function RevealStage({
                 height={400}
                 unoptimized
               />
-              {code === "KEYBOARD" && (
-                <span className={styles.productNotice}>
-                  경품 이미지 교체 예정
-                </span>
-              )}
             </div>
             <div className={styles.cardTitle}>
               <h2>{group?.prizeName ?? name}</h2>
