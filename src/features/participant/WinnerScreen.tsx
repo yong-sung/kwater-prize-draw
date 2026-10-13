@@ -4,6 +4,7 @@ import styles from "./GachaWaitingScreen.module.css";
 import winner from "./GachaWinnerScreen.module.css";
 import type { PrizeCode } from "@/lib/domain/types";
 import { prizeImagePath } from "@/lib/domain/prize-images";
+import { PRIZE_DISPLAY_NAMES } from "./prize-display";
 
 type WinnerScreenProps = { prizeCode?: PrizeCode; prizeName?: string };
 
@@ -11,6 +12,7 @@ export default function WinnerScreen({
   prizeCode,
   prizeName,
 }: WinnerScreenProps) {
+  const displayName = prizeCode ? PRIZE_DISPLAY_NAMES[prizeCode] : prizeName;
   return (
     <div className={styles.viewport}>
       <section className={styles.scene} aria-labelledby="winner-title">
@@ -55,7 +57,7 @@ export default function WinnerScreen({
               <div className={winner.prizeStage} data-prize-code={prizeCode}>
                 <Image
                   src={prizeImagePath(prizeCode)}
-                  alt={prizeName + " 경품 사진"}
+                  alt={displayName + " 경품 사진"}
                   width={480}
                   height={360}
                   sizes="(max-width: 430px) 75vw, 300px"
@@ -65,7 +67,7 @@ export default function WinnerScreen({
             </div>
           ) : null}
           {prizeCode && prizeName ? (
-            <p className={winner.prizeName}>{prizeName}</p>
+            <p className={winner.prizeName}>{displayName}</p>
           ) : null}
           <Image
             src="/assets/banguli_winner.png"

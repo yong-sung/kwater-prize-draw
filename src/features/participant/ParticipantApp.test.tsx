@@ -139,7 +139,7 @@ describe("참석자 모바일 화면", () => {
     render(<ParticipantApp />);
 
     expect(await screen.findByAltText("행복해하는 방울이")).toBeInTheDocument();
-    expect(screen.getByText(/스마트 텀블러/)).toBeInTheDocument();
+    expect(screen.getByText(/스타벅스 X 스탠리 텀블러/)).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "당첨되었습니다!" }),
     ).toBeInTheDocument();
