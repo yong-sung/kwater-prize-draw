@@ -7,9 +7,10 @@
 .prize {
   position: absolute;
   z-index: 1;
-  top: 45%;
-  left: 28%;
-  width: 46%;
+  bottom: max(24%, calc(32.44% - var(--winner-crowding) * 0.65));
+  left: 51%;
+  width: clamp(34%, calc(46% - var(--winner-crowding) * 0.67), 46%);
+  translate: -50% 0;
   text-align: center;
 }
 
@@ -45,8 +46,12 @@
   height: 120%;
 }
 
-.message {
-  margin-top: 0;
+.scene .message {
+  position: absolute;
+  top: var(--winner-text-top);
+  left: 50%;
+  translate: -50% 0;
+  margin: 0;
 }
 
 .title {
@@ -94,11 +99,18 @@
   display: none;
 }
 
-/* 짧고 넓은 화면에서만 상품을 캡슐 안쪽으로 정리합니다. */
-@container (min-aspect-ratio: 3/5) {
-  .prize {
-    top: 59%;
-    left: 36%;
-    width: 30%;
-  }
+.scene {
+  --winner-art-height: max(100cqh, calc(100cqw * 1670 / 942));
+  --winner-text-top: max(
+    calc(var(--ribbon-top) + 19.4cqw),
+    min(41.395cqw, calc(100cqh - var(--winner-art-height) * 0.78555))
+  );
+  /* 제목·설명 높이와 간격을 포함해 상품에 필요한 공간만 계산합니다. */
+  --winner-crowding: max(
+    0px,
+    calc(
+      var(--winner-text-top) + 26.912cqw + var(--winner-art-height) * 0.55 -
+        100cqh
+    )
+  );
 }

@@ -15,7 +15,10 @@ export default function WinnerScreen({
   const displayName = prizeCode ? PRIZE_DISPLAY_NAMES[prizeCode] : prizeName;
   return (
     <div className={styles.viewport}>
-      <section className={styles.scene} aria-labelledby="winner-title">
+      <section
+        className={`${styles.scene} ${winner.scene}`}
+        aria-labelledby="winner-title"
+      >
         <div className={styles.ribbon}>
           <svg viewBox="0 0 300 90" aria-hidden="true">
             <defs>
