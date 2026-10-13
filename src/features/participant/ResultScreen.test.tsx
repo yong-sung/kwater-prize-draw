@@ -24,9 +24,12 @@ describe("개인 결과 화면", () => {
         "/assets/banguli_winner.png",
       );
       expect(
-        screen.getByRole("heading", { name: "축하합니다!" }),
+        screen.getByRole("heading", { name: "당첨되었습니다!" }),
       ).toBeInTheDocument();
-      expect(screen.getByText("이벤트에 당첨되셨어요!")).toBeInTheDocument();
+      expect(screen.getByText("테스트 경품")).toBeInTheDocument();
+      expect(screen.getByText("당첨을 축하합니다.")).toBeInTheDocument();
+      expect(screen.getByText("해당 화면을 보여주시면")).toBeInTheDocument();
+      expect(screen.getByText("상품으로 교환해 드립니다")).toBeInTheDocument();
       expect(screen.getAllByAltText(/경품 사진/)).toHaveLength(1);
       expect(
         screen.queryByRole("button", { name: "확인하기" }),
@@ -45,7 +48,7 @@ describe("개인 결과 화면", () => {
       "/assets/banguli_losing.png",
     );
     expect(
-      screen.getByRole("heading", { name: "아쉽지만 당첨되지 않았어요" }),
+      screen.getByRole("heading", { name: "아쉬워요!" }),
     ).toBeInTheDocument();
     expect(
       screen.getByText("이벤트에 참여해 주셔서 감사합니다."),

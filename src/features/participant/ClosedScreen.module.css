@@ -1,37 +1,7 @@
-/* Reuse the completed view's layout; only the closed view's colors differ. */
-.scene {
-  background: #c6d4e1;
-}
-
 .background {
-  filter: grayscale(75%) saturate(55%) brightness(0.92);
+  filter: grayscale(55%) saturate(65%) brightness(0.96);
 }
 
-.frame {
-  filter: grayscale(75%) saturate(50%);
-}
-
-.clouds {
-  filter: grayscale(80%) saturate(40%);
-}
-
-.ribbon {
-  --ribbon-ink: #7488a4;
-}
-
-.title {
-  color: #264767;
-  text-shadow: 0 2px 0 #e2e9ef;
-}
-
-.description {
-  color: #506b89;
-}
-
-/* Match the portrait asset's visible face and hands to the shared cloud anchor. */
 .character {
-  top: auto;
-  bottom: -25%;
-  left: 14%;
-  width: 72%;
+  bottom: 21.8%;
 }
