@@ -5,6 +5,8 @@
   font-display: swap;
 }
 .stage {
+  --winner-row-height: clamp(56px, 4vw, 72px);
+  --winner-row-gap: 8px;
   position: relative;
   isolation: isolate;
   min-height: 100dvh;
@@ -210,7 +212,10 @@
 .winners {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  grid-auto-rows: minmax(var(--winner-row-height), auto);
+  align-content: start;
+  min-height: calc(var(--winner-row-height) * 5 + var(--winner-row-gap) * 4);
+  gap: var(--winner-row-gap);
   list-style: none;
   padding: 0;
   margin: 14px 0 0;
@@ -221,7 +226,7 @@
   justify-content: center;
   min-width: 0;
   gap: 5px;
-  min-height: clamp(48px, 4vw, 72px);
+  min-height: var(--winner-row-height);
   padding: 7px 5px;
   border-radius: 13px;
   background: linear-gradient(130deg, #e5f3ff, #def0ff);
@@ -254,7 +259,8 @@
 }
 .waiting {
   display: flex;
-  min-height: clamp(190px, 20vw, 360px);
+  min-height: calc(var(--winner-row-height) * 5 + var(--winner-row-gap) * 4);
+  margin-top: 14px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -314,6 +320,8 @@
 }
 @media (min-width: 901px) and (min-aspect-ratio: 4/3) {
   .stage {
+    --winner-row-height: max(6.4vh, 52px);
+    --winner-row-gap: 0.8vh;
     padding: 3vh 2.8vw;
   }
   .header {
@@ -353,7 +361,7 @@
     height: 16vh;
   }
   .cardTitle {
-    min-height: 8.4vh;
+    min-height: max(8.4vh, 72px);
     padding: 1.6vh 0;
   }
   .cardTitle h2 {
@@ -364,7 +372,7 @@
     font-size: 3.3vh;
   }
   .winners {
-    gap: 0.8vh 0.6vw;
+    column-gap: 0.6vw;
     margin-top: 1.2vh;
   }
   .winner {
@@ -379,7 +387,7 @@
     font-size: max(14px, 1.85vh);
   }
   .waiting {
-    min-height: 30vh;
+    margin-top: 1.2vh;
   }
   .footer {
     margin-top: 1vh;
@@ -443,9 +451,6 @@
   }
   .department {
     font-size: 12px;
-  }
-  .waiting {
-    min-height: 180px;
   }
 }
 
