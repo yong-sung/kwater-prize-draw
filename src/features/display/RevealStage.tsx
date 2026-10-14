@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { useEnterReveal } from "./useEnterReveal";
 import styles from "./RevealStage.module.css";
 
@@ -105,6 +105,11 @@ export default function RevealStage({
   }
   return (
     <section aria-label="당첨자 공개" className={styles.stage}>
+      {cards
+        .filter(({ group }) => group && group.winners.length >= 15)
+        .map(({ code }) => (
+          <PrizeFireworks key={code} prizeCode={code} />
+        ))}
       <div aria-hidden="true" className={styles.decorations}>
         {Array.from({ length: 12 }, (_, index) => (
           <i
@@ -237,6 +242,82 @@ export default function RevealStage({
         )}
       </footer>
     </section>
+  );
+}
+
+// 경품별로 한 번 마운트하여 명단의 반복 갱신에도 애니메이션을 재시작하지 않는다.
+function PrizeFireworks({ prizeCode }: { prizeCode: string }) {
+  const palettes = [
+    ["#fff4bc", "#ffc34a", "#ff873d"],
+    ["#ffffff", "#a5e8ff", "#d5b5ff"],
+    ["#fff1c9", "#ff8baa", "#ffd66a"],
+  ];
+  return (
+    <div
+      className={styles.fireworks}
+      aria-hidden="true"
+      data-fireworks-prize={prizeCode}
+    >
+      {["left", "right"].map((side) => (
+        <div
+          key={side}
+          className={`${styles.fireworksSide} ${side === "left" ? styles.fireworksLeft : styles.fireworksRight}`}
+          data-fireworks-side={side}
+        >
+          {Array.from({ length: 3 }, (_, burst) => (
+            <div
+              key={burst}
+              className={styles.fireworkBurst}
+              style={
+                {
+                  "--burst-delay": `${burst * 0.85 + (side === "right" ? 0.12 : 0)}s`,
+                  "--burst-x": `${[0, 5, -3][burst]}vw`,
+                  "--burst-y": `${[0, 8, 2][burst]}vh`,
+                } as CSSProperties
+              }
+            >
+              <i className={styles.fireworkFlash} />
+              <svg
+                className={styles.fireworkTrails}
+                viewBox="-360 -360 720 720"
+                focusable="false"
+              >
+                {Array.from({ length: 64 }, (_, index) => {
+                  const angle = (index / 64) * Math.PI * 2;
+                  const radius = 190 + ((index * 37) % 110);
+                  const x = Math.cos(angle) * radius;
+                  const y = Math.sin(angle) * radius;
+                  const path = `M 0 0 C ${x * 0.45} ${y * 0.45} ${x * 0.9} ${y * 0.9} ${x} ${y + 85}`;
+                  return (
+                    <g
+                      key={index}
+                      style={
+                        {
+                          "--trail-delay": `${burst * 0.85 + (side === "right" ? 0.12 : 0) + (index % 4) * 0.025}s`,
+                          "--trail-duration": `${2.1 + (index % 5) * 0.12}s`,
+                          "--spark-color": palettes[burst][index % 3],
+                        } as CSSProperties
+                      }
+                    >
+                      <path
+                        className={styles.fireworkTrail}
+                        d={path}
+                        pathLength={100}
+                      />
+                      <path
+                        className={styles.fireworkEmbers}
+                        d={path}
+                        pathLength={100}
+                      />
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
 

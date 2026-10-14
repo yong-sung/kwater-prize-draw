@@ -20,6 +20,133 @@
     linear-gradient(125deg, #20c5ff, #0095f6 60%, #26caff);
   font-family: "Arial Rounded MT Bold", "Malgun Gothic", sans-serif;
 }
+.fireworks {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fireworksSide {
+  position: absolute;
+  top: 17vh;
+}
+.fireworksLeft {
+  left: 14%;
+}
+.fireworksRight {
+  right: 14%;
+  transform: scaleX(-1);
+}
+.fireworkBurst {
+  position: absolute;
+  left: var(--burst-x);
+  top: var(--burst-y);
+}
+.fireworkTrails {
+  position: absolute;
+  width: clamp(320px, 40vw, 720px);
+  height: clamp(320px, 40vw, 720px);
+  overflow: visible;
+  transform: translate(-50%, -50%);
+}
+.fireworkTrail,
+.fireworkEmbers {
+  fill: none;
+  stroke: var(--spark-color);
+  stroke-linecap: round;
+  opacity: 0;
+}
+.fireworkTrail {
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 3px var(--spark-color));
+  animation: firework-trail var(--trail-duration)
+    cubic-bezier(0.12, 0.6, 0.3, 1) var(--trail-delay) both;
+}
+.fireworkEmbers {
+  stroke-width: 2.5;
+  stroke-dasharray: 0.3 3;
+  filter: drop-shadow(0 0 2px #fff3c4);
+  animation: firework-embers var(--trail-duration) ease-out var(--trail-delay)
+    both;
+}
+.fireworkFlash {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff, #ffe16780 30%, transparent 70%);
+  opacity: 0;
+  animation: firework-flash 0.6s ease-out var(--burst-delay) both;
+}
+@keyframes firework-trail {
+  0% {
+    opacity: 0;
+    stroke-dasharray: 1 100;
+    stroke-dashoffset: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 1;
+    stroke-dasharray: 32 100;
+    stroke-dashoffset: -28;
+  }
+  70% {
+    opacity: 0.95;
+    stroke-dasharray: 20 100;
+    stroke-dashoffset: -72;
+  }
+  100% {
+    opacity: 0;
+    stroke-dasharray: 2 100;
+    stroke-dashoffset: -98;
+  }
+}
+@keyframes firework-embers {
+  0%,
+  18% {
+    opacity: 0;
+    clip-path: circle(0% at 50% 50%);
+  }
+  40% {
+    opacity: 0.8;
+    clip-path: circle(36% at 50% 50%);
+  }
+  55% {
+    opacity: 0.3;
+  }
+  65% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.4;
+    clip-path: circle(65% at 50% 50%);
+  }
+  100% {
+    opacity: 0;
+    clip-path: circle(75% at 50% 50%);
+  }
+}
+@keyframes firework-flash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fireworks {
+    display: none;
+  }
+}
 .decorations {
   position: absolute;
   inset: 0;

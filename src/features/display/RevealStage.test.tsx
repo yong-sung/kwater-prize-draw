@@ -4,6 +4,61 @@ import userEvent from "@testing-library/user-event";
 import RevealStage from "./RevealStage";
 
 describe("RevealStage", () => {
+  it("각 경품의 15번째 당첨자 공개에 양쪽 폭죽을 재생하고 같은 명단 갱신에는 반복하지 않는다", () => {
+    const group = (prizeCode: string, count: number) => ({
+      prizeCode,
+      prizeName: prizeCode,
+      winners: Array.from({ length: count }, (_, index) => ({
+        name: `당첨자${index + 1}`,
+        department: "본부",
+      })),
+    });
+    const props = { status: "REVEALING", onReveal: vi.fn(), busy: false };
+    const { container, rerender } = render(
+      <RevealStage {...props} groups={[group("KEYBOARD", 14)]} />,
+    );
+    expect(container.querySelectorAll("[data-fireworks-prize]")).toHaveLength(
+      0,
+    );
+    rerender(<RevealStage {...props} groups={[group("KEYBOARD", 15)]} />);
+    const first = container.querySelector('[data-fireworks-prize="KEYBOARD"]');
+    expect(first).toHaveAttribute("aria-hidden", "true");
+    expect(first?.querySelectorAll("[data-fireworks-side]")).toHaveLength(2);
+    rerender(<RevealStage {...props} groups={[group("KEYBOARD", 15)]} />);
+    expect(container.querySelector('[data-fireworks-prize="KEYBOARD"]')).toBe(
+      first,
+    );
+    rerender(
+      <RevealStage
+        {...props}
+        groups={[
+          group("KEYBOARD", 15),
+          group("TUMBLER", 15),
+          group("SCANNER", 14),
+        ]}
+      />,
+    );
+    expect(container.querySelectorAll("[data-fireworks-prize]")).toHaveLength(
+      2,
+    );
+    rerender(
+      <RevealStage
+        {...props}
+        groups={[
+          group("KEYBOARD", 15),
+          group("TUMBLER", 15),
+          group("SCANNER", 15),
+        ]}
+      />,
+    );
+    expect(container.querySelectorAll("[data-fireworks-prize]")).toHaveLength(
+      3,
+    );
+    rerender(<RevealStage {...props} groups={[]} />);
+    expect(container.querySelectorAll("[data-fireworks-prize]")).toHaveLength(
+      0,
+    );
+  });
   it("Enter로 화면을 열어도 공개하지 않으며 키를 누르고 있어도 추첨이 시작되지 않는다", () => {
     vi.useFakeTimers();
     try {
