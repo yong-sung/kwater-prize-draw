@@ -11,6 +11,11 @@ export type RevealGroup = {
 
 const PRIZES = [
   {
+    code: "KEYBOARD",
+    name: "기계식 키보드",
+    image: "/images/prizes/keyboard-bangwool.png",
+  },
+  {
     code: "TUMBLER",
     name: "스타벅스 텀블러",
     image: "/images/prizes/cut_tumbler.png",
@@ -19,11 +24,6 @@ const PRIZES = [
     code: "SCANNER",
     name: "코닥 라벨 에라 M50",
     image: "/images/prizes/scanner.png",
-  },
-  {
-    code: "KEYBOARD",
-    name: "기계식 키보드",
-    image: "/images/prizes/keyboard-bangwool.png",
   },
 ];
 
