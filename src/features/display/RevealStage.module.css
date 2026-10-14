@@ -164,24 +164,13 @@
   width: 96%;
   height: 100%;
 }
-.tumbler .productArtwork {
-  width: auto;
-  aspect-ratio: 365 / 750;
-}
 .scanner .productArtwork {
   width: auto;
   aspect-ratio: 650 / 550;
 }
-.tumbler img,
 .scanner img {
   position: absolute;
   max-width: none;
-}
-.tumbler img {
-  width: 273.973%;
-  height: 133.333%;
-  left: -101.37%;
-  top: -16.667%;
 }
 .scanner img {
   width: 153.846%;
