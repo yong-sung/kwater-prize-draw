@@ -30,11 +30,11 @@
 
 .prizeStage[data-prize-code="TUMBLER"] .prizeImage {
   inset: auto;
-  top: -18%;
-  left: -10%;
-  width: 120%;
+  top: 8%;
+  left: 10%;
+  width: 80%;
   max-width: none;
-  height: 120%;
+  height: 80%;
 }
 
 .prizeStage[data-prize-code="SCANNER"] .prizeImage {
@@ -72,31 +72,101 @@
   display: block;
 }
 
-.prizeName {
+.confirm {
+  display: none;
+}
+
+.infoCard {
+  --info-space: calc(
+    var(--winner-art-height) * 0.187 - 3cqw - var(--safe-bottom)
+  );
+  --info-unit: clamp(0.5px, calc(var(--info-space) / 146), 1.2px);
+  --info-room: clamp(0px, calc(var(--info-space) - 100px), 20px);
   position: absolute;
   z-index: 2;
-  top: calc(81.3% + 6.977cqw);
-  left: 51%;
+  top: calc(81.3% + 2cqw);
+  left: 50%;
   translate: -50% 0;
-  width: max-content;
-  max-width: 90cqw;
-  margin: 0;
-  padding: 1.395cqw 2.791cqw;
-  border-radius: 999px;
-  background: #ffffffd9;
-  text-align: center;
+  width: 90cqw;
+  min-height: min(var(--info-space), calc(140 * var(--info-unit)));
+  max-height: var(--info-space);
+  overflow: auto;
+  padding: calc(3 * var(--info-unit) + var(--info-room) * 0.25)
+    calc(16 * var(--info-unit));
+  border: 1px solid #ffffffcc;
+  border-radius: 5cqw;
+  background: #ffffffe6;
   color: #123b70;
-  font-size: 3.1cqw;
+  text-align: center;
+}
+
+.cardLabel {
+  display: table;
+  margin: 0 auto;
+  padding: calc(var(--info-unit) + var(--info-room) * 0.1)
+    calc(18 * var(--info-unit));
+  border-radius: 999px;
+  background: #bce8ff;
+  font-size: max(10px, calc(13 * var(--info-unit)));
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.cardPrizeName {
+  margin: calc(4 * var(--info-unit) + var(--info-room) * 0.15) 0 0;
+  color: #123b70;
+  font-size: max(16px, min(calc(26 * var(--info-unit)), 5.2cqw));
   font-weight: 900;
-  -webkit-text-stroke: 0.2px currentColor;
-  line-height: 1.4;
-  white-space: normal;
+  -webkit-text-stroke: 0.15px currentColor;
+  line-height: 1.15;
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
 
-.confirm {
-  display: none;
+.winnerDetails {
+  display: grid;
+  gap: calc(4 * var(--info-unit) + var(--info-room) * 0.15);
+  margin: calc(3 * var(--info-unit) + var(--info-room) * 0.15) 0 0;
+  padding-top: calc(3 * var(--info-unit) + var(--info-room) * 0.15);
+  border-top: 1px solid #cce5f6;
+  font-size: max(10.5px, calc(15 * var(--info-unit)));
+  line-height: calc(1.2em + var(--info-room) * 0.05);
+}
+
+.winnerDetails > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  width: 86%;
+  margin-inline: auto;
+}
+
+.winnerDetails dt {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4em;
+  color: #597294;
+  font-weight: 500;
+  border-right: 1px solid #597294;
+  padding-right: 0.6em;
+  white-space: nowrap;
+}
+
+.winnerDetails svg {
+  width: 1em;
+  height: 1em;
+  flex: none;
+}
+
+.winnerDetails dd {
+  margin: 0;
+  padding-left: 1.2em;
+  text-align: left;
+  font-weight: 700;
+  min-width: 0;
+  white-space: nowrap;
+  overflow-x: auto;
 }
 
 .scene {

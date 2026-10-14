@@ -4,6 +4,30 @@ import ResultScreen from "./ResultScreen";
 import { PRIZE_DISPLAY_NAMES } from "./prize-display";
 
 describe("개인 결과 화면", () => {
+  it("인증된 당첨자의 부서와 이름을 정보 카드에 호칭 없이 표시한다", () => {
+    render(
+      <ResultScreen
+        isWinner
+        prizeCode="SCANNER"
+        prizeName="기존 데이터 명칭"
+        name="테스트이름"
+        department="테스트부서"
+      />,
+    );
+    expect(screen.getByText("당첨 상품")).toBeInTheDocument();
+    expect(screen.getByText("코닥 라벨 에라")).toBeInTheDocument();
+    expect(screen.getByText("당첨자 부서")).toBeInTheDocument();
+    expect(screen.getByText("테스트부서")).toBeInTheDocument();
+    expect(screen.getByText("테스트이름")).toBeInTheDocument();
+    expect(screen.queryByText("테스트이름님")).not.toBeInTheDocument();
+  });
+
+  it("이름·부서가 없으면 빈 값 대신 대시를 표시한다", () => {
+    render(<ResultScreen isWinner prizeCode="KEYBOARD" prizeName="경품" />);
+    expect(screen.getAllByText("—")).toHaveLength(2);
+    expect(screen.queryByText(/undefined|null/)).not.toBeInTheDocument();
+  });
+
   it.each([
     ["KEYBOARD", "/images/prizes/keyboard.png"],
     ["TUMBLER", "/images/prizes/tumbler.png"],

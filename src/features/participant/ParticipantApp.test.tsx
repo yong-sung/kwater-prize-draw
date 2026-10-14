@@ -131,6 +131,7 @@ describe("참석자 모바일 화면", () => {
           name: "홍길동",
           prizeCode: "TUMBLER",
           prizeName: "스마트 텀블러",
+          department: "테스트부서",
         }),
         { status: 200 },
       ),
@@ -140,6 +141,8 @@ describe("참석자 모바일 화면", () => {
 
     expect(await screen.findByAltText("행복해하는 방울이")).toBeInTheDocument();
     expect(screen.getByText(/스타벅스 X 스탠리 텀블러/)).toBeInTheDocument();
+    expect(screen.getByText("홍길동")).toBeInTheDocument();
+    expect(screen.getByText("테스트부서")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "당첨되었습니다!" }),
     ).toBeInTheDocument();

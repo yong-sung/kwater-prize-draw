@@ -2,6 +2,9 @@
 
 :root {
   color-scheme: light;
+  color-scheme: only light;
+  color: #000;
+  background-color: #fff;
 }
 
 body {
