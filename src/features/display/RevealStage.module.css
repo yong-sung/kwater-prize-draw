@@ -250,10 +250,12 @@
   animation: mascotDance 2.4s ease-in-out infinite;
 }
 .mascotLeft {
+  --mascot-tilt: -8deg;
   left: 1%;
   transform: rotate(-8deg);
 }
 .mascotRight {
+  --mascot-tilt: 8deg;
   right: 0;
   transform: rotate(8deg);
   animation-delay: -1.2s;
@@ -663,20 +665,16 @@
 @keyframes mascotDance {
   0%,
   100% {
-    translate: -3px 0;
-    rotate: -3deg;
+    transform: translate(-5px, 0) rotate(calc(var(--mascot-tilt) - 6deg));
   }
   25% {
-    translate: 0 -8px;
-    rotate: 0deg;
+    transform: translate(0, -14px) rotate(var(--mascot-tilt)) scale(1.02);
   }
   50% {
-    translate: 3px 0;
-    rotate: 3deg;
+    transform: translate(5px, 0) rotate(calc(var(--mascot-tilt) + 6deg));
   }
   75% {
-    translate: 0 -5px;
-    rotate: 0deg;
+    transform: translate(0, -9px) rotate(var(--mascot-tilt));
   }
 }
 @keyframes titleFloat {
