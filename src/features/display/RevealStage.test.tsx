@@ -17,8 +17,18 @@ describe("RevealStage", () => {
     await userEvent.click(screen.getByRole("button", { name: "레버 돌리기" }));
     expect(onReveal).toHaveBeenCalledTimes(1);
     expect(screen.getByLabelText("레버 추첨 장식")).toHaveStyle({
-      backgroundImage: 'url("/images/reveal/announcement-scene.png")',
+      backgroundImage: 'url("/images/reveal/announcement-scene-v2.png")',
     });
+  });
+  it("첫 공개 요청 중에도 발표 전 화면을 유지하고 레버 중복 클릭을 막는다", async () => {
+    const onReveal = vi.fn();
+    render(<RevealStage groups={[]} status="DRAWN" onReveal={onReveal} busy />);
+    const lever = screen.getByRole("button", { name: "레버 돌리기" });
+    expect(lever).toBeDisabled();
+    expect(screen.getByRole("status")).toHaveTextContent("추첨 중");
+    expect(screen.getByLabelText("레버 추첨 장식")).toBeInTheDocument();
+    await userEvent.click(lever);
+    expect(onReveal).not.toHaveBeenCalled();
   });
   it("추첨 시작 전 현재 경품명과 추첨 시작을 안내하고 경품마다 번호를 다시 매긴다", () => {
     render(

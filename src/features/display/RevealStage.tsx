@@ -50,7 +50,7 @@ export default function RevealStage({
   const extraGroups = groups.filter(
     (group) => !PRIZES.some((prize) => prize.code === group.prizeCode),
   );
-  if (status === "DRAWN" && groups.length === 0 && !busy) {
+  if (status === "DRAWN" && groups.length === 0) {
     return (
       <section aria-label="당첨자 공개" className={styles.preDrawStage}>
         <div className={styles.sceneArea}>
@@ -58,16 +58,20 @@ export default function RevealStage({
             className={styles.scene}
             aria-label="레버 추첨 장식"
             style={{
-              backgroundImage: 'url("/images/reveal/announcement-scene.png")',
+              backgroundImage:
+                'url("/images/reveal/announcement-scene-v2.png")',
             }}
           >
             <h1 className="sr-only">당첨자 발표</h1>
+            <p className="sr-only">제4차 AI 인사이트 라운드</p>
+            <p className="sr-only">AI본부 디지털관리처</p>
             <p role="status" className="sr-only">
-              추첨 대기 중
+              {busy ? "추첨 중" : "추첨 대기 중"}
             </p>
             <button
               type="button"
               onClick={onReveal}
+              disabled={busy}
               aria-label={nextPrizeName ? startLabel : "레버 돌리기"}
               className={styles.lever}
             >
