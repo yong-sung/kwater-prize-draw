@@ -13,7 +13,7 @@ const PRIZES = [
   {
     code: "TUMBLER",
     name: "스타벅스 텀블러",
-    image: "/images/prizes/tumbler.png",
+    image: "/images/prizes/cut_tumbler.png",
   },
   {
     code: "SCANNER",
