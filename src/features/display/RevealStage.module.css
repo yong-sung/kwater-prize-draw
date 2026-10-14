@@ -153,12 +153,22 @@
   z-index: -1;
   pointer-events: none;
 }
+.decorations::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(ellipse at 20% 35%, #c7fbff55, transparent 40%),
+    radial-gradient(ellipse at 80% 65%, #9ceaff44, transparent 40%);
+  animation: waterGlow 14s ease-in-out infinite alternate;
+}
 .confetti {
   position: absolute;
   width: clamp(10px, 1.3vw, 24px);
   height: clamp(20px, 2.6vw, 46px);
   border-radius: 4px;
   background: linear-gradient(90deg, #ffca2e, #ffe78a);
+  animation: confettiDrift 6s ease-in-out infinite;
 }
 .confetti:nth-child(3n) {
   background: linear-gradient(90deg, #00d7f7, #9df9ff);
@@ -174,6 +184,7 @@
   box-shadow:
     inset 2px 2px 9px #ffffff80,
     0 0 12px #c3fbff40;
+  animation: bubbleFloat 10s ease-in-out infinite;
 }
 .header {
   position: relative;
@@ -197,6 +208,7 @@
   aspect-ratio: 2161 / 430;
   overflow: hidden;
   margin: 0;
+  animation: titleFloat 5s ease-in-out infinite;
 }
 .titleImage {
   position: absolute;
@@ -234,6 +246,8 @@
   width: clamp(120px, 19vw, 350px);
   height: auto;
   pointer-events: none;
+  transform-origin: 50% 75%;
+  animation: mascotDance 2.4s ease-in-out infinite;
 }
 .mascotLeft {
   left: 1%;
@@ -242,6 +256,13 @@
 .mascotRight {
   right: 0;
   transform: rotate(8deg);
+  animation-delay: -1.2s;
+}
+.stage[data-busy="true"] .mascot {
+  animation-duration: 1.2s;
+}
+.stage[data-busy="true"] .mascotRight {
+  animation-delay: -0.6s;
 }
 .cards {
   position: relative;
@@ -357,6 +378,7 @@
   padding: 7px 5px;
   border-radius: 13px;
   background: linear-gradient(130deg, #e5f3ff, #def0ff);
+  animation: winnerArrive 450ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 .winner > div {
   min-width: 0;
@@ -422,9 +444,16 @@
   font-weight: 800;
   box-shadow: 0 5px 16px #0063b52a;
   cursor: pointer;
+  transition:
+    translate 160ms ease,
+    box-shadow 160ms ease;
 }
 .revealButton:hover {
   background: #e4f5ff;
+}
+.revealButton:hover:not(:disabled) {
+  translate: 0 -2px;
+  box-shadow: 0 8px 24px #0063b54a;
 }
 .revealButton:focus-visible {
   outline: 3px solid #09245f;
@@ -631,8 +660,90 @@
   cursor: wait;
 }
 
+@keyframes mascotDance {
+  0%,
+  100% {
+    translate: -3px 0;
+    rotate: -3deg;
+  }
+  25% {
+    translate: 0 -8px;
+    rotate: 0deg;
+  }
+  50% {
+    translate: 3px 0;
+    rotate: 3deg;
+  }
+  75% {
+    translate: 0 -5px;
+    rotate: 0deg;
+  }
+}
+@keyframes titleFloat {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -4px;
+  }
+}
+@keyframes bubbleFloat {
+  0%,
+  100% {
+    translate: 0 16px;
+    opacity: 0.3;
+  }
+  50% {
+    translate: 16px -48px;
+    opacity: 0.8;
+  }
+}
+@keyframes confettiDrift {
+  0%,
+  100% {
+    translate: -4px 0;
+    transform: rotate(-12deg);
+  }
+  50% {
+    translate: 8px 18px;
+    transform: rotate(12deg);
+  }
+}
+@keyframes waterGlow {
+  from {
+    translate: -2% -1%;
+  }
+  to {
+    translate: 2% 2%;
+  }
+}
+@keyframes winnerArrive {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .lever {
+  .decorations::before,
+  .stage .mascot,
+  .heading h1,
+  .confetti,
+  .bubble,
+  .winner {
+    animation: none;
+  }
+  .lever,
+  .revealButton {
     transition: none;
+  }
+  .revealButton:hover:not(:disabled) {
+    translate: none;
   }
 }

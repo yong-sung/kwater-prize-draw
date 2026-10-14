@@ -104,7 +104,7 @@ export default function RevealStage({
     );
   }
   return (
-    <section aria-label="당첨자 공개" className={styles.stage}>
+    <section aria-label="당첨자 공개" className={styles.stage} data-busy={busy}>
       {cards
         .filter(({ group }) => group && group.winners.length >= 15)
         .map(({ code }) => (
@@ -119,6 +119,8 @@ export default function RevealStage({
               left: `${6 + index * 8}%`,
               top: `${4 + (index % 4) * 21}%`,
               rotate: `${index * 37 + 25}deg`,
+              animationDelay: `${-index * 0.7}s`,
+              animationDuration: `${5 + (index % 4)}s`,
             }}
           />
         ))}
@@ -130,6 +132,8 @@ export default function RevealStage({
               left: `${3 + index * 15}%`,
               top: `${23 + (index % 3) * 27}%`,
               width: `${22 + (index % 3) * 24}px`,
+              animationDelay: `${-index * 1.3}s`,
+              animationDuration: `${8 + (index % 3) * 2}s`,
             }}
           />
         ))}
