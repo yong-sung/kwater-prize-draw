@@ -28,6 +28,6 @@ export async function revealPrizeGroup({
     if (step.eventStatus === "REVEALED" || !step.prizeCode) return;
 
     expectedPrizeCode = step.prizeCode;
-    await wait(200);
+    await wait(0);
   }
 }
