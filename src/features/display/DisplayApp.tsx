@@ -5,7 +5,6 @@ import QrStage from "./QrStage";
 import RevealStage, { type RevealGroup } from "./RevealStage";
 import { orderRevealGroups } from "./reveal-order";
 import { revealPrizeGroup, type RevealStep } from "./revealPrizeGroup";
-import { useEnterReveal } from "./useEnterReveal";
 import { useEventSignal } from "@/features/participant/useEventSignal";
 
 type EventData = {
@@ -77,10 +76,6 @@ export default function DisplayApp() {
       setBusy(false);
     }
   }, [event, status, requestReveal, refresh]);
-  useEnterReveal({
-    enabled: status === "DRAWN" || status === "REVEALING",
-    onReveal: reveal,
-  });
   if (error)
     return (
       <main className="flex min-h-screen items-center justify-center p-8 text-center">

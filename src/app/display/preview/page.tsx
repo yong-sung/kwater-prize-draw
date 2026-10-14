@@ -4,7 +4,7 @@ import RevealStage from "@/features/display/RevealStage";
 
 // 디자인 확인용 가상 명단. 추첨 API와 연결하지 않는다.
 const groups = [
-  { prizeCode: "TUMBLER", prizeName: "스타벅스 텀블러" },
+  { prizeCode: "TUMBLER", prizeName: "스탠리 텀블러" },
   { prizeCode: "SCANNER", prizeName: "코닥 라벨 에라 M50" },
   { prizeCode: "KEYBOARD", prizeName: "기계식 키보드" },
 ].map((prize) => ({

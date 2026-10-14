@@ -1,29 +1,87 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import RevealStage from "./RevealStage";
 
 describe("RevealStage", () => {
-  it("캡슐 머신의 레버를 클릭하면 공개 요청을 한 번 전달한다", async () => {
+  it("Enter로 화면을 열어도 공개하지 않으며 키를 누르고 있어도 추첨이 시작되지 않는다", () => {
+    vi.useFakeTimers();
+    try {
+      const onReveal = vi.fn();
+      render(
+        <RevealStage
+          groups={[]}
+          status="DRAWN"
+          nextPrizeName="기계식 키보드"
+          onReveal={onReveal}
+          busy={false}
+        />,
+      );
+      fireEvent.keyDown(document.body, { key: "Enter" });
+      expect(screen.queryByLabelText("레버 추첨 장식")).not.toBeInTheDocument();
+      expect(onReveal).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(600);
+      fireEvent.keyDown(document.body, { key: "Enter", repeat: true });
+      expect(onReveal).not.toHaveBeenCalled();
+      fireEvent.keyDown(document.body, { key: "Enter" });
+      expect(onReveal).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("서버의 이전 텀블러 이름도 발표 화면에서는 스탠리 텀블러로 표시한다", () => {
+    render(
+      <RevealStage
+        groups={[
+          {
+            prizeCode: "TUMBLER",
+            prizeName: "스타벅스 텀블러",
+            winners: [{ name: "테스트", department: "테스트부서" }],
+          },
+        ]}
+        status="REVEALING"
+        nextPrizeName="스타벅스 텀블러"
+        onReveal={() => undefined}
+        busy={false}
+      />,
+    );
+    expect(
+      screen.getByRole("heading", { name: "스탠리 텀블러" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "스탠리 텀블러 추첨 시작" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("스타벅스 텀블러")).not.toBeInTheDocument();
+  });
+  it("레버는 화면만 전환하고 키보드 추첨 버튼을 눌러야 공개 요청한다", async () => {
     const onReveal = vi.fn();
     render(
       <RevealStage
         groups={[]}
         status="DRAWN"
+        nextPrizeName="기계식 키보드"
         onReveal={onReveal}
         busy={false}
       />,
     );
-    await userEvent.click(screen.getByRole("button", { name: "레버 돌리기" }));
-    expect(onReveal).toHaveBeenCalledTimes(1);
     expect(screen.getByLabelText("레버 추첨 장식")).toHaveStyle({
       backgroundImage: 'url("/images/reveal/announcement-scene-v2.png")',
     });
+    await userEvent.click(
+      screen.getByRole("button", { name: "발표 화면 열기" }),
+    );
+    expect(onReveal).not.toHaveBeenCalled();
+    expect(screen.queryByLabelText("레버 추첨 장식")).not.toBeInTheDocument();
+    expect(screen.getAllByText("공개 대기 중")).toHaveLength(3);
+    await userEvent.click(
+      screen.getByRole("button", { name: "기계식 키보드 추첨 시작" }),
+    );
+    expect(onReveal).toHaveBeenCalledTimes(1);
   });
   it("첫 공개 요청 중에도 발표 전 화면을 유지하고 레버 중복 클릭을 막는다", async () => {
     const onReveal = vi.fn();
     render(<RevealStage groups={[]} status="DRAWN" onReveal={onReveal} busy />);
-    const lever = screen.getByRole("button", { name: "레버 돌리기" });
+    const lever = screen.getByRole("button", { name: "발표 화면 열기" });
     expect(lever).toBeDisabled();
     expect(screen.getByRole("status")).toHaveTextContent("추첨 중");
     expect(screen.getByLabelText("레버 추첨 장식")).toBeInTheDocument();

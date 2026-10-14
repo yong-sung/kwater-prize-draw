@@ -39,6 +39,16 @@ describe("DisplayApp API 계약", () => {
         cache: "no-store",
       }),
     );
+    const lever = await screen.findByRole("button", { name: "발표 화면 열기" });
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/display/reveal",
+      expect.anything(),
+    );
+    await lever.click();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/display/reveal",
+      expect.anything(),
+    );
     const button = await screen.findByRole("button", {
       name: "기계식 키보드 추첨 시작",
     });

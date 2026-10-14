@@ -1,6 +1,8 @@
 ﻿"use client";
 
 import Image from "next/image";
+import { useState } from "react";
+import { useEnterReveal } from "./useEnterReveal";
 import styles from "./RevealStage.module.css";
 
 export type RevealGroup = {
@@ -17,7 +19,7 @@ const PRIZES = [
   },
   {
     code: "TUMBLER",
-    name: "스타벅스 텀블러",
+    name: "스탠리 텀블러",
     image: "/images/prizes/cut_tumbler.png",
   },
   {
@@ -40,17 +42,36 @@ export default function RevealStage({
   onReveal: () => void;
   busy: boolean;
 }) {
+  const [presentationOpen, setPresentationOpen] = useState(false);
+  const showIntro =
+    status === "DRAWN" && groups.length === 0 && !presentationOpen;
+  useEnterReveal({
+    enabled: !busy && (status === "DRAWN" || status === "REVEALING"),
+    onReveal: showIntro ? () => setPresentationOpen(true) : onReveal,
+  });
   const complete = status === "REVEALED" || status === "PUBLISHED";
-  const startLabel = nextPrizeName ? `${nextPrizeName} 추첨 시작` : "추첨 시작";
-  const cards = PRIZES.map((prize) => ({
-    ...prize,
-    group: groups.find((group) => group.prizeCode === prize.code),
-  }));
+  const displayNextPrizeName = nextPrizeName?.replace(
+    "스타벅스 텀블러",
+    "스탠리 텀블러",
+  );
+  const startLabel = displayNextPrizeName
+    ? `${displayNextPrizeName} 추첨 시작`
+    : "추첨 시작";
+  const cards = PRIZES.map((prize) => {
+    const group = groups.find((group) => group.prizeCode === prize.code);
+    return {
+      ...prize,
+      group:
+        group && prize.code === "TUMBLER"
+          ? { ...group, prizeName: prize.name }
+          : group,
+    };
+  });
   // 서버에서 공개한 추가 경품도 명단에서 누락하지 않는다.
   const extraGroups = groups.filter(
     (group) => !PRIZES.some((prize) => prize.code === group.prizeCode),
   );
-  if (status === "DRAWN" && groups.length === 0) {
+  if (showIntro) {
     return (
       <section aria-label="당첨자 공개" className={styles.preDrawStage}>
         <div className={styles.sceneArea}>
@@ -70,9 +91,9 @@ export default function RevealStage({
             </p>
             <button
               type="button"
-              onClick={onReveal}
+              onClick={() => setPresentationOpen(true)}
               disabled={busy}
-              aria-label={nextPrizeName ? startLabel : "레버 돌리기"}
+              aria-label="발표 화면 열기"
               className={styles.lever}
             >
               <span className="sr-only">레버 돌리기</span>

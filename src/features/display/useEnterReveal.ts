@@ -15,7 +15,7 @@ export function useEnterReveal({
   useEffect(() => {
     if (!enabled) return;
     const handler = (event: KeyboardEvent) => {
-      if (event.key !== "Enter") return;
+      if (event.key !== "Enter" || event.repeat) return;
       const target = event.target as HTMLElement | null;
       if (
         target?.matches(
