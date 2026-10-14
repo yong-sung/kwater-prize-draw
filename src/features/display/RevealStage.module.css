@@ -319,7 +319,7 @@
   .header {
     height: 24vh;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
   }
   .heading {
     padding: 0 0 1vh;
@@ -336,7 +336,7 @@
     margin-top: 1.3vh;
   }
   .mascot {
-    width: min(21vw, 39vh);
+    width: min(21vw, 36vh);
     bottom: -7vh;
   }
   .mascotLeft {
@@ -377,7 +377,6 @@
   }
   .department {
     font-size: max(14px, 1.85vh);
-
   }
   .waiting {
     min-height: 30vh;
