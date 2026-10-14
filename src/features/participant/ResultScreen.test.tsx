@@ -77,10 +77,13 @@ describe("개인 결과 화면", () => {
       "/assets/banguli_losing.png",
     );
     expect(
-      screen.getByRole("heading", { name: "아쉬워요!" }),
+      screen.getByRole("heading", { name: "미당첨도 당첨이다!" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("이벤트에 참여해 주셔서 감사합니다."),
+      screen.getByText("이벤트에 함께해 주셔서 감사합니다."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("상품은 놓쳤지만, 참여는 성공!"),
     ).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByAltText(/경품 사진/)).not.toBeInTheDocument();

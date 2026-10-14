@@ -62,13 +62,13 @@ export default function LosingScreen() {
               id="losing-title"
               className={`${styles.title} ${resultStyles.title} ${losingStyles.title}`}
             >
-              아쉬워요!
+              미당첨도 당첨이다!
             </h2>
             <p
               className={`${resultStyles.description} ${losingStyles.description}`}
             >
-              <span>아쉽게도 당첨되지 않았어요.</span>
-              <span>이벤트에 참여해 주셔서 감사합니다.</span>
+              <span>상품은 놓쳤지만, 참여는 성공!</span>
+              <span>이벤트에 함께해 주셔서 감사합니다.</span>
             </p>
           </header>
         </div>
