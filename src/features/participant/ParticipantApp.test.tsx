@@ -161,7 +161,7 @@ describe("참석자 모바일 화면", () => {
 
     expect(await screen.findByAltText("슬퍼하는 방울이")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "아쉬워요!" }),
+      screen.getByRole("heading", { name: "미당첨도 당첨이다!" }),
     ).toBeInTheDocument();
   });
 
