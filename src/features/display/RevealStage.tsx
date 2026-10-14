@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { useState, type CSSProperties } from "react";
+import { useState, useSyncExternalStore, type CSSProperties } from "react";
 import { useEnterReveal } from "./useEnterReveal";
 import styles from "./RevealStage.module.css";
 
@@ -29,6 +29,19 @@ const PRIZES = [
   },
 ];
 
+function subscribeReducedMotion(onChange: () => void) {
+  if (typeof window.matchMedia !== "function") return () => {};
+  const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+function getReducedMotion() {
+  return (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 export default function RevealStage({
   groups,
   status,
@@ -43,6 +56,13 @@ export default function RevealStage({
   busy: boolean;
 }) {
   const [presentationOpen, setPresentationOpen] = useState(false);
+  const [motionOverride, setMotionOverride] = useState<boolean | null>(null);
+  const reducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotion,
+    () => true,
+  );
+  const motionEnabled = motionOverride ?? !reducedMotion;
   const showIntro =
     status === "DRAWN" && groups.length === 0 && !presentationOpen;
   useEnterReveal({
@@ -104,7 +124,20 @@ export default function RevealStage({
     );
   }
   return (
-    <section aria-label="당첨자 공개" className={styles.stage} data-busy={busy}>
+    <section
+      aria-label="당첨자 공개"
+      className={styles.stage}
+      data-busy={busy}
+      data-motion={motionEnabled ? "on" : "off"}
+    >
+      <button
+        type="button"
+        className={styles.motionToggle}
+        onClick={() => setMotionOverride(!motionEnabled)}
+        aria-pressed={motionEnabled}
+      >
+        {motionEnabled ? "움직임 끄기" : "움직임 켜기"}
+      </button>
       {cards
         .filter(({ group }) => group && group.winners.length >= 15)
         .map(({ code }) => (

@@ -143,7 +143,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .fireworks {
+  .stage:not([data-motion="on"]) .fireworks {
     display: none;
   }
 }
@@ -730,15 +730,35 @@
     scale: 1;
   }
 }
+.motionToggle {
+  position: fixed;
+  right: 14px;
+  bottom: 12px;
+  z-index: 20;
+  padding: 7px 12px;
+  border: 1px solid #ffffffa0;
+  border-radius: 100px;
+  background: #ffffffeb;
+  color: #075fb5;
+  font-size: 12px;
+  cursor: pointer;
+}
+.motionToggle:focus-visible {
+  outline: 3px solid #09245f;
+  outline-offset: 3px;
+}
+.stage[data-motion="off"] .decorations::before,
+.stage[data-motion="off"] .mascot,
+.stage[data-motion="off"] .heading h1,
+.stage[data-motion="off"] .confetti,
+.stage[data-motion="off"] .bubble,
+.stage[data-motion="off"] .winner {
+  animation: none;
+}
+.stage[data-motion="off"] .fireworks {
+  display: none;
+}
 @media (prefers-reduced-motion: reduce) {
-  .decorations::before,
-  .stage .mascot,
-  .heading h1,
-  .confetti,
-  .bubble,
-  .winner {
-    animation: none;
-  }
   .lever,
   .revealButton {
     transition: none;

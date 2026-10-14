@@ -4,6 +4,37 @@ import userEvent from "@testing-library/user-event";
 import RevealStage from "./RevealStage";
 
 describe("RevealStage", () => {
+  it("모션 줄이기 환경에서도 움직임 버튼으로 애니메이션을 직접 켜고 끌 수 있다", async () => {
+    vi.stubGlobal("matchMedia", () => ({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    try {
+      const onReveal = vi.fn();
+      render(
+        <RevealStage
+          groups={[]}
+          status="REVEALING"
+          onReveal={onReveal}
+          busy={false}
+        />,
+      );
+      const stage = screen.getByLabelText("당첨자 공개");
+      expect(stage).toHaveAttribute("data-motion", "off");
+      await userEvent.click(
+        screen.getByRole("button", { name: "움직임 켜기" }),
+      );
+      expect(stage).toHaveAttribute("data-motion", "on");
+      await userEvent.click(
+        screen.getByRole("button", { name: "움직임 끄기" }),
+      );
+      expect(stage).toHaveAttribute("data-motion", "off");
+      expect(onReveal).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
   it("각 경품의 15번째 당첨자 공개에 양쪽 폭죽을 재생하고 같은 명단 갱신에는 반복하지 않는다", () => {
     const group = (prizeCode: string, count: number) => ({
       prizeCode,
@@ -272,6 +303,8 @@ describe("RevealStage", () => {
       />,
     );
     expect(screen.getByText("모든 당첨자 공개 완료")).toBeInTheDocument();
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /추첨/ }),
+    ).not.toBeInTheDocument();
   });
 });
