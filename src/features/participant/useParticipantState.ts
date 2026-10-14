@@ -47,6 +47,8 @@ export function useParticipantState() {
       setView({
         kind: "WINNER",
         name: data.name,
+        department:
+          typeof data.department === "string" ? data.department : undefined,
         prizeCode: data.prizeCode,
         prizeName: data.prizeName,
       });
@@ -77,6 +79,10 @@ export function useParticipantState() {
               setView({
                 kind: "WINNER",
                 name: data.name,
+                department:
+                  typeof data.department === "string"
+                    ? data.department
+                    : undefined,
                 prizeCode: data.prizeCode,
                 prizeName: data.prizeName,
               });

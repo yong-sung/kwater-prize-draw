@@ -79,6 +79,7 @@ describe("개인 결과 API", () => {
           id: "participant-id",
           events: { status: "PUBLISHED" },
           name_ciphertext: encryptPii("홍길동", key),
+          department_ciphertext: encryptPii("테스트부서", key),
         }),
       )
       .mockReturnValueOnce(
@@ -89,6 +90,7 @@ describe("개인 결과 API", () => {
     expect(await response.json()).toEqual({
       state: "WINNER",
       name: "홍길동",
+      department: "테스트부서",
       prizeCode: "TUMBLER",
       prizeName: "스마트 텀블러",
     });

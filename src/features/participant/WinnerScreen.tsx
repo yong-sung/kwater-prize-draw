@@ -6,11 +6,31 @@ import type { PrizeCode } from "@/lib/domain/types";
 import { prizeImagePath } from "@/lib/domain/prize-images";
 import { PRIZE_DISPLAY_NAMES } from "./prize-display";
 
-type WinnerScreenProps = { prizeCode?: PrizeCode; prizeName?: string };
+type WinnerScreenProps = {
+  prizeCode?: PrizeCode;
+  prizeName?: string;
+  name?: string;
+  department?: string;
+};
+
+function PersonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="7" r="4" fill="currentColor" />
+      <path d="M4 22v-3a8 8 0 0 1 16 0v3Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function informationValue(value?: string) {
+  return typeof value === "string" && value.trim() ? value.trim() : "—";
+}
 
 export default function WinnerScreen({
   prizeCode,
   prizeName,
+  name,
+  department,
 }: WinnerScreenProps) {
   const displayName = prizeCode ? PRIZE_DISPLAY_NAMES[prizeCode] : prizeName;
   return (
@@ -70,7 +90,26 @@ export default function WinnerScreen({
             </div>
           ) : null}
           {prizeCode && prizeName ? (
-            <p className={winner.prizeName}>{displayName}</p>
+            <section className={winner.infoCard} aria-label="당첨 정보">
+              <p className={winner.cardLabel}>당첨 상품</p>
+              <h3 className={winner.cardPrizeName}>{displayName}</h3>
+              <dl className={winner.winnerDetails}>
+                <div>
+                  <dt>
+                    <PersonIcon />
+                    당첨자 부서
+                  </dt>
+                  <dd>{informationValue(department)}</dd>
+                </div>
+                <div>
+                  <dt>
+                    <PersonIcon />
+                    당첨자 이름
+                  </dt>
+                  <dd>{informationValue(name)}</dd>
+                </div>
+              </dl>
+            </section>
           ) : null}
           <Image
             src="/assets/banguli_winner.png"

@@ -34,6 +34,7 @@ describe("참석자 결과 자동 반영", () => {
                 ? {
                     state: "WINNER",
                     name: "테스트 참가자",
+                    department: "실시간 테스트부서",
                     prizeCode: "KEYBOARD",
                     prizeName: "기계식 키보드",
                   }
@@ -55,6 +56,8 @@ describe("참석자 결과 자동 반영", () => {
     });
 
     expect(await screen.findByText(/기계식 키보드/)).toBeInTheDocument();
+    expect(screen.getByText("테스트 참가자")).toBeInTheDocument();
+    expect(screen.getByText("실시간 테스트부서")).toBeInTheDocument();
     expect(
       screen.getByAltText("방울이 기계식 키보드 경품 사진"),
     ).toBeInTheDocument();

@@ -21,6 +21,8 @@ export default function ParticipantApp() {
           isWinner={true}
           prizeCode={view.prizeCode}
           prizeName={view.prizeName}
+          name={view.name}
+          department={view.department}
         />
       );
     case "NOT_WINNER":

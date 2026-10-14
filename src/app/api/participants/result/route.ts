@@ -34,7 +34,7 @@ export async function GET(request: Request) {
   const supabase = createServerClient();
   const { data: participant, error } = await supabase
     .from("participants")
-    .select("id,name_ciphertext,events(status)")
+    .select("id,name_ciphertext,department_ciphertext,events(status)")
     .eq("access_token_hash", hashAccessToken(token, tokenHashSecret))
     .single();
 
@@ -79,6 +79,9 @@ export async function GET(request: Request) {
           {
             state: "WINNER",
             name,
+            department: participant.department_ciphertext
+              ? decryptPii(participant.department_ciphertext, piiKey)
+              : "",
             prizeCode: prize.code,
             prizeName: prize.name,
           },
