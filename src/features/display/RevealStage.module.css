@@ -376,7 +376,7 @@
     font-size: min(1.35vw, 2.5vh);
   }
   .department {
-    font-size: max(11px, 1.3vh);
+    font-size: max(12px, 1.6vh);
   }
   .waiting {
     min-height: 30vh;
