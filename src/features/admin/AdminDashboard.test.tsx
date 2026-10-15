@@ -138,7 +138,8 @@ describe("관리자 대시보드", () => {
     render(<AdminDashboard />);
 
     expect(await screen.findByText("홍길동 · 물관리부")).toBeInTheDocument();
-    expect(screen.getByText("텀블러")).toBeInTheDocument();
+    expect(screen.getByText("스탠리 텀블러")).toBeInTheDocument();
+    expect(screen.queryByText("텀블러")).not.toBeInTheDocument();
     expect(screen.queryByText(/internal-/)).not.toBeInTheDocument();
   });
 

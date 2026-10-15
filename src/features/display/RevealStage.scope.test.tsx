@@ -27,7 +27,7 @@ it("공개가 시작된 화면은 기존 결과 UI를 사용한다", () => {
   );
   expect(screen.queryByLabelText("레버 추첨 장식")).not.toBeInTheDocument();
   expect(
-    screen.getByRole("button", { name: "텀블러 추첨 시작" }),
+    screen.getByRole("button", { name: "스탠리 텀블러 추첨 시작" }),
   ).toBeInTheDocument();
 });
 
