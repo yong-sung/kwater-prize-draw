@@ -4,6 +4,10 @@ import Image from "next/image";
 import { useState, useSyncExternalStore, type CSSProperties } from "react";
 import { useEnterReveal } from "./useEnterReveal";
 import styles from "./RevealStage.module.css";
+import {
+  getPrizeDisplayName,
+  TUMBLER_DISPLAY_NAME,
+} from "@/lib/domain/prize-display";
 
 export type RevealGroup = {
   prizeCode: string;
@@ -19,7 +23,7 @@ const PRIZES = [
   },
   {
     code: "TUMBLER",
-    name: "스탠리 텀블러",
+    name: TUMBLER_DISPLAY_NAME,
     image: "/images/prizes/cut_tumbler.png",
   },
   {
@@ -70,10 +74,9 @@ export default function RevealStage({
     onReveal: showIntro ? () => setPresentationOpen(true) : onReveal,
   });
   const complete = status === "REVEALED" || status === "PUBLISHED";
-  const displayNextPrizeName = nextPrizeName?.replace(
-    "스타벅스 텀블러",
-    "스탠리 텀블러",
-  );
+  const displayNextPrizeName = nextPrizeName
+    ? getPrizeDisplayName(undefined, nextPrizeName)
+    : nextPrizeName;
   const startLabel = displayNextPrizeName
     ? `${displayNextPrizeName} 추첨 시작`
     : "추첨 시작";

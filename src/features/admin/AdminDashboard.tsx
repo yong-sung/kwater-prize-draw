@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { useEventSignal } from "@/features/participant/useEventSignal";
+import { getPrizeDisplayName } from "@/lib/domain/prize-display";
 type Participant = {
   id: string;
   event_id: string;
@@ -292,7 +293,11 @@ export function AdminDashboard() {
                     ? `${r.winner.name} · ${r.winner.department}`
                     : "미배정"}
                 </span>
-                <span>{r.prize?.name ?? "경품 없음"}</span>
+                <span>
+                  {r.prize
+                    ? getPrizeDisplayName(r.prize.code, r.prize.name)
+                    : "경품 없음"}
+                </span>
                 <button
                   disabled={busy || e.status === "PUBLISHED" || r.unawarded}
                   onClick={() => {

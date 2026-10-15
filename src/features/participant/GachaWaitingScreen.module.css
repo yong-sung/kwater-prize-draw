@@ -145,10 +145,11 @@
 }
 
 .notice {
+  margin-inline: 4%;
   margin-bottom: max(4.186cqw, var(--safe-bottom));
-  padding: 2.093cqw 2.791cqw;
+  padding: 3.5cqw 3.25cqw;
   color: #315477;
-  font-size: 3.14cqw;
+  font-size: clamp(13px, 3.65cqw, 16px);
   font-weight: 500;
   line-height: 1.55;
 }
@@ -159,13 +160,13 @@
 }
 
 .notice > p + p {
-  margin-top: 1.163cqw;
+  margin-top: 1.6cqw;
 }
 
 .notice > p:first-child {
   color: #123b70;
-  font-size: 1.08em;
-  font-weight: 700;
+  font-size: 1.16em;
+  font-weight: 800;
 }
 
 @media (min-width: 600px) {

@@ -115,30 +115,39 @@ describe("RevealStage", () => {
       vi.useRealTimers();
     }
   });
-  it("서버의 이전 텀블러 이름도 발표 화면에서는 스탠리 텀블러로 표시한다", () => {
-    render(
-      <RevealStage
-        groups={[
-          {
-            prizeCode: "TUMBLER",
-            prizeName: "스타벅스 텀블러",
-            winners: [{ name: "테스트", department: "테스트부서" }],
-          },
-        ]}
-        status="REVEALING"
-        nextPrizeName="스타벅스 텀블러"
-        onReveal={() => undefined}
-        busy={false}
-      />,
-    );
-    expect(
-      screen.getByRole("heading", { name: "스탠리 텀블러" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "스탠리 텀블러 추첨 시작" }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText("스타벅스 텀블러")).not.toBeInTheDocument();
-  });
+  it.each([
+    "스타벅스 텀블러",
+    "스타벅스 X 스탠리 텀블러",
+    "스마트 텀블러",
+    "K-water 텀블러",
+    "텀블러",
+  ])(
+    "서버의 이전 이름 %s도 발표 화면에서는 스탠리 텀블러로 표시한다",
+    (oldName) => {
+      render(
+        <RevealStage
+          groups={[
+            {
+              prizeCode: "TUMBLER",
+              prizeName: oldName,
+              winners: [{ name: "테스트", department: "테스트부서" }],
+            },
+          ]}
+          status="REVEALING"
+          nextPrizeName={oldName}
+          onReveal={() => undefined}
+          busy={false}
+        />,
+      );
+      expect(
+        screen.getByRole("heading", { name: "스탠리 텀블러" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "스탠리 텀블러 추첨 시작" }),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(oldName)).not.toBeInTheDocument();
+    },
+  );
   it("레버는 화면만 전환하고 키보드 추첨 버튼을 눌러야 공개 요청한다", async () => {
     const onReveal = vi.fn();
     render(
