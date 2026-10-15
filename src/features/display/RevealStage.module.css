@@ -1,0 +1,767 @@
+@font-face {
+  font-family: "CookieRun";
+  src: url("/fonts/CookieRunBlack.otf") format("opentype");
+  font-weight: 900;
+  font-display: swap;
+}
+.stage {
+  --winner-row-height: clamp(56px, 4vw, 72px);
+  --winner-row-gap: 8px;
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: clamp(18px, 2.8vw, 54px);
+  color: #081957;
+  background:
+    url("/images/display/background-wave.svg") center / cover,
+    radial-gradient(ellipse at 48% 4%, #007bff 0%, transparent 55%),
+    radial-gradient(ellipse at 10% 70%, #62e8ff 0%, transparent 55%),
+    linear-gradient(125deg, #20c5ff, #0095f6 60%, #26caff);
+  font-family: "Arial Rounded MT Bold", "Malgun Gothic", sans-serif;
+}
+.fireworks {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fireworksSide {
+  position: absolute;
+  top: 17vh;
+}
+.fireworksLeft {
+  left: 14%;
+}
+.fireworksRight {
+  right: 14%;
+  transform: scaleX(-1);
+}
+.fireworkBurst {
+  position: absolute;
+  left: var(--burst-x);
+  top: var(--burst-y);
+}
+.fireworkTrails {
+  position: absolute;
+  width: clamp(320px, 40vw, 720px);
+  height: clamp(320px, 40vw, 720px);
+  overflow: visible;
+  transform: translate(-50%, -50%);
+}
+.fireworkTrail,
+.fireworkEmbers {
+  fill: none;
+  stroke: var(--spark-color);
+  stroke-linecap: round;
+  opacity: 0;
+}
+.fireworkTrail {
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 3px var(--spark-color));
+  animation: firework-trail var(--trail-duration)
+    cubic-bezier(0.12, 0.6, 0.3, 1) var(--trail-delay) both;
+}
+.fireworkEmbers {
+  stroke-width: 2.5;
+  stroke-dasharray: 0.3 3;
+  filter: drop-shadow(0 0 2px #fff3c4);
+  animation: firework-embers var(--trail-duration) ease-out var(--trail-delay)
+    both;
+}
+.fireworkFlash {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff, #ffe16780 30%, transparent 70%);
+  opacity: 0;
+  animation: firework-flash 0.6s ease-out var(--burst-delay) both;
+}
+@keyframes firework-trail {
+  0% {
+    opacity: 0;
+    stroke-dasharray: 1 100;
+    stroke-dashoffset: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 1;
+    stroke-dasharray: 32 100;
+    stroke-dashoffset: -28;
+  }
+  70% {
+    opacity: 0.95;
+    stroke-dasharray: 20 100;
+    stroke-dashoffset: -72;
+  }
+  100% {
+    opacity: 0;
+    stroke-dasharray: 2 100;
+    stroke-dashoffset: -98;
+  }
+}
+@keyframes firework-embers {
+  0%,
+  18% {
+    opacity: 0;
+    clip-path: circle(0% at 50% 50%);
+  }
+  40% {
+    opacity: 0.8;
+    clip-path: circle(36% at 50% 50%);
+  }
+  55% {
+    opacity: 0.3;
+  }
+  65% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.4;
+    clip-path: circle(65% at 50% 50%);
+  }
+  100% {
+    opacity: 0;
+    clip-path: circle(75% at 50% 50%);
+  }
+}
+@keyframes firework-flash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage:not([data-motion="on"]) .fireworks {
+    display: none;
+  }
+}
+.decorations {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.decorations::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(ellipse at 20% 35%, #c7fbff55, transparent 40%),
+    radial-gradient(ellipse at 80% 65%, #9ceaff44, transparent 40%);
+  animation: waterGlow 14s ease-in-out infinite alternate;
+}
+.confetti {
+  position: absolute;
+  width: clamp(10px, 1.3vw, 24px);
+  height: clamp(20px, 2.6vw, 46px);
+  border-radius: 4px;
+  background: linear-gradient(90deg, #ffca2e, #ffe78a);
+  animation: confettiDrift 6s ease-in-out infinite;
+}
+.confetti:nth-child(3n) {
+  background: linear-gradient(90deg, #00d7f7, #9df9ff);
+}
+.bubble {
+  position: absolute;
+  aspect-ratio: 1;
+  border: 1px solid #dcfaffb0;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 28% 23%, white 0 5%, #fff9 7%, transparent 17%),
+    radial-gradient(circle at 70% 85%, #fff7, transparent 50%);
+  box-shadow:
+    inset 2px 2px 9px #ffffff80,
+    0 0 12px #c3fbff40;
+  animation: bubbleFloat 10s ease-in-out infinite;
+}
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(160px, 15vw, 290px);
+  margin: 0 auto;
+  max-width: 1800px;
+}
+.heading {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 12px 0 28px;
+  color: white;
+}
+.heading h1 {
+  position: relative;
+  width: min(65vw, 1100px);
+  aspect-ratio: 2161 / 430;
+  overflow: hidden;
+  margin: 0;
+  animation: titleFloat 5s ease-in-out infinite;
+}
+.titleImage {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: auto;
+  transform: translateY(-50%);
+}
+.heading p {
+  margin: 20px 0 0;
+  font-size: clamp(20px, 2.5vw, 46px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  text-shadow: 0 3px 0 #2a8fe9;
+}
+.heading .congratulations {
+  position: relative;
+  width: 28vw;
+  aspect-ratio: 2200 / 400;
+  overflow: hidden;
+  margin: 0 auto;
+}
+.congratulationsImage {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: auto;
+  transform: translateY(-50%);
+}
+.mascot {
+  position: absolute;
+  bottom: -15px;
+  width: clamp(120px, 19vw, 350px);
+  height: auto;
+  pointer-events: none;
+  transform-origin: 50% 75%;
+  animation: mascotDance 2.4s ease-in-out infinite;
+}
+.mascotLeft {
+  --mascot-tilt: -8deg;
+  left: 1%;
+  transform: rotate(-8deg);
+}
+.mascotRight {
+  --mascot-tilt: 8deg;
+  right: 0;
+  transform: rotate(8deg);
+  animation-delay: -1.2s;
+}
+.stage[data-busy="true"] .mascot {
+  animation-duration: 1.2s;
+}
+.stage[data-busy="true"] .mascotRight {
+  animation-delay: -0.6s;
+}
+.cards {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.2vw, 24px);
+  max-width: 1800px;
+  margin: 0 auto;
+}
+.card {
+  min-width: 0;
+  padding: clamp(14px, 1.5vw, 28px);
+  border: 2px solid #fff;
+  border-radius: clamp(24px, 2.3vw, 42px);
+  background: linear-gradient(145deg, #fff, #f5fcff);
+  box-shadow: 0 12px 36px #0078d326;
+}
+.product {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: clamp(145px, 15vw, 285px);
+  overflow: hidden;
+  border-radius: 24px;
+  background: #fff;
+}
+.productArtwork {
+  position: relative;
+  width: 92%;
+  height: 92%;
+  overflow: hidden;
+}
+.product img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.productNotice {
+  position: absolute;
+  bottom: 4%;
+  padding: 4px 24px;
+  border-radius: 100px;
+  background: #ffffffeb;
+  font-weight: 800;
+  font-size: clamp(12px, 1.2vw, 22px);
+}
+.keyboard .productArtwork {
+  width: 96%;
+  height: 100%;
+}
+.scanner .productArtwork {
+  width: auto;
+  aspect-ratio: 650 / 550;
+}
+.scanner img {
+  position: absolute;
+  max-width: none;
+}
+.scanner img {
+  width: 153.846%;
+  height: 181.818%;
+  left: -33.846%;
+  top: -47.273%;
+}
+.cardTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  min-height: 74px;
+  padding: 16px 0 14px;
+  border-bottom: 2px solid #a6dcff;
+}
+.cardTitle h2 {
+  font-family: "CookieRun", "Malgun Gothic", sans-serif;
+  margin: 0;
+  font-size: clamp(18px, 2.15vw, 40px);
+  font-weight: 900;
+  letter-spacing: -0.065em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.badge {
+  flex-shrink: 0;
+  border-radius: 100px;
+  padding: 7px 20px;
+  background: linear-gradient(#168aff, #0070ff);
+  box-shadow: inset 0 2px 3px #87c9ff;
+  color: white;
+  font-size: clamp(18px, 1.9vw, 36px);
+  line-height: 1.1;
+  font-weight: 900;
+}
+.winners {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: minmax(var(--winner-row-height), auto);
+  align-content: start;
+  min-height: calc(var(--winner-row-height) * 5 + var(--winner-row-gap) * 4);
+  gap: var(--winner-row-gap);
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+}
+.winner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  gap: 5px;
+  min-height: var(--winner-row-height);
+  padding: 7px 5px;
+  border-radius: 13px;
+  background: linear-gradient(130deg, #e5f3ff, #def0ff);
+  animation: winnerArrive 450ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.winner > div {
+  min-width: 0;
+  text-align: center;
+}
+.number {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.name {
+  display: block;
+  font-size: clamp(17px, 1.5vw, 28px);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+.department {
+  display: block;
+  margin-top: 2px;
+  font-size: clamp(11px, 0.8vw, 15px);
+  color: #496a93;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+.waiting {
+  display: flex;
+  min-height: calc(var(--winner-row-height) * 5 + var(--winner-row-gap) * 4);
+  margin-top: 14px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #6994ba;
+}
+.waitingIcon {
+  font-size: 48px;
+  color: #93cfff;
+}
+.waiting p {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 10px 0;
+}
+.waiting > span:last-child {
+  font-size: 14px;
+}
+.footer {
+  position: relative;
+  margin: 22px auto 0;
+  text-align: center;
+  color: white;
+}
+.revealButton {
+  padding: 12px 32px;
+  border: 2px solid #ffffffa0;
+  border-radius: 100px;
+  background: #fff;
+  color: #075fb5;
+  font-size: 20px;
+  font-weight: 800;
+  box-shadow: 0 5px 16px #0063b52a;
+  cursor: pointer;
+  transition:
+    translate 160ms ease,
+    box-shadow 160ms ease;
+}
+.revealButton:hover {
+  background: #e4f5ff;
+}
+.revealButton:hover:not(:disabled) {
+  translate: 0 -2px;
+  box-shadow: 0 8px 24px #0063b54a;
+}
+.revealButton:focus-visible {
+  outline: 3px solid #09245f;
+  outline-offset: 4px;
+}
+.revealButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.hint {
+  font-size: 14px;
+  margin: 10px 0 0;
+}
+.complete {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  .stage {
+    --winner-row-height: max(6.4vh, 52px);
+    --winner-row-gap: 0.8vh;
+    padding: 3vh 2.8vw;
+  }
+  .header {
+    height: 24vh;
+    min-height: 0;
+    overflow: visible;
+  }
+  .heading {
+    padding: 0 0 1vh;
+  }
+  .heading h1 {
+    width: min(52vw, 76vh);
+  }
+  .heading .congratulations {
+    width: min(28vw, 48vh);
+  }
+  .heading p {
+    font-size: 3.8vh;
+    line-height: 1.2;
+    margin-top: 1.3vh;
+  }
+  .mascot {
+    width: min(21vw, 36vh);
+    bottom: -7vh;
+  }
+  .mascotLeft {
+    left: 3%;
+  }
+  .mascotRight {
+    right: 2%;
+  }
+  .card {
+    padding: 2.3vh 1.5vw;
+    border-radius: 3.5vh;
+  }
+  .product {
+    height: 16vh;
+  }
+  .cardTitle {
+    min-height: max(8.4vh, 72px);
+    padding: 1.6vh 0;
+  }
+  .cardTitle h2 {
+    font-size: min(2.4vw, 4.4vh);
+    white-space: nowrap;
+  }
+  .badge {
+    font-size: 3.3vh;
+  }
+  .winners {
+    column-gap: 0.6vw;
+    margin-top: 1.2vh;
+  }
+  .winner {
+    min-height: 6vh;
+    padding: 0.3vh 6px;
+    border-radius: 1.5vh;
+  }
+  .name {
+    font-size: min(1.65vw, 3vh);
+  }
+  .department {
+    font-size: max(14px, 1.85vh);
+  }
+  .waiting {
+    margin-top: 1.2vh;
+  }
+  .footer {
+    margin-top: 1vh;
+  }
+}
+@media (max-width: 900px) {
+  .mascot {
+    width: 140px;
+    opacity: 0.85;
+  }
+  .heading {
+    padding-bottom: 20px;
+  }
+  .heading h1 {
+    width: 72vw;
+  }
+  .heading .congratulations {
+    width: 45vw;
+  }
+  .badge {
+    padding: 6px 10px;
+  }
+  .winner {
+    flex-direction: column;
+    gap: 0;
+  }
+  .number {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .header {
+    min-height: 160px;
+  }
+  .mascot {
+    width: 90px;
+    bottom: 0;
+  }
+  .mascotLeft {
+    left: -24px;
+  }
+  .mascotRight {
+    right: -24px;
+  }
+  .heading p {
+    font-size: 17px;
+    margin-top: 12px;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .product {
+    height: 200px;
+  }
+  .cardTitle h2 {
+    font-size: 25px;
+  }
+  .name {
+    font-size: 20px;
+  }
+  .department {
+    font-size: 12px;
+  }
+}
+
+.preDrawStage {
+  min-height: 100dvh;
+  background: #a8ddfa;
+  color: #172c48;
+}
+
+.sceneArea {
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #e5f8ff, #95d2f7);
+}
+
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.lever {
+  position: absolute;
+  left: 43.4%;
+  top: 75%;
+  width: 13.2%;
+  height: 8.3%;
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  transition:
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.lever:hover:not(:disabled) {
+  background: rgb(255 240 132 / 15%);
+  box-shadow: 0 0 28px rgb(255 216 62 / 65%);
+}
+
+.lever:focus-visible {
+  outline: 4px solid #172c48;
+  outline-offset: 5px;
+}
+
+.lever:disabled {
+  cursor: wait;
+}
+
+@keyframes mascotDance {
+  0%,
+  100% {
+    transform: translate(-5px, 0) rotate(calc(var(--mascot-tilt) - 6deg));
+  }
+  25% {
+    transform: translate(0, -14px) rotate(var(--mascot-tilt)) scale(1.02);
+  }
+  50% {
+    transform: translate(5px, 0) rotate(calc(var(--mascot-tilt) + 6deg));
+  }
+  75% {
+    transform: translate(0, -9px) rotate(var(--mascot-tilt));
+  }
+}
+@keyframes titleFloat {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -4px;
+  }
+}
+@keyframes bubbleFloat {
+  0%,
+  100% {
+    translate: 0 16px;
+    opacity: 0.3;
+  }
+  50% {
+    translate: 16px -48px;
+    opacity: 0.8;
+  }
+}
+@keyframes confettiDrift {
+  0%,
+  100% {
+    translate: -4px 0;
+    transform: rotate(-12deg);
+  }
+  50% {
+    translate: 8px 18px;
+    transform: rotate(12deg);
+  }
+}
+@keyframes waterGlow {
+  from {
+    translate: -2% -1%;
+  }
+  to {
+    translate: 2% 2%;
+  }
+}
+@keyframes winnerArrive {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+.motionToggle {
+  position: fixed;
+  right: 14px;
+  bottom: 12px;
+  z-index: 20;
+  padding: 7px 12px;
+  border: 1px solid #ffffffa0;
+  border-radius: 100px;
+  background: #ffffffeb;
+  color: #075fb5;
+  font-size: 12px;
+  cursor: pointer;
+}
+.motionToggle:focus-visible {
+  outline: 3px solid #09245f;
+  outline-offset: 3px;
+}
+.stage[data-motion="off"] .decorations::before,
+.stage[data-motion="off"] .mascot,
+.stage[data-motion="off"] .heading h1,
+.stage[data-motion="off"] .confetti,
+.stage[data-motion="off"] .bubble,
+.stage[data-motion="off"] .winner {
+  animation: none;
+}
+.stage[data-motion="off"] .fireworks {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lever,
+  .revealButton {
+    transition: none;
+  }
+  .revealButton:hover:not(:disabled) {
+    translate: none;
+  }
+}

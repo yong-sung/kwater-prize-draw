@@ -5,13 +5,13 @@ import QrStage from "./QrStage";
 import RevealStage, { type RevealGroup } from "./RevealStage";
 import { orderRevealGroups } from "./reveal-order";
 import { revealPrizeGroup, type RevealStep } from "./revealPrizeGroup";
-import { useEnterReveal } from "./useEnterReveal";
 import { useEventSignal } from "@/features/participant/useEventSignal";
 
 type EventData = {
   id: string;
   title: string;
   status: string;
+  nextPrizeName?: string | null;
   groups?: RevealGroup[];
 };
 export default function DisplayApp() {
@@ -76,10 +76,6 @@ export default function DisplayApp() {
       setBusy(false);
     }
   }, [event, status, requestReveal, refresh]);
-  useEnterReveal({
-    enabled: status === "DRAWN" || status === "REVEALING",
-    onReveal: reveal,
-  });
   if (error)
     return (
       <main className="flex min-h-screen items-center justify-center p-8 text-center">
@@ -97,6 +93,7 @@ export default function DisplayApp() {
       <RevealStage
         groups={groups}
         status={status}
+        nextPrizeName={event.nextPrizeName}
         onReveal={reveal}
         busy={busy}
       />

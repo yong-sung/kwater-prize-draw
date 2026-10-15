@@ -93,6 +93,7 @@ it("DRAWN 행사에 직접 진입하면 공개 시작 동작을 유지한다", a
           venue: "",
           startsAt: null,
           status: "DRAWN",
+          nextPrizeName: "스탠리 텀블러",
           participantCount: 1,
           privacy: { items: [], purpose: "", retentionDays: 7 },
           groups: [],
@@ -104,12 +105,10 @@ it("DRAWN 행사에 직접 진입하면 공개 시작 동작을 유지한다", a
   render(<DisplayApp />);
   await waitFor(() =>
     expect(
-      screen.getByRole("button", { name: /다음 당첨자 공개/ }),
+      screen.getByRole("button", { name: "발표 화면 열기" }),
     ).toBeInTheDocument(),
   );
-  expect(
-    screen.getByRole("button", { name: /다음 당첨자 공개/ }),
-  ).toBeEnabled();
+  expect(screen.getByRole("button", { name: "발표 화면 열기" })).toBeEnabled();
 });
 
 it("강연장 로딩 문구를 정상 한국어로 표시한다", () => {

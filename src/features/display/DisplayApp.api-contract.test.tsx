@@ -14,6 +14,7 @@ describe("DisplayApp API 계약", () => {
             id: "event-1",
             title: "행사",
             status: "DRAWN",
+            nextPrizeName: "기계식 키보드",
             groups: [],
           }),
           { status: 200 },
@@ -38,8 +39,18 @@ describe("DisplayApp API 계약", () => {
         cache: "no-store",
       }),
     );
+    const lever = await screen.findByRole("button", { name: "발표 화면 열기" });
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/display/reveal",
+      expect.anything(),
+    );
+    await lever.click();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/display/reveal",
+      expect.anything(),
+    );
     const button = await screen.findByRole("button", {
-      name: /Enter로 다음 당첨자 공개/,
+      name: "기계식 키보드 추첨 시작",
     });
     await button.click();
     await waitFor(() =>

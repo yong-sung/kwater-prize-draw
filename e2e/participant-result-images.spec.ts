@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const cases = [
   ["KEYBOARD", "기계식 키보드"],
-  ["TUMBLER", "K-water 텀블러"],
+  ["TUMBLER", "스탠리 텀블러"],
   ["SCANNER", "카닥 라벨 에라"],
 ] as const;
 

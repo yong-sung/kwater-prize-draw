@@ -1,0 +1,184 @@
+.character {
+  right: calc(max(2%, (100% - 100cqw) / 2 + 2cqw) - 2.326cqw);
+  bottom: 23%;
+  width: min(40%, 45cqw);
+}
+
+.prize {
+  position: absolute;
+  z-index: 1;
+  bottom: max(24%, calc(32.44% - var(--winner-crowding) * 0.65));
+  left: 51%;
+  width: clamp(34%, calc(46% - var(--winner-crowding) * 0.67), 46%);
+  translate: -50% 0;
+  text-align: center;
+}
+
+.prizeStage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.15;
+}
+
+.prizeImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.prizeStage[data-prize-code="TUMBLER"] .prizeImage {
+  inset: auto;
+  top: 8%;
+  left: 10%;
+  width: 80%;
+  max-width: none;
+  height: 80%;
+}
+
+.prizeStage[data-prize-code="SCANNER"] .prizeImage {
+  inset: auto;
+  top: -12%;
+  left: -10%;
+  width: 120%;
+  max-width: none;
+  height: 120%;
+}
+
+.scene .message {
+  position: absolute;
+  top: var(--winner-text-top);
+  left: 50%;
+  translate: -50% 0;
+  margin: 0;
+}
+
+.title {
+  font-size: var(--event-title-size);
+}
+
+.description {
+  margin: 2.628cqw 0 0;
+  color: #123b70;
+  font-size: 3cqw;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.035em;
+  word-break: keep-all;
+}
+
+.description span {
+  display: block;
+}
+
+.confirm {
+  display: none;
+}
+
+.infoCard {
+  --info-space: calc(
+    var(--winner-art-height) * 0.187 - 3cqw - var(--safe-bottom)
+  );
+  --info-unit: clamp(0.5px, calc(var(--info-space) / 146), 1.2px);
+  --info-room: clamp(0px, calc(var(--info-space) - 100px), 20px);
+  position: absolute;
+  z-index: 2;
+  top: calc(81.3% + 1cqw);
+  left: 50%;
+  translate: -50% 0;
+  width: 92cqw;
+  min-height: min(var(--info-space), calc(146 * var(--info-unit)));
+  padding: calc(3 * var(--info-unit) + var(--info-room) * 0.25)
+    calc(16 * var(--info-unit));
+  border: 1px solid #ffffffcc;
+  border-radius: 5cqw;
+  background: #ffffffe6;
+  color: #123b70;
+  text-align: center;
+}
+
+.cardLabel {
+  display: table;
+  margin: 0 auto;
+  padding: calc(var(--info-unit) + var(--info-room) * 0.1)
+    calc(18 * var(--info-unit));
+  border-radius: 999px;
+  background: #bce8ff;
+  font-size: max(10px, calc(13 * var(--info-unit)));
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.cardPrizeName {
+  margin: calc(4 * var(--info-unit) + var(--info-room) * 0.15) 0 0;
+  color: #123b70;
+  font-size: max(15px, min(calc(24 * var(--info-unit)), 4.8cqw));
+  font-weight: 900;
+  -webkit-text-stroke: 0.15px currentColor;
+  line-height: 1.15;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.winnerDetails {
+  display: grid;
+  gap: calc(4 * var(--info-unit) + var(--info-room) * 0.15);
+  margin: calc(3 * var(--info-unit) + var(--info-room) * 0.4) 0 0;
+  padding-top: calc(3 * var(--info-unit) + var(--info-room) * 0.4);
+  border-top: 1px solid #cce5f6;
+  font-size: max(11.5px, calc(16 * var(--info-unit)));
+  line-height: calc(1.2em + var(--info-room) * 0.05);
+}
+
+.winnerDetails > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  width: 86%;
+  margin-inline: auto;
+}
+
+.winnerDetails dt {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4em;
+  color: #597294;
+  font-weight: 500;
+  border-right: 1px solid #597294;
+  padding-right: 0.6em;
+  white-space: nowrap;
+}
+
+.winnerDetails svg {
+  width: 1em;
+  height: 1em;
+  flex: none;
+}
+
+.winnerDetails dd {
+  margin: 0;
+  padding-left: 1.2em;
+  text-align: left;
+  font-weight: 700;
+  min-width: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.scene {
+  --winner-art-height: max(100cqh, calc(100cqw * 1670 / 942));
+  --winner-text-top: max(
+    calc(var(--ribbon-top) + 19.4cqw),
+    min(41.395cqw, calc(100cqh - var(--winner-art-height) * 0.78555))
+  );
+  /* 제목·설명 높이와 간격을 포함해 상품에 필요한 공간만 계산합니다. */
+  --winner-crowding: max(
+    0px,
+    calc(
+      var(--winner-text-top) + 26.912cqw + var(--winner-art-height) * 0.55 -
+        100cqh
+    )
+  );
+}

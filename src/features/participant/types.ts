@@ -5,7 +5,13 @@ export type ParticipantView =
   | { kind: "FORM" }
   | { kind: "CLOSED" }
   | { kind: "WAITING"; name: string }
-  | { kind: "WINNER"; name: string; prizeCode: PrizeCode; prizeName: string }
+  | {
+      kind: "WINNER";
+      name: string;
+      department?: string;
+      prizeCode: PrizeCode;
+      prizeName: string;
+    }
   | { kind: "NOT_WINNER"; name: string }
   | { kind: "PURGED" }
   | { kind: "LOADING" }

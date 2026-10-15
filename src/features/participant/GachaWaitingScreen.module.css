@@ -1,0 +1,190 @@
+.viewport {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --preview-gutter: 0px;
+  margin: -1rem;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  background: #eef7fc;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+:global(main):has(> .viewport > .scene) {
+  min-height: 100svh;
+}
+
+.scene {
+  --event-title-size: 7.32cqw;
+  --ribbon-top: max(7.907cqw, calc(var(--safe-top) + 2px));
+  position: relative;
+  isolation: isolate;
+  container-type: size;
+  width: 100%;
+  height: calc(100svh - var(--preview-gutter));
+  margin-inline: auto;
+  overflow: clip;
+  background: #61c4f8;
+  font-family: Arial, "Malgun Gothic", sans-serif;
+}
+
+/* 원본 비율로 화면을 채우고 상품·캐릭터는 같은 배경 좌표를 사용합니다. */
+.artwork {
+  position: absolute;
+  z-index: 0;
+  bottom: 0;
+  left: 50%;
+  width: max(100cqw, calc(100cqh * 942 / 1670));
+  aspect-ratio: 942 / 1670;
+  transform: translateX(-50%);
+}
+
+.background {
+  z-index: 0;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.ribbon {
+  position: absolute;
+  z-index: 3;
+  top: var(--ribbon-top);
+  left: 50%;
+  width: 58cqw;
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+.ribbon svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.character {
+  position: absolute;
+  z-index: 1;
+  right: max(2%, calc((100% - 100cqw) / 2 + 2cqw));
+  bottom: 20.2%;
+  width: min(34%, 38cqw);
+  height: auto;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-top: max(
+    min(41.395cqw, 21.445cqh),
+    calc(var(--ribbon-top) + 19.4cqw)
+  );
+  padding-bottom: 0.93cqw;
+  text-align: center;
+}
+
+.message {
+  position: relative;
+  isolation: isolate;
+  width: 90%;
+  margin-inline: auto;
+  color: #003aa8;
+  translate: 0 0;
+}
+
+.message::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: calc((100% + 12cqw) * 1.888);
+  height: calc((100% + 11.163cqw) * 1.652);
+  translate: -50% -50%;
+  background: radial-gradient(
+    ellipse closest-side at center,
+    #ffffffd9 0%,
+    #ffffffa6 30%,
+    #ffffff59 60%,
+    #ffffff00 100%
+  );
+  pointer-events: none;
+}
+
+.scene:has(> .ribbon) .message::before {
+  top: calc(50% - 3.488cqw);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--event-title-size);
+  font-weight: 900;
+  -webkit-text-stroke: 0.35px currentColor;
+  line-height: 1.2;
+  letter-spacing: -0.055em;
+}
+
+.title span,
+.description span {
+  display: block;
+}
+
+.description {
+  color: #123b70;
+  margin: 3.86cqw 0 0;
+  font-size: 3cqw;
+  font-weight: 500;
+  line-height: 1.65;
+  letter-spacing: -0.035em;
+  word-break: keep-all;
+}
+
+.notice {
+  margin-inline: 4%;
+  margin-bottom: max(4.186cqw, var(--safe-bottom));
+  padding: 3.5cqw 3.25cqw;
+  color: #315477;
+  font-size: clamp(13px, 3.65cqw, 16px);
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.notice > p {
+  font-size: 1em;
+  font-weight: 500;
+}
+
+.notice > p + p {
+  margin-top: 1.6cqw;
+}
+
+.notice > p:first-child {
+  color: #123b70;
+  font-size: 1.16em;
+  font-weight: 800;
+}
+
+@media (min-width: 600px) {
+  .viewport {
+    --preview-gutter: 48px;
+    padding-block: 24px;
+  }
+
+  .scene {
+    width: min(430px, calc((100svh - var(--preview-gutter)) * 430 / 830));
+    border-radius: 28px;
+    box-shadow: 0 12px 48px #5596bc1f;
+  }
+}
+
+/* 극단적으로 낮은 화면은 가독성을 유지하고 스크롤을 허용합니다. */
+@media (max-height: 420px) {
+  .scene {
+    min-height: 560px;
+  }
+}

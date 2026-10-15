@@ -5,19 +5,7 @@ import { useParticipantState } from "./useParticipantState";
 import EntryForm from "./EntryForm";
 import WaitingScreen from "./WaitingScreen";
 import ResultScreen from "./ResultScreen";
-
-function ClosedScreen() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] p-4 text-center">
-      <div className="card max-w-[720px] w-full p-8 bg-white shadow-sm rounded-[24px]">
-        <h2 className="text-2xl font-bold text-[#08B9D6] mb-4">
-          응모가 마감되었습니다
-        </h2>
-        <p className="text-gray-600">다음 행사에 참여해 주세요.</p>
-      </div>
-    </div>
-  );
-}
+import ClosedScreen from "./ClosedScreen";
 
 export default function ParticipantApp() {
   const { view, submitForm, error } = useParticipantState();
@@ -33,6 +21,8 @@ export default function ParticipantApp() {
           isWinner={true}
           prizeCode={view.prizeCode}
           prizeName={view.prizeName}
+          name={view.name}
+          department={view.department}
         />
       );
     case "NOT_WINNER":

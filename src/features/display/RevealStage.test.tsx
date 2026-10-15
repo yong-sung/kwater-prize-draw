@@ -1,8 +1,292 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import RevealStage from "./RevealStage";
 
 describe("RevealStage", () => {
+  it("모션 줄이기 환경에서도 움직임 버튼으로 애니메이션을 직접 켜고 끌 수 있다", async () => {
+    vi.stubGlobal("matchMedia", () => ({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    try {
+      const onReveal = vi.fn();
+      render(
+        <RevealStage
+          groups={[]}
+          status="REVEALING"
+          onReveal={onReveal}
+          busy={false}
+        />,
+      );
+      const stage = screen.getByLabelText("당첨자 공개");
+      expect(stage).toHaveAttribute("data-motion", "off");
+      await userEvent.click(
+        screen.getByRole("button", { name: "움직임 켜기" }),
+      );
+      expect(stage).toHaveAttribute("data-motion", "on");
+      await userEvent.click(
+        screen.getByRole("button", { name: "움직임 끄기" }),
+      );
+      expect(stage).toHaveAttribute("data-motion", "off");
+      expect(onReveal).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+  it("각 경품의 15번째 당첨자 공개에 양쪽 폭죽을 재생하고 같은 명단 갱신에는 반복하지 않는다", () => {
+    const group = (prizeCode: string, count: number) => ({
+      prizeCode,
+      prizeName: prizeCode,
+      winners: Array.from({ length: count }, (_, index) => ({
+        name: `당첨자${index + 1}`,
+        department: "본부",
+      })),
+    });
+    const props = { status: "REVEALING", onReveal: vi.fn(), busy: false };
+    const { container, rerender } = render(
+      <RevealStage {...props} groups={[group("KEYBOARD", 14)]} />,
+    );
+    expect(container.querySelectorAll("[data-fireworks-prize]")).toHaveLength(
+      0,
+    );
+    rerender(<RevealStage {...props} groups={[group("KEYBOARD", 15)]} />);
+    const first = container.querySelector('[data-fireworks-prize="KEYBOARD"]');
+    expect(first).toHaveAttribute("aria-hidden", "true");
+    expect(first?.querySelectorAll("[data-fireworks-side]")).toHaveLength(2);
+    rerender(<RevealStage {...props} groups={[group("KEYBOARD", 15)]} />);
+    expect(container.querySelector('[data-fireworks-prize="KEYBOARD"]')).toBe(
+      first,
+    );
+    rerender(
+      <RevealStage
+        {...props}
+        groups={[
+          group("KEYBOARD", 15),
+          group("TUMBLER", 15),
+          group("SCANNER", 14),
+        ]}
+      />,
+    );
+    expect(container.querySelectorAll("[data-fireworks-prize]")).toHaveLength(
+      2,
+    );
+    rerender(
+      <RevealStage
+        {...props}
+        groups={[
+          group("KEYBOARD", 15),
+          group("TUMBLER", 15),
+          group("SCANNER", 15),
+        ]}
+      />,
+    );
+    expect(container.querySelectorAll("[data-fireworks-prize]")).toHaveLength(
+      3,
+    );
+    rerender(<RevealStage {...props} groups={[]} />);
+    expect(container.querySelectorAll("[data-fireworks-prize]")).toHaveLength(
+      0,
+    );
+  });
+  it("Enter로 화면을 열어도 공개하지 않으며 키를 누르고 있어도 추첨이 시작되지 않는다", () => {
+    vi.useFakeTimers();
+    try {
+      const onReveal = vi.fn();
+      render(
+        <RevealStage
+          groups={[]}
+          status="DRAWN"
+          nextPrizeName="기계식 키보드"
+          onReveal={onReveal}
+          busy={false}
+        />,
+      );
+      fireEvent.keyDown(document.body, { key: "Enter" });
+      expect(screen.queryByLabelText("레버 추첨 장식")).not.toBeInTheDocument();
+      expect(onReveal).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(600);
+      fireEvent.keyDown(document.body, { key: "Enter", repeat: true });
+      expect(onReveal).not.toHaveBeenCalled();
+      fireEvent.keyDown(document.body, { key: "Enter" });
+      expect(onReveal).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it.each([
+    "스타벅스 텀블러",
+    "스타벅스 X 스탠리 텀블러",
+    "스마트 텀블러",
+    "K-water 텀블러",
+    "텀블러",
+  ])(
+    "서버의 이전 이름 %s도 발표 화면에서는 스탠리 텀블러로 표시한다",
+    (oldName) => {
+      render(
+        <RevealStage
+          groups={[
+            {
+              prizeCode: "TUMBLER",
+              prizeName: oldName,
+              winners: [{ name: "테스트", department: "테스트부서" }],
+            },
+          ]}
+          status="REVEALING"
+          nextPrizeName={oldName}
+          onReveal={() => undefined}
+          busy={false}
+        />,
+      );
+      expect(
+        screen.getByRole("heading", { name: "스탠리 텀블러" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "스탠리 텀블러 추첨 시작" }),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(oldName)).not.toBeInTheDocument();
+    },
+  );
+  it("레버는 화면만 전환하고 키보드 추첨 버튼을 눌러야 공개 요청한다", async () => {
+    const onReveal = vi.fn();
+    render(
+      <RevealStage
+        groups={[]}
+        status="DRAWN"
+        nextPrizeName="기계식 키보드"
+        onReveal={onReveal}
+        busy={false}
+      />,
+    );
+    expect(screen.getByLabelText("레버 추첨 장식")).toHaveStyle({
+      backgroundImage: 'url("/images/reveal/announcement-scene-v2.png")',
+    });
+    await userEvent.click(
+      screen.getByRole("button", { name: "발표 화면 열기" }),
+    );
+    expect(onReveal).not.toHaveBeenCalled();
+    expect(screen.queryByLabelText("레버 추첨 장식")).not.toBeInTheDocument();
+    expect(screen.getAllByText("공개 대기 중")).toHaveLength(3);
+    await userEvent.click(
+      screen.getByRole("button", { name: "기계식 키보드 추첨 시작" }),
+    );
+    expect(onReveal).toHaveBeenCalledTimes(1);
+  });
+  it("첫 공개 요청 중에도 발표 전 화면을 유지하고 레버 중복 클릭을 막는다", async () => {
+    const onReveal = vi.fn();
+    render(<RevealStage groups={[]} status="DRAWN" onReveal={onReveal} busy />);
+    const lever = screen.getByRole("button", { name: "발표 화면 열기" });
+    expect(lever).toBeDisabled();
+    expect(screen.getByRole("status")).toHaveTextContent("추첨 중");
+    expect(screen.getByLabelText("레버 추첨 장식")).toBeInTheDocument();
+    await userEvent.click(lever);
+    expect(onReveal).not.toHaveBeenCalled();
+  });
+  it("추첨 시작 전 현재 경품명과 추첨 시작을 안내하고 경품마다 번호를 다시 매긴다", () => {
+    render(
+      <RevealStage
+        groups={[
+          {
+            prizeCode: "KEYBOARD",
+            prizeName: "기계식 키보드",
+            winners: [
+              { name: "홍길동", department: "본부" },
+              { name: "김하나", department: "지사" },
+            ],
+          },
+          {
+            prizeCode: "TUMBLER",
+            prizeName: "스탠리 텀블러",
+            winners: [{ name: "이한울", department: "본부" }],
+          },
+        ]}
+        status="DRAWN"
+        nextPrizeName="기계식 키보드"
+        onReveal={() => undefined}
+        busy={false}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "경품 당첨자 발표" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "경품 당첨자 발표" }),
+    ).toHaveAttribute("src", "/images/display/prize-draw-title.png");
+    expect(
+      screen.getByRole("img", { name: "당첨을 축하합니다!" }),
+    ).toHaveAttribute("src", "/images/display/congratulations.png");
+    expect(
+      screen.getByRole("button", { name: "기계식 키보드 추첨 시작" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("공개된 당첨자")).not.toBeInTheDocument();
+
+    const keyboard = screen
+      .getByRole("heading", { name: "기계식 키보드" })
+      .closest("article");
+    const tumbler = screen
+      .getByRole("heading", { name: "스탠리 텀블러" })
+      .closest("article");
+    expect(within(keyboard!).getByLabelText("1번")).toBeInTheDocument();
+    expect(within(keyboard!).getByLabelText("2번")).toBeInTheDocument();
+    expect(within(tumbler!).getByLabelText("1번")).toBeInTheDocument();
+    expect(within(keyboard!).getByText("2명")).toBeInTheDocument();
+    expect(within(tumbler!).getByText("1명")).toBeInTheDocument();
+    expect(
+      within(keyboard!).getByRole("img", { name: "기계식 키보드" }),
+    ).toBeInTheDocument();
+    expect(within(keyboard!).getByText("본부")).toBeInTheDocument();
+  });
+
+  it("다음 경품명을 추첨 시작 버튼에 표시한다", () => {
+    render(
+      <RevealStage
+        groups={[]}
+        status="REVEALING"
+        nextPrizeName="스탠리 텀블러"
+        onReveal={() => undefined}
+        busy={false}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "스탠리 텀블러 추첨 시작" }),
+    ).toBeEnabled();
+    expect(screen.getAllByText("공개 대기 중")).toHaveLength(3);
+    expect(screen.queryByText("15명")).not.toBeInTheDocument();
+  });
+
+  it("대기 화면은 추첨 준비 상태 메시지와 장식 요소를 표시한다", () => {
+    render(
+      <RevealStage
+        groups={[]}
+        status="DRAWN"
+        nextPrizeName="기계식 키보드"
+        onReveal={() => undefined}
+        busy={false}
+      />,
+    );
+
+    expect(screen.getByText("추첨 대기 중")).toBeInTheDocument();
+    expect(screen.getByLabelText("레버 추첨 장식")).toBeInTheDocument();
+  });
+
+  it("추첨 진행 중에는 진행 문구를 표시한다", () => {
+    render(
+      <RevealStage
+        groups={[]}
+        status="REVEALING"
+        nextPrizeName="스탠리 텀블러"
+        onReveal={() => undefined}
+        busy
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "추첨 중...." })).toBeDisabled();
+    expect(screen.queryByText("공개된 당첨자")).not.toBeInTheDocument();
+  });
+
   it("REVEALED 상태에서는 완료 문구를 표시하고 다음 공개 버튼을 제공하지 않는다", () => {
     render(
       <RevealStage
@@ -17,17 +301,19 @@ describe("RevealStage", () => {
       screen.queryByRole("button", { name: /다음 당첨자 공개/ }),
     ).not.toBeInTheDocument();
   });
-});
 
-it("PUBLISHED 상태도 완료 문구를 표시하고 공개 버튼을 숨긴다", () => {
-  render(
-    <RevealStage
-      groups={[]}
-      status="PUBLISHED"
-      onReveal={() => undefined}
-      busy={false}
-    />,
-  );
-  expect(screen.getByText("모든 당첨자 공개 완료")).toBeInTheDocument();
-  expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  it("PUBLISHED 상태도 완료 문구를 표시하고 공개 버튼을 숨긴다", () => {
+    render(
+      <RevealStage
+        groups={[]}
+        status="PUBLISHED"
+        onReveal={() => undefined}
+        busy={false}
+      />,
+    );
+    expect(screen.getByText("모든 당첨자 공개 완료")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /추첨/ }),
+    ).not.toBeInTheDocument();
+  });
 });

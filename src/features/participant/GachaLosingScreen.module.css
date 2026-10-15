@@ -1,0 +1,18 @@
+.character {
+  right: max(3.5%, calc((100% - 100cqw) / 2 + 3.5cqw));
+  bottom: 22.5%;
+  width: min(29%, 32.5cqw);
+}
+
+.message {
+  margin-top: 0;
+}
+
+.title {
+  font-size: var(--event-title-size);
+}
+
+.description {
+  margin-top: 2.791cqw;
+  font-size: 3.35cqw;
+}

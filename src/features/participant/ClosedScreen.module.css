@@ -1,0 +1,7 @@
+.background {
+  filter: grayscale(55%) saturate(65%) brightness(0.96);
+}
+
+.character {
+  bottom: 21.8%;
+}
